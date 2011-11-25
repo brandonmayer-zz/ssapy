@@ -1,0 +1,6 @@
+This library is intended to replicate Self Confirming Price Prediction from Yoon & Wellman 2011,
+"Self-Confirming Price Prediction for Bidding in Simultaneous Second-Price Sealed-Bid Auctions". 
+
+Though originally I thought to make it an object oriented library, I wanted to parallelize the algorithms which 
+for cross-platform compatibility necessitated the use of the python multiprocessing module which makes
+executable scripts manditory on MS Windows (__main__ must be defined).
