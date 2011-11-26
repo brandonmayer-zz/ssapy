@@ -1,15 +1,17 @@
-This directory contains code written for csci2951, "Autonomous Agents and Computational Market Design"
-with Professor Amy Greenwald, and /TA Eric Sodomka.
+This directory contains code written for CSCI2951, "Autonomous Agents and Computational Market Design"
+with Professor Amy Greenwald, and TA Eric Sodomka in the Computer Science Department at Brown University.
 
 Link to course website:
 http://www.cs.brown.edu/courses/csci2951-c/
 
-The decision of what language to use for projects was left up to students and for no other reason
-than that I wanted to become a better python programmer, I decided to implement all code in python.
-Beyond the standard libraries, numpy and matlibplot modules are necessary to run the code at this point.
-I may want to delv into pyOpenCL at some point but as of yet it is not needed.
+The decision of which language to use was left up to students. I decided to implement my code in python
+in order to become a more fluid python programmer.
 
-The basic structed is that all libraries, class and functions are located in the directory
+Beyond the standard libraries, numpy and matlibplot modules are necessary to run the code at this point.
+I may want to delve into pyOpenCL at some point, but haven't as of yet.
+
+The basic structure is that all libraries, class and functions are located in the directory
 auctionSimulator.
 
-I use the contents of auctionTests to write scripts utilizing this library to run tests and simulations.
+I use the contents of auctionTests to write scripts utilizing this library to implement 
+test cases and simulations.
