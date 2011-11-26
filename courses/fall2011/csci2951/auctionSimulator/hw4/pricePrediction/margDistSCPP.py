@@ -16,20 +16,20 @@ class margDistSCPP(pointSCPP):
     
     savePickle and loadPickle are inherited from the pointSCPP class
     """
-    def __init__(self, marginalDistributionPrediction = None):
+    def __init__(self, margDistData = None):
         """
         marginalDistributionPrediction should be a list of size m of tuples
         each tuple specifies a normalized histogram count and bin edges
         """          
         # initialize as empty
-        if marginalDistributionPrediction == None:
+        if margDistData == None:
             self.data = None
             self.m = None
         else:
-            if self.validateData(marginalDistributionPrediction):
-                self.data = marginalDistributionPrediction
-                if isinstance(marginalDistributionPrediction,list):
-                    self.m = len(marginalDistributionPrediction)
+            if self.validateData(margDistData=margDistData):
+                self.data = margDistData
+                if isinstance(margDistData,list):
+                    self.m = len(margDistData)
                 else:
                     self.m = 1
     
@@ -37,7 +37,7 @@ class margDistSCPP(pointSCPP):
     def type():
         return "marginalDistributionSCPP"
         
-    def setPricePrediction(margDistData):
+    def setPricePrediction(self, margDistData):
         if self.validateData(margDistData):
             self.data = margDistData
             
@@ -45,7 +45,8 @@ class margDistSCPP(pointSCPP):
                 self.m = len(margDistData)
             else:
                 self.m = 1
-
+                
+        
     @staticmethod
     def validateData(margDistData = None):
         assert isinstance(margDistData, list) or\
@@ -62,13 +63,13 @@ class margDistSCPP(pointSCPP):
                 numpy.testing.assert_almost_equal( 
                     numpy.sum(hist*numpy.diff(binEdges),dtype=numpy.float), 
                     numpy.float(1.0),
-                    msg = "Marginal Distribution Data must be a valid PDF." )
+                    err_msg = "Marginal Distribution Data must be a valid PDF." )
                 
         elif isinstance(margDistData,tuple):
-            numpy.teseting.assert_almost_equal(
-                    numpy.sum( margDistData[0]*numpy.diff(margDistData[0]),dtype=numpy.float),
+            numpy.testing.assert_almost_equal(
+                    numpy.sum( margDistData[0]*numpy.diff(margDistData[1]),dtype=numpy.float),
                     numpy.float(1.0),
-                    msg = "Marginal Distribution Data must be a valid PDF." ) 
+                    err_msg = "Marginal Distribution Data must be a valid PDF." ) 
                                                
         # if you made it here you are good to go
         return True

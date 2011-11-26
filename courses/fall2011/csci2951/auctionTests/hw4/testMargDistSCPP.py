@@ -7,14 +7,15 @@ Date:      11/26/2011
 Just some sanity checks.
 """
 
-from auctionSimulator.hw4.pricePrediction.marginalDistributionSCPP import *
+from auctionSimulator.hw4.pricePrediction.margDistSCPP import *
 
 import numpy
 import unittest
 
-class testMarginalDistributionSCPP(unittest.TestCase):
+class testMargDistSCPP(unittest.TestCase):
     """
-    Unit test worker class
+    A quick unit test to check the validation and storage proceedures of self confirming
+    marginal distributions for price prediction. 
     """
     def setUp(self):
         """
@@ -34,4 +35,49 @@ class testMarginalDistributionSCPP(unittest.TestCase):
             self.randomPriceDist.append(numpy.histogram(randomPrices,bins=range(0,51),density=True))
         #test a single distribution
         
+    def test_constructors(self):
         
+        singleConstructor = margDistSCPP(self.randomPriceDist[0])
+        
+        self.assertEqual(singleConstructor.m, 1, 
+                         msg = "singleConstructor.m = {0} not 1".format(singleConstructor.m))
+        
+        numpy.testing.assert_allclose(singleConstructor.data[0], self.randomPriceDist[0][0])
+        numpy.testing.assert_allclose(singleConstructor.data[1], self.randomPriceDist[0][1])
+        #create empty data then use setPricePrediciton
+        singleEmpty = margDistSCPP()
+        singleEmpty.setPricePrediction(self.randomPriceDist[0])
+                
+        self.assertEqual(singleEmpty.m ,1)
+        
+        numpy.testing.assert_allclose(singleEmpty.data[0], self.randomPriceDist[0][0])
+        numpy.testing.assert_allclose(singleEmpty.data[1], self.randomPriceDist[0][1])
+        
+        multiConstructor = margDistSCPP(self.randomPriceDist)
+        
+        self.assertEqual(multiConstructor.m, 
+                         self.m,
+                         msg = "multiConstructor.m = {0}, not self.m = {1}".format(multiConstructor.m,self.m) )
+
+        for idx in xrange(len(self.randomPriceDist)):
+            numpy.testing.assert_allclose(multiConstructor.data[idx][0], self.randomPriceDist[idx][0])
+            numpy.testing.assert_allclose(multiConstructor.data[idx][1], self.randomPriceDist[idx][1])
+            
+        multiEmpty = margDistSCPP()
+        
+        multiEmpty.setPricePrediction(self.randomPriceDist)
+        
+        self.assertEqual(multiEmpty.m,
+                         self.m,
+                         msg = "multiEmpty.m = {0}, not self.m = {1}".format(multiEmpty.m,self.m))
+        
+        for idx in xrange(len(self.randomPriceDist)):
+            numpy.testing.assert_allclose(multiEmpty.data[idx][0], self.randomPriceDist[idx][0])
+            numpy.testing.assert_allclose(multiEmpty.data[idx][1], self.randomPriceDist[idx][1])
+            
+            
+        #doing ok if we reach here w/o an exception
+        return True
+        
+if __name__ == "__main__":
+    unittest.main(verbosity=2)
