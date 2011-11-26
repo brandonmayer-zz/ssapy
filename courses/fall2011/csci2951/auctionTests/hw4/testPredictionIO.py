@@ -73,6 +73,7 @@ class TestPredictionIO(unittest.TestCase):
         # check all datum are approximatly (to decimal places) the same for the reloaded point price prediction            
         self.assertEqual( list(reloadedPointPrediction.data), list(pointPrediction.data) )
         
+        # loop over all marginal distributions for goods
         for idx in xrange(len(reloadedDistPrediction.data)):
             histR, binEdgesR = reloadedDistPrediction.data[idx]
             histO, binEdgesO = distPrediction.data[idx]
