@@ -1,29 +1,19 @@
-import auctionSimulator.hw4.agents as hw4_agents 
+import auctionSimulator.hw4.agents as hw4_agents
+from auctionSimulator.hw4.pricePrediction.marginalDistributionSCPP import * 
 import itertools
 import numpy
 import multiprocessing
 
 import os
-
-def f(x):
-    return x*x
-
-def worker(x):
-    return x
-
-
-    
+  
 if __name__ == '__main__':
-    global output
     
-    print "Using {0} cpus".format(multiprocessing.cpu_count())
-    pool = multiprocessing.Pool()
+    m = 5
     
-          
-    result = pool.map(worker,xrange(1000000))
-
-    pool.close()
-    pool.join()
+    hist = numpy.random.random_integers(1,10,50)
+    binEdges = numpy.arange(1,51)
+    myDist = marginalDistributionSCPP((hist,binEdges))
     
-    print result
-       
+    pass
+    
+    

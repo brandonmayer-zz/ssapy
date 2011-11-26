@@ -13,7 +13,9 @@ import numpy
 import unittest
 import tempfile
 class TestPredictionIO(unittest.TestCase):
-    
+    """
+    Unit test worker class
+    """
     def setUp(self):
         """
         Initialize some random distributions that will act as test data for 
