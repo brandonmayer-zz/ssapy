@@ -1146,7 +1146,7 @@
 <XPD:REF name="Views[3]">HeDYI/IGIEOXnwQO11/ZOAAA</XPD:REF>
 <XPD:ATTR name="#Specializations" type="integer">1</XPD:ATTR>
 <XPD:REF name="Specializations[0]">I9PREgmrEUeZ7Ze6+KTKdwAA</XPD:REF>
-<XPD:ATTR name="#Operations" type="integer">2</XPD:ATTR>
+<XPD:ATTR name="#Operations" type="integer">3</XPD:ATTR>
 <XPD:OBJ name="Operations[0]" type="UMLOperation" guid="s6l2XJDobEu5Ws+CmzGoLgAA">
 <XPD:ATTR name="Name" type="string">type</XPD:ATTR>
 <XPD:ATTR name="OwnerScope" type="UMLScopeKind">skClassifier</XPD:ATTR>
@@ -1162,10 +1162,20 @@
 <XPD:ATTR name="Name" type="string">savePickle</XPD:ATTR>
 <XPD:REF name="Owner">KASR0FAdkUO9ABZJrx0XngAA</XPD:REF>
 <XPD:ATTR name="#Parameters" type="integer">1</XPD:ATTR>
-<XPD:OBJ name="Parameters[0]" type="UMLParameter" guid="ultQFr3/FU+8yNTinNu3HwAA">
+<XPD:OBJ name="Parameters[0]" type="UMLParameter" guid="W1/uTh29l0W1CaR9eMKPRQAA">
 <XPD:ATTR name="Name" type="string">filename</XPD:ATTR>
 <XPD:ATTR name="TypeExpression" type="string">string</XPD:ATTR>
 <XPD:REF name="BehavioralFeature">uOv2rJHeo0uLAguRf79jtgAA</XPD:REF>
+</XPD:OBJ>
+</XPD:OBJ>
+<XPD:OBJ name="Operations[2]" type="UMLOperation" guid="hqFxWjoV20uLRLGeYRp/bwAA">
+<XPD:ATTR name="Name" type="string">loadPickle</XPD:ATTR>
+<XPD:REF name="Owner">KASR0FAdkUO9ABZJrx0XngAA</XPD:REF>
+<XPD:ATTR name="#Parameters" type="integer">1</XPD:ATTR>
+<XPD:OBJ name="Parameters[0]" type="UMLParameter" guid="xGSfnrB4pke515RbgR6/5gAA">
+<XPD:ATTR name="Name" type="string">filename</XPD:ATTR>
+<XPD:ATTR name="TypeExpression" type="string">string</XPD:ATTR>
+<XPD:REF name="BehavioralFeature">hqFxWjoV20uLRLGeYRp/bwAA</XPD:REF>
 </XPD:OBJ>
 </XPD:OBJ>
 <XPD:ATTR name="#Attributes" type="integer">2</XPD:ATTR>
