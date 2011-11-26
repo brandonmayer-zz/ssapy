@@ -26,43 +26,50 @@ class margDistSCPP(pointSCPP):
             self.data = None
             self.m = None
         else:
-            if self.validateDist(marginalDistributionPrediction):
+            if self.validateData(marginalDistributionPrediction):
                 self.data = marginalDistributionPrediction
                 if isinstance(marginalDistributionPrediction,list):
                     self.m = len(marginalDistributionPrediction)
                 else:
                     self.m = 1
-        
-    def setPricePrediction(pricePrediction):
-        if self.validateDist(pricePrediction):
-            self.data = pricePrediction
-            
-            if isinstance(marginalDistributionPrediction,list):
-                self.m = len(marginalDistributionPrediction)
-            else:
-                self.m = 1
-        
+    
     @staticmethod
     def type():
         return "marginalDistributionSCPP"
-    
-    @staticmethod
-    def validateDist(marginalDistribution = None):
-        assert isinstance(marginalDistribution, list) or\
-                isinstance(marginalDistribution, tuple),\
-                "{1} is not a list or tuple".format(marginalDistribution)
         
-        if isinstance(marginalDistribution,list):
+    def setPricePrediction(margDistData):
+        if self.validateData(margDistData):
+            self.data = margDistData
+            
+            if isinstance(margDistData,list):
+                self.m = len(margDistData)
+            else:
+                self.m = 1
+
+    @staticmethod
+    def validateData(margDistData = None):
+        assert isinstance(margDistData, list) or\
+                isinstance(margDistData, tuple),\
+                "{1} is not a list or tuple".format(margDistData)
+        
+        if isinstance(margDistData,list):
                       
-            for hist,binEdges in marginalDistribution:
+            for hist,binEdges in margDistData:
                 assert isinstance(hist,numpy.ndarray) and\
                         isinstance(binEdges,numpy.ndarray),\
                             "hist and binEdges must be numpy arrays."               
             
                 numpy.testing.assert_almost_equal( 
                     numpy.sum(hist*numpy.diff(binEdges),dtype=numpy.float), 
-                    numpy.float(1.0) )
-                    
+                    numpy.float(1.0),
+                    msg = "Marginal Distribution Data must be a valid PDF." )
+                
+        elif isinstance(margDistData,tuple):
+            numpy.teseting.assert_almost_equal(
+                    numpy.sum( margDistData[0]*numpy.diff(margDistData[0]),dtype=numpy.float),
+                    numpy.float(1.0),
+                    msg = "Marginal Distribution Data must be a valid PDF." ) 
+                                               
         # if you made it here you are good to go
         return True
         

@@ -32,9 +32,6 @@ class testMarginalDistributionSCPP(unittest.TestCase):
         for good in xrange(self.m):
             randomPrices = numpy.random.normal(loc=mu[good],scale=sigma[good],size=10000)
             self.randomPriceDist.append(numpy.histogram(randomPrices,bins=range(0,51),density=True))
-            
-            #this is to purposely cause errors
-            self.randomPriceCount.append(numpy.histogram(randomPrices,bins=range(0,51),density=False))
         #test a single distribution
         
         

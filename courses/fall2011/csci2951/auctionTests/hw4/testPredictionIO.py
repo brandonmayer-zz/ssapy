@@ -6,7 +6,7 @@ Date:      11/26/2011
 
 Just some IO sanity checks.
 """
-from auctionSimulator.hw4.pricePrediction.marginalDistributionSCPP import *
+from auctionSimulator.hw4.pricePrediction.margDistSCPP import *
 from auctionSimulator.hw4.pricePrediction.pointSCPP import *
 
 import numpy
@@ -40,7 +40,7 @@ class TestPredictionIO(unittest.TestCase):
         
         # create the prediction instance wrappers
         pointPrediction = pointSCPP(self.randomPriceVector)
-        distPrediction  = marginalDistributionSCPP(self.randomPriceDist)
+        distPrediction  = margDistSCPP(self.randomPriceDist)
                 
         # save them to temp files
         pointPrediction.savePickle(self.pointFileObject.file)
@@ -58,7 +58,7 @@ class TestPredictionIO(unittest.TestCase):
         self.assertIsInstance(reloadedPointPrediction, pointSCPP)
         
         # check the reloaded distribution prediction is the correct class instance
-        self.assertIsInstance(reloadedDistPrediction, marginalDistributionSCPP)
+        self.assertIsInstance(reloadedDistPrediction, margDistSCPP)
         
         # check the reloaded distribution represents marginal distributions over the correct
         # number of goods
