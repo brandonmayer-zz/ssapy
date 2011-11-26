@@ -10,6 +10,12 @@ in order to become a more fluid python programmer.
 Beyond the standard libraries, numpy and matlibplot modules are necessary to run the code at this point.
 I may want to delve into pyOpenCL at some point, but haven't as of yet.
 
+I recommend downloading external python libraries from Christoph Gohlke at:
+
+http://www.lfd.uci.edu/~gohlke/pythonlibs/
+
+They are the "bees' knees" of python builds.
+
 The basic structure is that all libraries, class and functions are located in the directory
 auctionSimulator.
 
