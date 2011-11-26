@@ -44,6 +44,7 @@ class testMargDistSCPP(unittest.TestCase):
         
         numpy.testing.assert_allclose(singleConstructor.data[0], self.randomPriceDist[0][0])
         numpy.testing.assert_allclose(singleConstructor.data[1], self.randomPriceDist[0][1])
+        
         #create empty data then use setPricePrediciton
         singleEmpty = margDistSCPP()
         singleEmpty.setPricePrediction(self.randomPriceDist[0])

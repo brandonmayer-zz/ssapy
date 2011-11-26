@@ -32,17 +32,15 @@ class pointSCPP(object):
         """
         Function to serialize class to binary file
         """
+        assert (isinstance(f,basestring) or
+                isinstance(f,file) ),\
+                "pointSCPP.savePickle must provide a filename string or file object."
         if isinstance(f,basestring):
             pickle.dump(self,open(f,'wb'))
             
         elif isinstance(f,file):
             pickle.dump(self,f)
-        else:
-            print "----ERROR----"
-            print "{0}::savePickle".format(self.type())
-            print "Cannot save pickled instance"
-            print "Must Provide filename string or file object"
-            return False
+        
         
     def loadPickle(self,f):
         """
