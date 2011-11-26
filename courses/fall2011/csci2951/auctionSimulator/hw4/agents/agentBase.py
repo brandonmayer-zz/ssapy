@@ -442,7 +442,7 @@ class agent(object):
     
     def setDistributionPricePrediction(self,distributionPricePrediction = None, validate = True, tol=0.00001):
         """
-        Helper function interface with verify option.
+        Helper function interface with validate option.
         """
         if distributionPricePrediction:
             if validate:

@@ -27,10 +27,10 @@ class targetPrice(agent):
         Helper function (don't call this one) that processes the given
         price prediction and returns a bid
         
-        args = {'pricePrediction': numpy array}
+        args = {'pointPricePrediction': numpy array}
         """
-        if 'pricePrediction' in args:
-            pricePrediction = args['pricePrediction']
+        if 'pointPricePrediction' in args:
+            pricePrediction = args['pointPricePrediction']
             
             [opt_bundle_idx, opt_bundle, predictedSurplus] = self.acq(pricePrediction)
                 
@@ -43,7 +43,13 @@ class targetPrice(agent):
             else:
                 return numpy.array([p for p in itertools.imap(operator.mul, opt_bundle, pricePrediction)])
         else:
-            return numpy.array([0]*self.l)
+            warning = "----WARNING----\n" +\
+                      "auctionSimulator.hw4.agents.targetPrice.SS\n" +\
+                      "A point price prediction was not specified as an argument and " +\
+                      "this instance has no stored prediction.\n"+\
+                      "Agent id {0} will bid zero price for all items".format(self.id)
+            sys.stderr.write(warning)
+            return numpy.array([0]*self.m)
     def bid(self,args={}):
         """
         Bid is a vector of predicted prices.
