@@ -36,8 +36,8 @@ class simYW(agentBase):
     
     def __init__(self, 
                  m = 5, 
-                 l = None, 
                  v = None,
+                 l = None, 
                  vmin=0,
                  vmax=50, 
                  name="Anonymous"):
@@ -144,9 +144,6 @@ class simYW(agentBase):
         print "Agent Type:              {0}".format(self.type())
         print "Agent lambda           = {0}".format(self.l)
         print "Agent Valuation Vector = {0}".format(self.v)
-        
-        if 'priceVector' in  args:
-            priceVector
         
     
     @staticmethod
