@@ -315,10 +315,7 @@ class simYW(agentBase):
         assert isinstance(l,int) and l >= 0 and l <= bundles.shape[1],\
             "simYW::acq l must be a positive integer less than the total number of available goods.\n"+\
             "l = {0}, bundles.shape[1] = {1}".format(l,bundles.shape[1])
-             
-        
-        
-            
+                 
         surplus = simYW.surplus(bundles=bundles,valuation=valuation,priceVector=priceVector)
         
         # initialize to the null bundle
