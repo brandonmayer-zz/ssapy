@@ -490,7 +490,7 @@
 <XPD:OBJ name="NameCompartment" type="UMLNameCompartmentView" guid="PsrTvMAdnkS9z6UATxNfAwAA">
 <XPD:OBJ name="NameLabel" type="LabelView" guid="xtQ3/XNLLU27shmzEHs5EAAA">
 <XPD:ATTR name="FontStyle" type="integer">1</XPD:ATTR>
-<XPD:ATTR name="Text" type="string">marginalDistributionSCPP</XPD:ATTR>
+<XPD:ATTR name="Text" type="string">margDistSCPP</XPD:ATTR>
 </XPD:OBJ>
 <XPD:OBJ name="StereotypeLabel" type="LabelView" guid="QuH+p/emr0axClovKd3omgAA">
 <XPD:ATTR name="Visible" type="boolean">False</XPD:ATTR>
@@ -2362,7 +2362,7 @@
 <XPD:REF name="Namespace">158PE7SaKkyD2zdUm2YtvAAA</XPD:REF>
 </XPD:OBJ>
 <XPD:OBJ name="OwnedElements[30]" type="UMLClass" guid="M67v9JLhLUyuVPoS3ImBbQAA">
-<XPD:ATTR name="Name" type="string">marginalDistributionSCPP</XPD:ATTR>
+<XPD:ATTR name="Name" type="string">margDistSCPP</XPD:ATTR>
 <XPD:REF name="Namespace">158PE7SaKkyD2zdUm2YtvAAA</XPD:REF>
 <XPD:ATTR name="#Views" type="integer">4</XPD:ATTR>
 <XPD:REF name="Views[0]">pWeA6ubq0EWX4x9WvmYXGAAA</XPD:REF>
