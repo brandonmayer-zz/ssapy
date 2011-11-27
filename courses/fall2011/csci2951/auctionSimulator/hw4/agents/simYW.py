@@ -20,16 +20,18 @@ class simYW(agentBase):
     
     Note: 
         I made the functions:
-                        allBundles
-                        valuation
-                        cost
-                        surplus
-                        bundleFromIndex
+                        allBundles(nGoods = 5)
+                        valuation(bundles = None, v = None, l= None)
+                        cost(bundles = None, price = None)
+                        surplus(bundles=None, price=None, v=None, l=None)
+                        bundleFromIndex(index=None, nGoods = 5)
                         
         static functions on purpose to keep the class light. I wanted the
         class to store the data specific to the Yoon & Wellman specification as
         well as have the functions necessary to manipulate these data but I didn't
-        feel these funcitons should be attached to every class instance.
+        feel these funcitons should be attached to every class instance. This also
+        offers the added ability to force the parameters of these functions rather
+        than compute for class specific instances.
     """
     
     def __init__(self, 
@@ -125,7 +127,7 @@ class simYW(agentBase):
     
     
     @staticmethod
-    def valuation(bundles, v, l):
+    def valuation(bundles = None, v = None, l= None):
         """
         Calculate the valuation of a given list of bundles
         """
@@ -154,7 +156,7 @@ class simYW(agentBase):
             return numpy.atleast_1d(valuation)
         
     @staticmethod
-    def cost(bundles, price):
+    def cost(bundles = None, price = None):
         """
         A function to calculate the cost for a given set of bundles and prices
         """
@@ -236,9 +238,6 @@ class simYW(agentBase):
         return numpy.atleast_1d(binList)
         
         
-        
-    
-    
     def validatePriceVector(self,priceVector):
         """
         Return true if a given list of prices is compatible with this agent's functions.
