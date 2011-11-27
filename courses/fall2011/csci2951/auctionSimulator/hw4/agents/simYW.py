@@ -116,15 +116,38 @@ class simYW(agentBase):
         the bid is computed using the agent's strategy profile self.SS(self, args={})
         which can be called with arbitrary arguments.
         """
-        pass
+        print "Cannot Bid with abstract simYW."
+        print "Please instantiate a concrete agent"
+        raise AssertionError
     
+    @staticmethod
     def SS(self,args={}):
         """
         An agents' strategy profile. Computes the optimal bid given the
         agent's status and arguments to SS. Should be implmented for each
         agent type.
+        
+        Should be given the bundles to bid on, the valuation for each bundle
+        and any other relavant information for the concrete agent type.
         """
-        pass
+        print "Cannot Bid with abstract simYW."
+        print "Please instantiate a concrete agent"
+        raise AssertionError
+        
+    
+    def printSummary(self, args = {}):
+        """
+        Print a summary of agent state to standard out.
+        """
+        print "Agent Name:              {0}".format(self.name)
+        print "Agent ID:                {0}".format(self.id)
+        print "Agent Type:              {0}".format(self.type())
+        print "Agent lambda           = {0}".format(self.l)
+        print "Agent Valuation Vector = {0}".format(self.v)
+        
+        if 'priceVector' in  args:
+            priceVector
+        
     
     @staticmethod
     def allBundles(nGoods = 5):
