@@ -17,6 +17,9 @@ class pointSCPP(object):
                 print "pointPricePrediction must be a 1d array"
                 print "self.data = None"
                 self.data = None
+        elif pointPricePrediction == None:
+            self.data = None
+            self.m = None
         else:
             print "----Warning----"
             print "pointSCPP.__init__"

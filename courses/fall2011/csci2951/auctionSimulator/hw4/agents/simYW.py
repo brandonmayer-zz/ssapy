@@ -23,7 +23,7 @@ class simYW(agentBase):
                         allBundles(nGoods = 5)
                         valuation(bundles = None, v = None, l= None)
                         cost(bundles = None, price = None)
-                        surplus(bundles=None, price=None, v=None, l=None)
+                        surplus(bundles=None, valuation = None, priceVector = None,)
                         bundleFromIndex(index=None, nGoods = 5)
                         
         static functions on purpose to keep the class light. I wanted the
@@ -109,6 +109,23 @@ class simYW(agentBase):
         
         super(simYW,self).__init__(name)
         
+    def bid(self):
+        """
+        An interface to trigger the agent to bid.
+        Though this function should be called to return a specific agent's bid,
+        the bid is computed using the agent's strategy profile self.SS(self, args={})
+        which can be called with arbitrary arguments.
+        """
+        pass
+    
+    def SS(self,args={}):
+        """
+        An agents' strategy profile. Computes the optimal bid given the
+        agent's status and arguments to SS. Should be implmented for each
+        agent type.
+        """
+        pass
+    
     @staticmethod
     def allBundles(nGoods = 5):
         """
@@ -196,17 +213,26 @@ class simYW(agentBase):
             return numpy.atleast_1d([numpy.dot(bundle,price) for bundle in bundles])
         
     @staticmethod
-    def surplus(bundles=None, price=None, v=None, l=None):
+    def surplus(bundles=None, valuation = None, priceVector = None,):
         """
         Calculate the surplus for a given array of bundles, prices and a valuation vector.
         Surplus equals valuation less cost.
         """
-        assert bundles != None and\
-               price != None and\
-               v != None and\
-               l != None,\
-               "simYW::surplus must specify all parameters"
-        return numpy.atleast_1d([c for c in itertools.imap(operator.sub,simYW.valuation(bundles=bundles, v=v, l=l), simYW.cost(bundles=bundles, price=price))])
+                   
+        bundles = numpy.atleast_2d(bundles)
+        
+        valuation = numpy.atleast_1d(valuation)
+        
+        #there must be a valuation for each corresponding bundle
+        assert bundles.shape[0] == valuation.shape[0],\
+            "simYW::surplus bundles.shape[0] = {0} != valuation.shape[0] = {1}".format(bundles.shape[0],valuation.shape[0])
+        
+        price = numpy.atleast_1d(price)
+        
+        #there must be a price for each good
+        assert bundles.shape[1] == priceVector.shape[0]
+            
+        return numpy.atleast_1d([c for c in itertools.imap(operator.sub,valuation, simYW.cost(bundles=bundles, price=price))])
     
     @staticmethod
     def bundleFromIndex(index=None, nGoods = 5):
@@ -236,13 +262,79 @@ class simYW(agentBase):
             binList.insert(0,0)
             
         return numpy.atleast_1d(binList)
+    
+        
+    @staticmethod
+    def acq(bundles = None, valuation = None, l = None, priceVector = None):
+        """
+        Given the number of goods, a price vector over each good
+        and a valuation for each good, compute the optimal acquisition
+        as described in Boyan and Greenwald 2001.
+        
+        INPUTS:
+            bundles       :=     a numpy 2d array
+                                 rows indicate individual bundles
+                                 columns are individual goods
+                                 
+            priceVector   :=     vector of prices over goods.
+                                 priceVector.shape[0] == bundles.shape[1] == number of goods
+            
+            valuation     :=     an numpy array of valuations, one for each bundle
+        
+        """    
+        bundles = numpy.atleast_2d(bundles)
+        priceVector = numpy.atleast_1d(priceVector)
+        valuation = numpy.atleast_1d(valuation)
+        
+        assert bundles.shape[0] == valuation.shape[0],\
+            "simYW::acq There must be a single valuation for each bundle"
+            
+        assert priceVector.shape[0] == bundles.shape[1],\
+            "simYW::acq there must be a price for each good in a bundle"
+            
+        assert isinstance(l,int) and l >= 0 and l <= bundles.shape[1],\
+            "simYW::acq l must be a positive integer less than the total number of available goods.\n"+\
+            "l = {0}, bundles.shape[1] = {1}".format(l,bundles.shape[1])
+             
         
         
+            
+        surplus = simYW.surplus(bundles=bundles,valuation=valuation,priceVector=priceVector)
+        
+        # initialize to the null bundle
+        optBundle = [0]*bundles.shape[1]
+        optSurplus = 0
+        # there may be more than one "optimal bundles" i.e. bundles with
+        # the same maximal surplus
+        optBundleIdxList = numpy.nonzero(surplus == numpy.max(surplus))[0]
+        
+        if len(optBundleIdxList) == 1:
+            optBundle = bundles[optBundleIdxList[0]]
+            optSurplus = surplus[optBundleIdxList[0]]
+        else:
+            # there is more than one optimal bundle,
+            # we want to choose the bundle that completes its' task first,
+            # the so-called "minimally maximal" bundle
+            t = float('inf')
+            
+            for idx in optBundleIdxList:
+                #get the bundle in question
+                tempBundle = bundles[idx]
+                cs = numpy.cumsum(tempBundle)
+                tNew = (numpy.array(cs) >= l ).nonzero()
+                if tNew[0].any():
+                    tNew = tNew[0][0]
+                    if tNew < t:
+                        t = tNew
+                        optBundle = tempBundle
+                        optSurplus = surplus[idx]
+                        
+        return optBundle, optSurplus
+            
     def validatePriceVector(self,priceVector):
         """
         Return true if a given list of prices is compatible with this agent's functions.
         """
-        
         pv = numpy.atleast_2d(priceVector)
         
         assert pv.shape[0] == 1,\
