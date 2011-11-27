@@ -10,23 +10,23 @@ A base class for agents who utilize a point price prediction.
 from pricePredictionAgent import *
 from auctionSimulator.hw4.pricePrediction.pointSCPP import *
 
-class pointPredictionAgent(pricePredicitonAgent):
+class pointPredictionAgent(pricePredictionAgent):
     def __init__(self,
                  m = 5,
                  v = None,
                  l = None,
                  vmin = 0,
                  vmax = 50,
-                 pricePrediction = None,
+                 pointPricePrediction = None,
                  name = "Anonymous"):
         
-        super(pointPredictionAgent,self).__init__(m=m,v=v,l=l,vmin=vmin,vmax=vmax,name=name)
-        
-        if isinstance(pricePrediction,basestring)\
-             or isinstance(pricePrediction,file):
-            self.loadPricePredictionPickle(self,pricePrediction)
-        elif isinstance(pricePrediciton,pointSCPP):
-            self.setPricePrediction(pricePrediction)
+        super(pointPredictionAgent,self).__init__(m=m,
+                                                  v=v,
+                                                  l=l,
+                                                  vmin=vmin,
+                                                  vmax=vmax,
+                                                  name=name,
+                                                  pricePrediction=pointPricePrediction)
         
     @staticmethod
     def predictionType():
@@ -35,4 +35,44 @@ class pointPredictionAgent(pricePredicitonAgent):
     @staticmethod
     def type():
         return "pointPredictionAgent"
+    
+    def printSummary(self,args={}):
+        """
+        Print a summary of agent state to standard out.
+        """
+        super(pricePredictionAgent,self).printSummary()
+        
+        if self.pricePrediciton != None:
+            print 'Price Prediction = {0}'.format(pricePrediction.data)
+            print 'Bundle     |     Valuation    |    Cost    |    Surplus'
+            
+            bundles = self.allBundles(self.m)
+            
+            valuation = self.valuation(bundles = bundles, 
+                                       v = self.v, 
+                                       l = self.l)
+            
+            cost = self.cost(bundles=bundles, 
+                             price=self.pricePrediciton.data)
+            
+            surplus = self.surplus(bundles=bundles, 
+                                   valuation=valuation, 
+                                   priceVector=self.pricePrediciton.data)
+            
+            for i in xrange(bundles.shape[0]):
+                print "{0}    {1:5}    {2:5}    {3:5}".format( bundles[i].astype(numpy.int),
+                                                               valuation[i],
+                                                               cost[i],
+                                                               surplus[i])
+                
+            [optBundle, optSurplus] = self.acq(priceVector=pricePrediction.data)
+            
+            print "Optimal Bundle (acq):      {0}".format(optBundle.astype(numpy.int))
+            print "Surplus of Optimal Bundle: {0}".format(optSurplus)
+            print "Bid:                       {0}".format(self.bid())
+            
+            
+        
+        
+        
     

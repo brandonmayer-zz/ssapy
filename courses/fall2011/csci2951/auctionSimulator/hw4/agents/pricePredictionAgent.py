@@ -22,13 +22,29 @@ class pricePredictionAgent(simYW):
     
     This level of abstraction may be superfluous but I'll keep it for now.
     """
-    def __init__(self,m = 5, v = None, l = None, vmin=0, vmax=50, name="Anonymous" ):
+    def __init__(self,m = 5, v = None, l = None, vmin=0, vmax=50, name="Anonymous",pricePrecition = None ):
         
         super(pricePredictionAgent,self).__init__(m=m,v=v,l=l,vmin=vmin,vmax=vmax,name=name)
         
         # defines the pricePrediciton member variable common to point and distribution
         # price prediction schemes
-        self.pricePrediction = None
+        if pricePrediction == None:
+            self.pricePrediction = None
+        else:
+            self.loadOrSetPrediciton(pricePrediction)
+            
+    def loadOrSetPrediciton(self,pricePrediction):
+        if isinstance(pricePrediction,basestring)\
+             or isinstance(pricePrediction,file):
+            
+            self.loadPricePredictionPickle(self,pricePrediction)
+            
+        elif isinstance(pricePrediction,pointSCPP):
+            
+            self.setPricePrediction(pricePrediction)
+            
+        else:
+            self.pricePrediciton = None
         
     def loadPricePredictionPickle(self,f):
         """
@@ -56,14 +72,14 @@ class pricePredictionAgent(simYW):
         To set the price prediction member variable but provide some level of type
         checking
         """
-        if self.predicitonType() == "pointSCPP":
-            assert isinstance(pricePrediciton,pointSCPP),\
+        if self.predictionType() == "pointSCPP":
+            assert isinstance(pricePrediction,pointSCPP),\
             "----ERROR----\n" +\
             "{0}:setPricePrediction \n".format(self.type()) +\
             "self.predictionType() = {0} must match the pricePrediction type.".format(self.predictionType())
             
         elif self.predictionType() == "margDistSCPP":
-            assert isinstacne(pricePrediciton,margDistSCPP),\
+            assert isinstance(pricePrediction,margDistSCPP),\
             "----ERROR----\n" +\
             "{0}:setPricePrediction \n".format(self.type()) +\
             "self.predictionType() = {0} must match the pricePrediction type.".format(self.predictionType())

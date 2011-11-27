@@ -17,6 +17,7 @@ class pointSCPP(object):
                 print "pointPricePrediction must be a 1d array"
                 print "self.data = None"
                 self.data = None
+                self.m = None
         elif pointPricePrediction == None:
             self.data = None
             self.m = None
@@ -26,10 +27,9 @@ class pointSCPP(object):
             print "pointPricePrediction must be a numpy.ndarray"
             print "self.data = None"
             self.data = None
+            self.m = None
                     
-    @staticmethod
-    def type():
-        return "pointSCPP"
+    
     
     def savePickle(self,f):
         """
@@ -81,6 +81,11 @@ class pointSCPP(object):
             print "Cannot load pickled instance"
             print "Must Provide filename string or file object"
             return False
+    
+    def __call__(self):
+        return self.data
             
-                
+    @staticmethod
+    def type():
+        return "pointSCPP"          
     

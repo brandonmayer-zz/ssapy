@@ -90,7 +90,7 @@ class simYW(agentBase):
             self.l = l
         
         if v == None:
-            self.v = numpy.random.random_integers(low=vmin,high=vmax,self.m)
+            self.v = numpy.random.random_integers(low=vmin,high=vmax,size=self.m)
             self.v.sort() 
             #sort is in ascending order, 
             #switch around for descending
@@ -120,6 +120,25 @@ class simYW(agentBase):
         print "Please instantiate a concrete agent"
         raise AssertionError
     
+    def acq(self, priceVector = None):
+        """
+        Calculate the optimal bundle for this class instance.
+        """
+        bundles = simYW.allBundles(self.m)
+        valuation = simYW.valuation(bundles,self.v,self.l)
+        return acqYW(bundles=bundles,valuation=valuation,l=self.l,priceVector=priceVector)
+        
+
+    def printSummary(self, args = {}):
+        """
+        Print a summary of agent state to standard out.
+        """
+        print "Agent Name:              {0}".format(self.name)
+        print "Agent ID:                {0}".format(self.id)
+        print "Agent Type:              {0}".format(self.type())
+        print "Agent lambda           = {0}".format(self.l)
+        print "Agent Valuation Vector = {0}".format(self.v)
+        
     @staticmethod
     def SS(self,args={}):
         """
@@ -134,18 +153,6 @@ class simYW(agentBase):
         print "Please instantiate a concrete agent"
         raise AssertionError
         
-    
-    def printSummary(self, args = {}):
-        """
-        Print a summary of agent state to standard out.
-        """
-        print "Agent Name:              {0}".format(self.name)
-        print "Agent ID:                {0}".format(self.id)
-        print "Agent Type:              {0}".format(self.type())
-        print "Agent lambda           = {0}".format(self.l)
-        print "Agent Valuation Vector = {0}".format(self.v)
-        
-    
     @staticmethod
     def allBundles(nGoods = 5):
         """
@@ -160,7 +167,7 @@ class simYW(agentBase):
         """
         assert isinstance(nGoods,int) and nGoods >=0,\
             "nGoods must be a positive integer"
-        return numpy.atleast_2d([bin for bin in itertools.product([False,True],repeat=setLength)]).astype(bool)
+        return numpy.atleast_2d([bin for bin in itertools.product([False,True],repeat=nGoods)]).astype(bool)
     
     
     @staticmethod
@@ -285,7 +292,7 @@ class simYW(agentBase):
     
         
     @staticmethod
-    def acq(bundles = None, valuation = None, l = None, priceVector = None):
+    def acqYW(bundles = None, valuation = None, l = None, priceVector = None):
         """
         Given the number of goods, a price vector over each good
         and a valuation for each good, compute the optimal acquisition

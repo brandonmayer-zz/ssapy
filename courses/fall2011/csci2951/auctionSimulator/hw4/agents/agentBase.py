@@ -16,12 +16,12 @@ class agentBase(object):
     nextId = 0
     def __init__(self, name="Anonymous"):
         self.name = name
-        self.id = nextID
-        nextID += 1
+        self.id = agentBase.nextId
+        agentBase.nextId += 1
 
     def id(self):
         return self.id
     
-    @staticmember
+    @staticmethod
     def type():
         return "agentBase"    
