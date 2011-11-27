@@ -21,3 +21,11 @@ auctionSimulator.
 
 I use the contents of auctionTests to write scripts utilizing this library to implement 
 test cases and simulations.
+
+
+References:
+
+Wellman, M.P. (2011). "Trading Agents". Morgan & Claypool Publishers
+
+Yoon, D.Y., & Wellman, P.M.(2011). "Self-Confirming Price Prediction for Bidding in Simultaneous Second
+Price Sealed Bid Auctions". The 2011 Workshop on Trading Agent Design and Analysis. Barcelona, Catalonia, Spain.
