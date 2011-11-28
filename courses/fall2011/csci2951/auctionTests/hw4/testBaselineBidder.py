@@ -24,7 +24,7 @@ class testBaselineBidder(unittest.TestCase):
         name = "myBaselineBidder"
         myBaselineBidder = baselineBidder(m=5,name=name)
         
-        #some more of that "ocular method"
+        #"ocular method"
         myBaselineBidder.printSummary()
         
         #check the name is passed down the constructors correctly
