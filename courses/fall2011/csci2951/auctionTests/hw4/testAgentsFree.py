@@ -9,35 +9,35 @@ import numpy
 
 def main():
 #    p = [10,3,4,2,1]
-    p = [0,0,0,0,0]
+    p = numpy.array([0,0,0,0,0])
     
     myTargetPrice = targetPrice()
     
-    myTargetPrice.printAllSummary(p)   
+    myTargetPrice.printSummary(p)   
         
     print "\n \n \n"
     
     myBaseline = baselineBidder(name="myBaselineAgent")
     
-    myBaseline.printAllSummary({'priceVector':p})
+    myBaseline.printSummary({'pointPricePrediction':p})
     
     print "\n\n\n"
     
     myTargetMV = targetMV(name="myTargetMV")
     
-    myTargetMV.printAllSummary({'priceVector':p})
+    myTargetMV.printSummary({'pointPricePrediction':p})
     
     print "\n\n\n"
     
     myTargetMVS = targetMVS(name="myTargetMVS")
     
-    myTargetMVS.printAllSummary({'priceVector':p})
+    myTargetMVS.printSummary({'pointPricePrediction':p})
     
     print "\n\n\n"
     
     myStraightMV = straightMV(name="myStraightMV")
     
-    myStraightMV.printAllSummary({'priceVector':p}) 
+    myStraightMV.printSummary({'pointPricePrediction':p}) 
 
 if __name__ == "__main__":
     main()

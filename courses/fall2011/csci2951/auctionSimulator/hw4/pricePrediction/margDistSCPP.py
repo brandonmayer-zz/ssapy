@@ -36,6 +36,38 @@ class margDistSCPP(pointSCPP):
     @staticmethod
     def type():
         return "marginalDistributionSCPP"
+    
+    
+    def expectedPrices(self):
+        """
+        Calculate the expected price vector using the center bin avg method
+        """
+        e = []
+        for hist, binEdges in self.data:
+            e.append(self.centerBinAvg(hist,binEdges))
+            
+        return numpy.atleast_1d(e)
+    
+    @staticmethod
+    def centerBinAvg(hist = None, binEdges = None):
+        """
+        A helper function for computing averages with a histogram
+        take the value of a histogram bin to be equal to its center than 
+        calculate the average as avg = \sum_i^n binCenter*prob(binCenter)
+        
+        Note:
+            The histograms must be properly normalized.
+        """
+        
+        assert isinstance(hist,numpy.ndarray) or isinstance(binEdges,numpy.ndarray),\
+            "hist and binEdges must be of type numpy.ndarray"
+            
+        numpy.testing.assert_almost_equal( numpy.sum(hist*numpy.diff(binEdges),dtype=numpy.float), 
+                                           numpy.float(1.0) )
+        
+        numpy.testing.assert_equal( binEdges.shape[0], (hist.shape[0]+1) )
+    
+        return numpy.dot(hist, .5*binEdges[:-1]+binEdges[1:])
         
     def setPricePrediction(self, margDistData):
         if self.validateData(margDistData):
@@ -46,7 +78,6 @@ class margDistSCPP(pointSCPP):
             else:
                 self.m = 1
                 
-        
     @staticmethod
     def validateData(margDistData = None):
         assert isinstance(margDistData, list) or\
@@ -73,6 +104,8 @@ class margDistSCPP(pointSCPP):
                                                
         # if you made it here you are good to go
         return True
+    
+    
         
     
                 

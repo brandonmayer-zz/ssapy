@@ -38,9 +38,9 @@ class pointPredictionAgent(pricePredictionAgent):
     
     def printSummary(self,args={}):
         """
-        Print a summary of agent state to standard out.
+        Print a summary of agent's state to standard output.
         """
-        super(pricePredictionAgent,self).printSummary()
+        super(pointPredictionAgent,self).printSummary()
         
         #if self.pricePrediction != None:
         if 'pointPricePrediction' in args or self.pricePrediction != None:

@@ -101,4 +101,4 @@ class pricePredictionAgent(simYW):
     @staticmethod
     def type():
         return "pricePredictionAgent"
-        
+          
