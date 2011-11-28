@@ -30,15 +30,7 @@ class targetPrice(pointPredictionAgent):
     @staticmethod
     def type():
         return "targetPrice"
-    
-    def bid(self, args={}):
-        bundles = simYW.allBundles(self.m)
-        return targetPrice.SS({'pointPricePrediction':self.pricePrediction.data,
-                               'bundles':bundles,
-                               'l':self.l,
-                               'valuation': simYW.valuation(bundles,self.v,self.l)})
-                               
-    
+                                 
     @staticmethod
     def SS(args={}):
         assert 'pointPricePrediction' in args,\

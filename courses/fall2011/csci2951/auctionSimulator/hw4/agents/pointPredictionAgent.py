@@ -73,6 +73,40 @@ class pointPredictionAgent(pricePredictionAgent):
         else:
             print 'No Point Price Prediction loaded...'
             
+    def bid(self, args={}):
+        """
+        Interface to bid.
+        Will accept an argument of pointPricePrediction which
+        will take precidence over any stored prediction
+        """
+        bundles = self.allBundles(self.m)
+        
+        if 'pointPricePrediction' in args:
+            if isinstance(args['pointPricePrediction'],pointSCPP):
+                return self.SS({'pointPricePrediction':args['pointPricePrediction'].data,
+                                       'bundles':bundles,
+                                       'l':self.l,
+                                       'valuation': simYW.valuation(bundles,self.v,self.l)})
+            elif isinstance(args['pointPricePrediction'],numpy.ndarray):
+                return self.SS({'pointPricePrediction':args['pointPricePrediction'],
+                                       'bundles':bundles,
+                                       'l':self.l,
+                                       'valuation': simYW.valuation(bundles,self.v,self.l)})
+            else:
+                print '----ERROR----'
+                print 'pointPredictionAgent::bid'
+                print 'unkown pointPricePrediction type'
+                raise AssertionError
+            
+        else:
+            assert isinstance(self.pricePrediction,pointSCPP),\
+                "Must specify a price prediction to bid." 
+            return self.SS({'pointPricePrediction':self.pricePrediction.data,
+                                   'bundles':bundles,
+                                   'l':self.l,
+                                   'valuation': simYW.valuation(bundles,self.v,self.l)})
+            
+            
             
         
         

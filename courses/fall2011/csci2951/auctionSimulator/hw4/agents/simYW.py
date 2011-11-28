@@ -110,16 +110,7 @@ class simYW(agentBase):
         
         super(simYW,self).__init__(name)
         
-    def bid(self, args={}):
-        """
-        An interface to trigger the agent to bid.
-        Though this function should be called to return a specific agent's bid,
-        the bid is computed using the agent's strategy profile self.SS(self, args={})
-        which can be called with arbitrary arguments.
-        """
-        print "Cannot Bid with abstract simYW."
-        print "Please instantiate a concrete agent"
-        raise AssertionError
+
     
     def acq(self, priceVector = None):
         """
@@ -149,6 +140,17 @@ class simYW(agentBase):
         
         Should be given the bundles to bid on, the valuation for each bundle
         and any other relavant information for the concrete agent type.
+        """
+        print "Cannot Bid with abstract simYW."
+        print "Please instantiate a concrete agent"
+        raise AssertionError
+    
+    def bid(self, args={}):
+        """
+        An interface to trigger the agent to bid.
+        Though this function should be called to return a specific agent's bid,
+        the bid is computed using the agent's strategy profile class.SS(self, args={})
+        which can be called with arbitrary arguments.
         """
         print "Cannot Bid with abstract simYW."
         print "Please instantiate a concrete agent"
