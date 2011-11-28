@@ -60,6 +60,26 @@ class testStraightMV(unittest.TestCase):
         
         numpy.testing.assert_equal(bid2, bid3)
         
+        #test that a bid with a different instance but same parameters
+        #yields expected results
+        myStraightMV2 = straightMV(l=myStraightMV.l,v=myStraightMV.v,m=myStraightMV.m)
+        
+        bid4 = myStraightMV2.bid({'pointPricePrediction':randomPointPrediction})
+        
+        numpy.testing.assert_equal(bid4, bid)
+        
+        # test that a bid with the static strategy profile yeilds expected
+        # bid
+        bundles = simYW.allBundles(m)
+        v = myStraightMV.v
+        l = myStraightMV.l
+        bid5 = straightMV.SS({'bundles':simYW.allBundles(m),
+                              'valuation': myStraightMV.valuation(bundles = bundles, v = v, l = l),
+                              'pointPricePrediction':randomPointPrediction2.data,
+                              'l':l})
+        
+        numpy.testing.assert_equal(bid, bid5)
+        
     
 if __name__ == "__main__":
     unittest.main()
