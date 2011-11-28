@@ -29,7 +29,9 @@ class testBaselineBidder(unittest.TestCase):
         
         self.assertEqual(m, myBaselineBidder.m)
         
-        #some more of that ocular method
+        self.assertEqual(myBaselineBidder.type(), "baselineBidder")
+        
+        #some more of that "ocular method"
         myBaselineBidder.printSummary()
         
 

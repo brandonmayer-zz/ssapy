@@ -36,10 +36,12 @@ class testTargetPrice(unittest.TestCase):
                                                                     myTargetPrice.pricePrediction.data)) 
                                    
         
-        # test all the calls to super's produce the desired results
+        # test all the calls to super produce the desired results
         self.assertEqual("myTargetPrice", myTargetPrice.name)
     
         self.assertEqual(m,myTargetPrice.m)
+        
+        self.assertEqual(myTargetPrice.type(), "targetPrice")
     
         #inspect via ocular method :P    
         myTargetPrice.printSummary()
