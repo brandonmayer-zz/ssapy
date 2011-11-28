@@ -25,62 +25,90 @@ class targetMVS(pointPredictionAgent):
     """
     
     @staticmethod
-    def type(self):
+    def type():
         return "targetMVS"
     
-    def SS(self, args = {}):
+    @staticmethod
+    def SS(args = {}):
         """
         Calculate a vector of marginal values given a single bundle
         and price vector assuming the price off all goods not in the bundle
         are infinite (unobtainable).
         """
         
-        validate = True
-        if 'validate' in args:
-            validate = args['validate']
+        assert 'pointPricePrediction' in args,\
+            "Must specify pointPricePrediction in args parameter."
             
-        if 'pointPricePrediction' in args:
+        assert isinstance(args['pointPricePrediction'],pointSCPP) or\
+                isinstance(args['pointPricePrediction'], numpy.ndarray),\
+               "args['pointPricePrediction'] must be either a pointSCPP or numpy.ndarray"
             
-            pricePrediction = args['pointPricePrediction']     
+        assert 'bundles' in args,\
+            "Must specify bundles in args parameter."
             
-            if validate:
-                self.validatePriceVector(pricePrediction)
-                   
-            [optBundleIdx, optBundle, optSurplus] = self.acq(pricePrediction,validate=False)
+        assert 'valuation' in args,\
+            "Must specify the valuation of each bundle in the args parameter."
             
-            # set the price of all goods not in the optimal bundle to infinity
-            # deep copy price to preserve original price vector
-            pricePredictionInf = numpy.array(pricePrediction).astype(numpy.float)
-            pricePredictionInf[ (numpy.atleast_1d(optBundle) == 0) ] = float('inf')
+        assert 'l' in args,\
+            "Must specify l, the target number of goods in args parameter."
             
-            marginalValueBid = []
-            for idx in xrange(self.m):
-                if optBundle[idx] == 1:
-                    tempPriceInf = pricePredictionInf.astype(numpy.float)
-                    tempPriceInf[idx] = float('inf')
-                    tempPriceZero = pricePredictionInf
-                    tempPriceZero[idx] = 0
-                    
-                    [optIdxInf, optBundleInf, predictedSurplusInf] = self.acq(tempPriceInf, validate=False)
-                    [optIdxZero, optBundleZero, predictedSurplusZero] = self.acq(tempPriceZero, validate=False)
-                    
-                    #this shouldn't happend but just in case.
-                    if predictedSurplusZero - predictedSurplusInf < 0:
-                        marginalValueBid.append(0)
-                    else:
-                        marginalValueBid.append(predictedSurplusZero - predictedSurplusInf)
-                else:
-                    marginalValueBid.append(0)
-                    
-            return numpy.atleast_1d(marginalValueBid).astype('float')
+        if isinstance(args['pointPricePrediction'], pointSCPP):
+                        
+            pricePrediction = args['pointPricePrediction'].data
+            
+        elif isinstance(args['pointPricePrediction'],numpy.ndarray):
+            
+            pricePrediction = numpy.atleast_1d(args['pointPricePrediction'])
+            
         else:
-            warning = "----WARNING----\n" +\
-                      "auctionSimulator.hw4.agents.{0}.bid\n".format(self.type()) +\
-                      "A point price prediction was not specified as an argument and " +\
-                      "this instance has no stored prediction.\n"+\
-                      "Agent id {0} will bid zero price for all items\n".format(self.id)
-            sys.stderr.write(warning)
-            return numpy.zeros(self.m)
+            # this should never happen
+            pricePrediction = None
+            raise AssertionError
+               
+#        [optBundleIdx, optBundle, optSurplus] = self.acq(pricePrediction,validate=False)
+    
+        optBundle,optSurplus = targetMVS.acqYW(bundles      = args['bundles'],
+                                               valuation    = args['valuation'],
+                                               l            = args['l'],
+                                               priceVector  = pricePrediction)
+        
+        
+        
+        # set the price of all goods not in the optimal bundle to infinity
+        # deep copy price to preserve original price vector
+        pricePredictionInf = numpy.array(pricePrediction).astype(numpy.float)
+        pricePredictionInf[ (numpy.atleast_1d(optBundle) == 0) ] = float('inf')
+        
+        
+        marginalValueBid = []
+        for idx in xrange(args['bundles'].shape[1]):
+            if optBundle[idx] == 1:
+                tempPriceInf = pricePredictionInf.astype(numpy.float)
+                tempPriceInf[idx] = float('inf')
+                tempPriceZero = pricePredictionInf
+                tempPriceZero[idx] = 0
+                
+                [optBundleInf, predictedSurplusInf]   = targetMVS.acqYW(bundles     = args['bundles'],
+                                                                        valuation   = args['valuation'],
+                                                                        l           = args['l'],
+                                                                        priceVector = tempPriceInf)
+                
+                [optBundleZero, predictedSurplusZero] = targetMVS.acqYW(bundles     = args['bundles'],
+                                                                        valuation   = args['valuation'],
+                                                                        l           = args['l'],
+                                                                        priceVector = tempPriceZero)
+                #this shouldn't happend but just in case.
+                if predictedSurplusZero - predictedSurplusInf < 0:
+                    print '----WARNING----'
+                    print 'targetMVS.SS() predictedSurplusZero - predictedSurplusInf < 0'
+                    marginalValueBid.append(0)
+                else:
+                    marginalValueBid.append(predictedSurplusZero - predictedSurplusInf)
+            else:
+                marginalValueBid.append(0)
+                
+        return numpy.atleast_1d(marginalValueBid).astype('float')
+        
             
         
             

@@ -46,7 +46,7 @@ class pointPredictionAgent(pricePredictionAgent):
         if 'pointPricePrediction' in args or self.pricePrediction != None:
             
             if 'pointPricePrediction' in args:
-                if isinstance(args['pointPricePreciction'],pointSCPP):
+                if isinstance(args['pointPricePrediction'],pointSCPP):
                     pricePrediction = args['pointPricePrediction'].data
                 elif isinstance(args['pointPricePrediciton'],numpy.ndarray):
                     pricePrediction = args['pointPricePrediction']
@@ -83,7 +83,7 @@ class pointPredictionAgent(pricePredictionAgent):
             
             print "Optimal Bundle (acq):      {0}".format(optBundle.astype(numpy.int))
             print "Surplus of Optimal Bundle: {0}".format(optSurplus)
-            print "Bid:                       {0}".format(self.bid())
+            print "Bid:                       {0}".format(self.bid({'pointPricePrediction':pricePrediction}))
             print ''
         else:
             print 'No point price prediction information provided...'
@@ -91,7 +91,7 @@ class pointPredictionAgent(pricePredictionAgent):
     def bid(self, args={}):
         """
         Interface to bid.
-        Will accept an argument of pointPricePrediction which
+        Accepts an argument of pointPricePrediction which
         will take precidence over any stored prediction
         """
         bundles = self.allBundles(self.m)
