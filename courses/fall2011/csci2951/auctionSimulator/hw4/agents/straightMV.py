@@ -7,61 +7,69 @@ Date: 11/17/2011
 Specialized agent class to replicate straightMV from
 Yoon and Wellman (2011)
 """
-from targetMV import *
+from auctionSimulator.hw4.agents.pointPredictionAgent import *
 
-class straightMV(targetMV):
+class straightMV(pointPredictionAgent):
     """
     straightMV bids marginal values for all goods.
-    
-    Inherits from targetMV only need to override type(), SS() and bid functions
-    see targetMV.py and agent.py for additional member functions/variables 
     """
+    @staticmethod
     def type(self):
         return "straightMV"
     
-    #def SS(self, bundle, pricePrediction, validate=True):
+    @staticmethod
     def SS(self, args={}):
         """
         Calculate the marginal values of all goods for auction
         given the predicted prices.
         
         NOTE:
-            Bid on all available goods, don't solve acq
+            Bid on all available goods, don't solve acq for overall best bundle.
         """
-        validate = True
-        
-        if 'validate' in args:
-            validate = args['validate']
+        assert 'pointPricePrediction' in args,\
+            "Must specify pointPricePrediction in args parameter."
             
-        pricePrediction = []
-        if 'pointPricePrediction' in args:
-            pricePrediction = args['pointPricePrediction']
-            if validate:
-                self.validatePriceVector(pricePrediction)
+        assert isinstance(args['pointPricePrediction'],pointSCPP) or\
+                isinstance(args['pointPricePrediction'], numpy.ndarray),\
+               "args['pointPricePrediction'] must be either a pointSCPP or numpy.ndarray"
             
-            marginalValueBid = []
-            for idx in xrange(self.m):
-                tempPriceInf = numpy.array(pricePrediction).astype(numpy.float)
-                tempPriceInf[idx] = float('inf')
-                tempPriceZero = numpy.array(pricePrediction)
-                tempPriceZero[idx] = 0 
-                
-                [optIdxInf, optBundleInf, predictedSurplusInf] = self.acq(tempPriceInf, validate=False)
-                [optIdxZero, optBundleZero, predictedSurplusZero] = self.acq(tempPriceZero, validate=False)
-                    
-                #this shouldn't happend but just in case.
-                if predictedSurplusZero - predictedSurplusInf < 0:
-                    marginalValueBid.append(0)
-                else:
-                    marginalValueBid.append(predictedSurplusZero - predictedSurplusInf)
-                
-            return numpy.atleast_1d(marginalValueBid).astype('float')
+        assert 'bundles' in args,\
+            "Must specify bundles in args parameter."
+            
+        assert 'valuation' in args,\
+            "Must specify the valuation of each bundle in the args parameter."
+            
+        assert 'l' in args,\
+            "Must specify l, the target number of goods in args parameter."
+            
+        if isinstance(args['pointPricePrediction'], pointSCPP):
+                        
+            pricePrediction = args['pointPricePrediction'].data
+            
+        elif isinstance(args['pointPricePrediction'],numpy.ndarray):
+            
+            pricePrediction = numpy.atleast_1d(args['pointPricePrediciton'])
+            
         else:
-            warning = "----WARNING----\n" +\
-                      "auctionSimulator.hw4.agents.{0}.bid\n".format(self.type()) +\
-                      "A point price prediction was not specified as an argument and " +\
-                      "this instance has no stored prediction.\n"+\
-                      "Agent id {0} will bid zero price for all items\n".format(self.id)
-            sys.stderr.write(warning)
-            return numpy.zeros(self.m)
+            # this should never happen
+            pricePrediction = None
+        
+        marginalValueBid = []
+        for idx in xrange(self.m):
+            tempPriceInf = numpy.array(pricePrediction).astype(numpy.float)
+            tempPriceInf[idx] = float('inf')
+            tempPriceZero = numpy.array(pricePrediction)
+            tempPriceZero[idx] = 0 
+            
+            [optIdxInf, optBundleInf, predictedSurplusInf] = self.acq(tempPriceInf)
+            [optIdxZero, optBundleZero, predictedSurplusZero] = self.acq(tempPriceZero)
+                
+            #this shouldn't happend but just in case.
+            if predictedSurplusZero - predictedSurplusInf < 0:
+                marginalValueBid.append(0)
+            else:
+                marginalValueBid.append(predictedSurplusZero - predictedSurplusInf)
+            
+        return numpy.atleast_1d(marginalValueBid).astype('float')
+        
             

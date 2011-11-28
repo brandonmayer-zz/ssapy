@@ -50,14 +50,15 @@ class testTargetPrice(unittest.TestCase):
         bid = myTargetPrice.bid()
         
         bundles = simYW.allBundles(m)
+        
         valuation = simYW.valuation(bundles=bundles, 
                                     v=myTargetPrice.v, 
                                     l=myTargetPrice.l)
         
         [optBundle, optSurplus] = simYW.acqYW(bundles,
-                                            valuation,
-                                            myTargetPrice.l,
-                                            randomPointPrediction.data)
+                                              valuation,
+                                              myTargetPrice.l,
+                                              randomPointPrediction.data)
         
         targetBid = []
         for idx in xrange(optBundle.shape[0]):

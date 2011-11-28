@@ -106,9 +106,3 @@ class pointPredictionAgent(pricePredictionAgent):
                                    'l':self.l,
                                    'valuation': simYW.valuation(bundles,self.v,self.l)})
             
-            
-            
-        
-        
-        
-    
