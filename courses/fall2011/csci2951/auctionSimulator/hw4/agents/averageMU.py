@@ -25,6 +25,7 @@ class averageMU(targetMU):
              
         super(averageMU,self).__init__(m,v_min,v_max,name)
         
+          
     def type(self):
         return "averageMU"
                  

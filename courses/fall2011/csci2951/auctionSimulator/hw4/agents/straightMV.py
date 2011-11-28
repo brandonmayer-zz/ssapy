@@ -53,6 +53,7 @@ class straightMV(pointPredictionAgent):
         else:
             # this should never happen
             pricePrediction = None
+            raise AssertionError
         
         marginalValueBid = []
         for idx in xrange(args['bundles'].shape[1]):

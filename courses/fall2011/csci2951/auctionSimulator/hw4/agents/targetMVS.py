@@ -7,9 +7,10 @@ Date: 11/18/2011
 Specialized agent class to replicate targetMV* (hence MVS stands for MV Star) from
 Yoon and Wellman (2011)
 """
-from targetMV import *
+#from targetMV import *
+from pointPredictionAgent import *
 
-class targetMVS(targetMV):
+class targetMVS(pointPredictionAgent):
     """
     targetMVS is identical to targetMV so we can inherit from targetMV
     and only override the helper bid strategy profile SS.
@@ -22,6 +23,8 @@ class targetMVS(targetMV):
         all of the usual member functions and variables are defined though not 
         explicitly listed here, check those files.
     """
+    
+    @staticmethod
     def type(self):
         return "targetMVS"
     

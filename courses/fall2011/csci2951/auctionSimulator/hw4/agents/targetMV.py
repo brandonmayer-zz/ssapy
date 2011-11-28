@@ -10,21 +10,21 @@ Yoon and Wellman (2011)
 from pointPredictionAgent import *
 
 class targetMV(pointPredictionAgent):
-    def __init__(self,
-                 m = 5,
-                 v = None,
-                 l = None,
-                 vmin = 1, 
-                 vmax = 50,
-                 pointPricePrediction = None,
-                 name="Anonymous"): 
-        super(targetMV,self).__init__(m = m,
-                                      v = v,
-                                      l = l,
-                                      vmin = vmin,
-                                      vmax = vmax,
-                                      pointPricePrediction = pointPricePrediction,
-                                      name = name)
+#    def __init__(self,
+#                 m = 5,
+#                 v = None,
+#                 l = None,
+#                 vmin = 1, 
+#                 vmax = 50,
+#                 pointPricePrediction = None,
+#                 name="Anonymous"): 
+#        super(targetMV,self).__init__(m = m,
+#                                      v = v,
+#                                      l = l,
+#                                      vmin = vmin,
+#                                      vmax = vmax,
+#                                      pointPricePrediction = pointPricePrediction,
+#                                      name = name)
         
     @staticmethod
     def type(self):
@@ -39,6 +39,10 @@ class targetMV(pointPredictionAgent):
         assert 'pointPricePrediction' in args,\
             "Must specify pointPricePrediciton in args parameter."
             
+        assert isinstance(args['pointPricePrediction'],pointSCPP) or\
+                isinstance(args['pointPricePrediction'], numpy.ndarray),\
+               "args['pointPricePrediction'] must be either a pointSCPP or numpy.ndarray"
+            
         assert 'bundles' in args,\
             "Must specify bundles in args parameter."
             
@@ -48,8 +52,19 @@ class targetMV(pointPredictionAgent):
         assert 'l' in args,\
             "Must specify l, the target number of goods in args parameter."
 
-        
-        
+        if isinstance(args['pointPricePrediction'], pointSCPP):
+                        
+            pricePrediction = args['pointPricePrediction'].data
+            
+        elif isinstance(args['pointPricePrediction'],numpy.ndarray):
+            
+            pricePrediction = numpy.atleast_1d(args['pointPricePrediction'])
+            
+        else:
+            # this should never happen
+            pricePrediction = None
+            print 'Even HAL made mistakes...'
+            raise AssertionError
         
                 
         # solve acq for optimal bundle

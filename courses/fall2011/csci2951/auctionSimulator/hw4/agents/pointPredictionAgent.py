@@ -84,6 +84,7 @@ class pointPredictionAgent(pricePredictionAgent):
             print "Optimal Bundle (acq):      {0}".format(optBundle.astype(numpy.int))
             print "Surplus of Optimal Bundle: {0}".format(optSurplus)
             print "Bid:                       {0}".format(self.bid())
+            print ''
         else:
             print 'No point price prediction information provided...'
             

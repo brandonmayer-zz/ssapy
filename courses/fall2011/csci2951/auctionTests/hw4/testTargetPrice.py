@@ -16,9 +16,9 @@ class testTargetPrice(unittest.TestCase):
     """
     Unit test worker class for targetPrice tests.
     """
-    def test_targetConstructor(self):
+    def test_targetPrice(self):
         """
-        Test the target price constructors
+        Test the targetPrice
         """
         m = 5
                
