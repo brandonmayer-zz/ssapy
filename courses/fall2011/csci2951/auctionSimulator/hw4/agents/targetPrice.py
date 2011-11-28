@@ -24,7 +24,7 @@ class targetPrice(pointPredictionAgent):
                                          l=l,
                                          vmin=vmin,
                                          vmax=vmax,
-                                         pricePrediction=pointPricePrediction,
+                                         pointPricePrediction=pointPricePrediction,
                                          name=name)
         
     @staticmethod
@@ -55,16 +55,16 @@ class targetPrice(pointPredictionAgent):
 
         # solve acq for optimal bundle
         # size checks of parameters will be done in acq
-        [optBundle, optSurplus] = simYW.acq(bundles=args['bundles'],
+        [optBundle, optSurplus] = simYW.acqYW(bundles=args['bundles'],
                                             valuation=args['valuation'],
                                             l=args['l'],
                                             priceVector=args['pointPricePrediction'])
         
         #bid the prices for the optimal bundle
         bid = []
-        for idx in optBundle.shape[0]:
+        for idx in xrange(optBundle.shape[0]):
             if optBundle[idx]:
-                bid.append(args['pointPricePredicton'][idx])
+                bid.append(args['pointPricePrediction'][idx])
             else:
                 bid.append(0)
                 

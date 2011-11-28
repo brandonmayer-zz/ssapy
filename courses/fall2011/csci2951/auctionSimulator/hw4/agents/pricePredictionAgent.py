@@ -22,18 +22,18 @@ class pricePredictionAgent(simYW):
     
     This level of abstraction may be superfluous but I'll keep it for now.
     """
-    def __init__(self,m = 5, v = None, l = None, vmin=0, vmax=50, name="Anonymous",pricePrecition = None ):
+    def __init__(self,m = 5, v = None, l = None, vmin=0, vmax=50, name="Anonymous",pricePrediction = None ):
         
         super(pricePredictionAgent,self).__init__(m=m,v=v,l=l,vmin=vmin,vmax=vmax,name=name)
         
         # defines the pricePrediciton member variable common to point and distribution
         # price prediction schemes
-        if pricePrediction == None:
-            self.pricePrediction = None
-        else:
-            self.loadOrSetPrediciton(pricePrediction)
+        self.pricePrediction = None
+        
+        if pricePrediction != None:
+            self.loadOrSetPrediction(pricePrediction)
             
-    def loadOrSetPrediciton(self,pricePrediction):
+    def loadOrSetPrediction(self,pricePrediction):
         if isinstance(pricePrediction,basestring)\
              or isinstance(pricePrediction,file):
             
@@ -44,7 +44,7 @@ class pricePredictionAgent(simYW):
             self.setPricePrediction(pricePrediction)
             
         else:
-            self.pricePrediciton = None
+            self.pricePrediction = None
         
     def loadPricePredictionPickle(self,f):
         """
@@ -54,11 +54,11 @@ class pricePredictionAgent(simYW):
                   or an opened pickle fileobject
         """
         if self.predictionType() == "pointSCPP":
-            self.pricePrediciton = pointSCPP()
-            self.pricePrediciton.loadPickle(f)
+            self.pricePrediction = pointSCPP()
+            self.pricePrediction.loadPickle(f)
             
         elif self.predictionType() == "margDistSCPP":
-            self.pricePrediciton = margDistSCPP()
+            self.pricePrediction = margDistSCPP()
             self.pricePrediction.loadPickle(f)
         else:
             sys.stderr.write('----ERROR----\n')
@@ -77,12 +77,14 @@ class pricePredictionAgent(simYW):
             "----ERROR----\n" +\
             "{0}:setPricePrediction \n".format(self.type()) +\
             "self.predictionType() = {0} must match the pricePrediction type.".format(self.predictionType())
+            self.pricePrediction = pricePrediction
             
         elif self.predictionType() == "margDistSCPP":
             assert isinstance(pricePrediction,margDistSCPP),\
             "----ERROR----\n" +\
             "{0}:setPricePrediction \n".format(self.type()) +\
             "self.predictionType() = {0} must match the pricePrediction type.".format(self.predictionType())
+            self.pricePrediction = pricePrediction
         else:
             sys.stderr.write('----ERROR----\n')
             sys.stderr.write('pricePredictionAgent::setPricPrediction()\n')

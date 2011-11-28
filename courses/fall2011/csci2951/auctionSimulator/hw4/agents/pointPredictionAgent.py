@@ -42,9 +42,9 @@ class pointPredictionAgent(pricePredictionAgent):
         """
         super(pricePredictionAgent,self).printSummary()
         
-        if self.pricePrediciton != None:
-            print 'Price Prediction = {0}'.format(pricePrediction.data)
-            print 'Bundle     |     Valuation    |    Cost    |    Surplus'
+        if self.pricePrediction != None:
+            print 'Price Prediction = {0}'.format(self.pricePrediction.data)
+            print 'Bundle | Valuation | Cost | Surplus'
             
             bundles = self.allBundles(self.m)
             
@@ -53,23 +53,25 @@ class pointPredictionAgent(pricePredictionAgent):
                                        l = self.l)
             
             cost = self.cost(bundles=bundles, 
-                             price=self.pricePrediciton.data)
+                             price=self.pricePrediction.data)
             
             surplus = self.surplus(bundles=bundles, 
                                    valuation=valuation, 
-                                   priceVector=self.pricePrediciton.data)
+                                   priceVector=self.pricePrediction.data)
             
             for i in xrange(bundles.shape[0]):
-                print "{0}    {1:5}    {2:5}    {3:5}".format( bundles[i].astype(numpy.int),
-                                                               valuation[i],
-                                                               cost[i],
-                                                               surplus[i])
+                print "{0}  {1:^5} {2:^5} {3:^5}".format( bundles[i].astype(numpy.int),
+                                                          valuation[i],
+                                                          cost[i],
+                                                          surplus[i])
                 
-            [optBundle, optSurplus] = self.acq(priceVector=pricePrediction.data)
+            [optBundle, optSurplus] = self.acq(priceVector=self.pricePrediction.data)
             
             print "Optimal Bundle (acq):      {0}".format(optBundle.astype(numpy.int))
             print "Surplus of Optimal Bundle: {0}".format(optSurplus)
             print "Bid:                       {0}".format(self.bid())
+        else:
+            print 'No Point Price Prediction loaded...'
             
             
         

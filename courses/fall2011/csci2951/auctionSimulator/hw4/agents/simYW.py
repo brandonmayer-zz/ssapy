@@ -12,6 +12,7 @@ from auctionSimulator.hw4.agents.agentBase import *
 
 import itertools
 import numpy
+import operator
 
 class simYW(agentBase):
     """
@@ -126,7 +127,7 @@ class simYW(agentBase):
         """
         bundles = simYW.allBundles(self.m)
         valuation = simYW.valuation(bundles,self.v,self.l)
-        return acqYW(bundles=bundles,valuation=valuation,l=self.l,priceVector=priceVector)
+        return simYW.acqYW(bundles=bundles,valuation=valuation,l=self.l,priceVector=priceVector)
         
 
     def printSummary(self, args = {}):
@@ -181,8 +182,9 @@ class simYW(agentBase):
         assert isinstance(v, numpy.ndarray),\
             "v must be a numpy.ndarray"
         
-        assert isinstance(l,int) and l >= 0 and l < v.shape[0],\
-            "simYW::valuation l must be a positive integer which is smaller than the size of v"
+        assert isinstance(l,int) and l >= 0 and l <= v.shape[0],\
+            "simYW::valuation l = {0} must be a positive integer "+\
+            "which is smaller than the size of v = {1}".format(l,v)
             
             
         bundles = numpy.atleast_2d(bundles)
@@ -197,7 +199,7 @@ class simYW(agentBase):
                 t = numpy.nonzero(bundle >= l)[0][0]
                 valuation.append(v[t])
                 
-            return numpy.atleast_1d(valuation)
+        return numpy.atleast_1d(valuation)
         
     @staticmethod
     def cost(bundles = None, price = None):
@@ -252,9 +254,9 @@ class simYW(agentBase):
         
         #there must be a valuation for each corresponding bundle
         assert bundles.shape[0] == valuation.shape[0],\
-            "simYW::surplus bundles.shape[0] = {0} != valuation.shape[0] = {1}".format(bundles.shape[0],valuation.shape[0])
+            "simYW::surplus bundles.shape[0] = {0} != valuation.shape[0] = {1}".format(bundles.shape[1],valuation.shape[0])
         
-        price = numpy.atleast_1d(price)
+        price = numpy.atleast_1d(priceVector)
         
         #there must be a price for each good
         assert bundles.shape[1] == priceVector.shape[0]

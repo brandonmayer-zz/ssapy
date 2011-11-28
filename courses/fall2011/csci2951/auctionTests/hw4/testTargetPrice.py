@@ -28,21 +28,37 @@ class testTargetPrice(unittest.TestCase):
                                     m = m,
                                     pointPricePrediction = randomPointPrediction)
         
+        numpy.testing.assert_equal(randomPointPrediction.data, 
+                                   myTargetPrice.pricePrediction.data, 
+                                   err_msg="randomPointPrediction.data = {0} and " +\
+                                           "myTargetPrice.pricePrediction.data = {1] " +\
+                                           "should be equal".format(randomPointPrediction.data,
+                                                                    myTargetPrice.pricePrediction.data)) 
+                                   
+        
+        myTargetPrice.printSummary()
+        
         bid = myTargetPrice.bid()
         
         bundles = simYW.allBundles(m)
         valuation = simYW.valuation(bundles=bundles, 
                                     v=myTargetPrice.v, 
                                     l=myTargetPrice.l)
-        [optBundle, optSurplus] = simYW.acq(bundles,
+        [optBundle, optSurplus] = simYW.acqYW(bundles,
                                             valuation,
                                             myTargetPrice.l,
                                             randomPointPrediction.data)
         
+        targetBid = []
+        for idx in xrange(optBundle.shape[0]):
+            if optBundle[idx]:
+                targetBid.append(randomPointPrediction.data[idx])
+            else:
+                targetBid.append(0)
+        targetBid = numpy.atleast_1d(targetBid)
+                
         
-        
-        
-        
-
+        numpy.testing.assert_equal(bid,targetBid)
+                
 if __name__ == "__main__":
     unittest.main()
