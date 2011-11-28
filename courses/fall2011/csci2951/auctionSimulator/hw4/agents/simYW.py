@@ -21,17 +21,19 @@ class simYW(agentBase):
     
     Note: 
         I made the functions:
+        
                         allBundles(nGoods = 5)
                         valuation(bundles = None, v = None, l= None)
                         cost(bundles = None, price = None)
                         surplus(bundles=None, valuation = None, priceVector = None,)
                         bundleFromIndex(index=None, nGoods = 5)
+                        acqYW(bundles = None, valuation = None, l = None, priceVector = None)
                         
         static functions on purpose to keep the class light. I wanted the
         class to store the data specific to the Yoon & Wellman specification as
         well as have the functions necessary to manipulate these data but I didn't
         feel these funcitons should be attached to every class instance. This also
-        offers the added ability to force the parameters of these functions rather
+        offers the added ability to specify the parameters of these functions rather
         than compute for class specific instances.
     """
     

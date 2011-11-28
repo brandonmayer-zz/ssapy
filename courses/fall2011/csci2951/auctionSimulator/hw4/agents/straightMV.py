@@ -14,11 +14,11 @@ class straightMV(pointPredictionAgent):
     straightMV bids marginal values for all goods.
     """
     @staticmethod
-    def type(self):
+    def type():
         return "straightMV"
     
     @staticmethod
-    def SS(self, args={}):
+    def SS(args={}):
         """
         Calculate the marginal values of all goods for auction
         given the predicted prices.
@@ -48,21 +48,28 @@ class straightMV(pointPredictionAgent):
             
         elif isinstance(args['pointPricePrediction'],numpy.ndarray):
             
-            pricePrediction = numpy.atleast_1d(args['pointPricePrediciton'])
+            pricePrediction = numpy.atleast_1d(args['pointPricePrediction'])
             
         else:
             # this should never happen
             pricePrediction = None
         
         marginalValueBid = []
-        for idx in xrange(self.m):
+        for idx in xrange(args['bundles'].shape[1]):
             tempPriceInf = numpy.array(pricePrediction).astype(numpy.float)
             tempPriceInf[idx] = float('inf')
             tempPriceZero = numpy.array(pricePrediction)
             tempPriceZero[idx] = 0 
             
-            [optIdxInf, optBundleInf, predictedSurplusInf] = self.acq(tempPriceInf)
-            [optIdxZero, optBundleZero, predictedSurplusZero] = self.acq(tempPriceZero)
+            optBundleInf, predictedSurplusInf = simYW.acqYW(bundles     = args['bundles'],
+                                                            valuation   = args['valuation'],
+                                                            l           = args['l'],
+                                                            priceVector = tempPriceInf)
+            
+            optBundleZero, predictedSurplusZero = simYW.acqYW(bundles     = args['bundles'],
+                                                              valuation   = args['valuation'],
+                                                              l           = args['l'], 
+                                                              priceVector = tempPriceZero)
                 
             #this shouldn't happend but just in case.
             if predictedSurplusZero - predictedSurplusInf < 0:

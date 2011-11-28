@@ -24,15 +24,15 @@ class testBaselineBidder(unittest.TestCase):
         name = "myBaselineBidder"
         myBaselineBidder = baselineBidder(m=5,name=name)
         
+        #some more of that "ocular method"
+        myBaselineBidder.printSummary()
+        
         #check the name is passed down the constructors correctly
         self.assertEqual(name,myBaselineBidder.name)
         
         self.assertEqual(m, myBaselineBidder.m)
         
         self.assertEqual(myBaselineBidder.type(), "baselineBidder")
-        
-        #some more of that "ocular method"
-        myBaselineBidder.printSummary()
         
 
 if __name__ == "__main__":
