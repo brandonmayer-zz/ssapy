@@ -110,7 +110,7 @@ class simYW(agentBase):
         
         super(simYW,self).__init__(name)
         
-    def bid(self):
+    def bid(self, args={}):
         """
         An interface to trigger the agent to bid.
         Though this function should be called to return a specific agent's bid,

@@ -80,17 +80,3 @@ class averageMU(targetMU):
             avgMV[idx]=numpy.mean(mv)
             
         return avgMV
-            
-                
-                
-                
-                
-                
-        
-        
-        
-    
-        
-        
-        
-    

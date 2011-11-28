@@ -7,20 +7,36 @@ Date: 11/17/2011
 Specialized agent class to replicate baselineBidding from
 Yoon and Wellman (2011)
 """
-from agentBase import *
+from simYW import *
 
-class baselineBidder(agent):
+class baselineBidder(simYW):
     """
     Replicated BaselineBidding agent from Yoon & Wellman 2011
     """
-    def __init__(self, m = 5,
-                 v_min = 1, 
-                 v_max = 50,
+    def __init__(self, 
+                 m = 5,
+                 v = None,
+                 l = None,
+                 vmin = 1, 
+                 vmax = 50,
                  name = "Anonymous baselineBidder"): 
-        super(baselineBidder,self).__init__(m,v_min,v_max,name)
+        super(baselineBidder,self).__init__(m = m,
+                                            v = v,
+                                            l = l, 
+                                            vmin = vmin,
+                                            vmax = vmax,
+                                            name = name)
         
     def type(self):
         return "baselineBidder" 
+    
+    def printSummary(self,args={}):
+        """
+        Print a summary of the class instance
+        """
+        super(baselineBidder,self).printSummary()
+        
+        print"Bid:     {0}".format(self.bid())
         
     def bid(self,args={}):
         """

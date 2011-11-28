@@ -31,7 +31,7 @@ class targetPrice(pointPredictionAgent):
     def type():
         return "targetPrice"
     
-    def bid(self):
+    def bid(self, args={}):
         bundles = simYW.allBundles(self.m)
         return targetPrice.SS({'pointPricePrediction':self.pricePrediction.data,
                                'bundles':bundles,

@@ -36,14 +36,22 @@ class testTargetPrice(unittest.TestCase):
                                                                     myTargetPrice.pricePrediction.data)) 
                                    
         
+        # test all the calls to super's produce the desired results
+        self.assertEqual("myTargetPrice", myTargetPrice.name)
+    
+        self.assertEqual(m,myTargetPrice.m)
+    
+        #inspect via ocular method :P    
         myTargetPrice.printSummary()
         
+        #test basic bid expectation
         bid = myTargetPrice.bid()
         
         bundles = simYW.allBundles(m)
         valuation = simYW.valuation(bundles=bundles, 
                                     v=myTargetPrice.v, 
                                     l=myTargetPrice.l)
+        
         [optBundle, optSurplus] = simYW.acqYW(bundles,
                                             valuation,
                                             myTargetPrice.l,
