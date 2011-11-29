@@ -7,8 +7,9 @@ from auctionSimulator.hw4.agents.targetMU import *
 from auctionSimulator.hw4.agents.straightMU import *
 
 
-import itertools
+import unittest
 import numpy
+import tempfile
 
 class testDistAgents(unittest.TestCase):
     """
@@ -34,7 +35,36 @@ class testDistAgents(unittest.TestCase):
         #test a single distribution
         
     def test_straightMU(self):
-        pass
+        m = 5
+        
+        # test some of the pickle constructors for code coverage
+        # similar to the point (straightMV) test case
+        randomMargDist = margDistSCPP(self.randomPriceDist)
+        
+        tempFileObject = tempfile.NamedTemporaryFile('w+b', suffix='.pkl')
+        
+        randomMargDist.savePickle(tempFileObject.file)
+        
+        # set index to beggining of file to simulate close and re-open
+        tempFileObject.file.seek(0)
+        
+        randomMargDist2 = margDistSCPP()
+        
+        randomMargDist2.loadPickle(tempFileObject.file)
+        
+        # test that the pickle methods work
+        for idx in xrange(len(randomMargDist.data)):
+            
+            numpy.testing.assert_equal(randomMargDist.data[idx][0],
+                                       randomMargDist2.data[idx][0], 
+                                       err_msg = 'Pickling save/load failed')
+        
+            numpy.testing.assert_equal(randomMargDist.data[idx][1],
+                                       randomMargDist2.data[idx][1], 
+                                       err_msg = 'Pickling save/load failed')
+
+    
+        
 #def main():
 #    
 #    #simulate a price Distribution

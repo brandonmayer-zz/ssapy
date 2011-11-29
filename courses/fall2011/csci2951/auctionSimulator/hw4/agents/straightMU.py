@@ -1,5 +1,5 @@
 """
-this is /auctionSimulator/hw4/straightMU.py
+this is /auctionSimulator/hw4/agents/straightMU.py
 
 Author: Brandon Mayer
 Date:   11/21/2011
@@ -68,44 +68,3 @@ class straightMU(margDistPredictionAgent):
                                'bundles'              : args['bundles'],
                                'l'                    : args['l'],
                                'valuation'            : args['valuation'] })
-                              
-    
-#    def SS(self,args={'method':'average'}):
-#        """
-#        Calculate the expected marginal price vector given marginal distributions
-#        over good prices. 
-#        
-#        We consider in the average, the price associated with a bin to be the
-#        bins center. The average is then calculated as summing the product 
-#        of the bin centers multiplied by the bin probability.
-#        """
-#        if 'method' in args:
-#            method = args['method']
-#        else:
-#            method = 'average'
-#            
-#        if not 'distributionPricePrediction' in args:
-#            return numpy.zeros(self.m)
-#        
-#        marginalAverages = []
-#        
-#        if method == 'average':
-#            marginalAverages = self.pointExpectedValFromDist(args['distributionPricePrediction'])
-#        
-#            if marginalAverages.shape[0] != self.m:
-#                    warning = "----WARNING----\n"+\
-#                          "auctionSimulator.hw4.agents.targetMUS.SS()\n" +\
-#                          "Calculated point vector has the wrong size.\n" +\
-#                          "Returning a bid of all zeros."
-#                    sys.stderr.write(warning)
-#                    return numpy.zeros(self.m)
-#        else:
-#            warning = "----WARNING----\n"+\
-#                      "auctionSimulator.hw4.agents.targetMUS.SS()\n" +\
-#                      "unknown method specified for extracing point prediction from distribution.\n" +\
-#                      "Returning a bid of all zeros.\n"
-#            sys.stderr.write(warning)
-#            return numpy.zeros(self.m)
-#                
-#        return super(straightMU,self).SS({'pointPricePrediction':marginalAverages})
-        

@@ -6,7 +6,7 @@ Date:          11/27/2011
 
 A base class for agents who utilize a distribution price prediction.
 """
-from pricePredicitonAgent import *
+from pricePredictionAgent import *
 from auctionSimulator.hw4.pricePrediction.margDistSCPP import *
 
 class margDistPredictionAgent(pricePredictionAgent):
@@ -136,14 +136,4 @@ class margDistPredictionAgent(pricePredictionAgent):
                             'bundles':self.allBundles(self.m),
                             'l':self.l,
                             'valuation':simYW.valuation(bundles,self.v,self.l)})
-                             
-                
-            
-                                
-        
-                                   
-                
-                
-                
-                
-                
+                                 
