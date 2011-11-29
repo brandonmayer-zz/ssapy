@@ -35,7 +35,7 @@ class straightMU(margDistPredictionAgent):
         assert 'margDistPrediction' in args,\
             "Must specify margDistPrediction in args parameter."
             
-        assert isinstance(args['margDistPrediciton'],margDistSCPP) or\
+        assert isinstance(args['margDistPrediction'],margDistSCPP) or\
                 isinstance(args['margDistPrediction'],tuple),\
             "args['margDistPrediction'] must be an instance of type margDistSCPP or a python tuple."
             
@@ -48,21 +48,21 @@ class straightMU(margDistPredictionAgent):
         assert 'l' in args,\
             "Must specify l, the target number of goods in args parameter"
             
-        if isinstance(args['margDistPrediciton'], margDistSCPP):
+        pricePrediction = None
+        if isinstance(args['margDistPrediction'], margDistSCPP):
                         
-            pricePrediction = args['margDistSCPP']
+            pricePrediction = args['margDistPrediction']
             
-        elif isinstance(args['margDistPrediciton'], tuple):
+        elif isinstance(args['margDistPrediction'], tuple):
             
-            pricePrediction = margDistSCPP(args['margDistPrediciton'])
+            pricePrediction = margDistSCPP(args['margDistPrediction'])
             
         else:
             # this should never happen
-            pricePrediction = None
             raise AssertionError
         
         if method == 'average':
-            expectedPrices = pricePrediciton.expectedPrices()
+            expectedPrices = pricePrediction.expectedPrices()
         
         return straightMV.SS({ 'pointPricePrediction' : expectedPrices,
                                'bundles'              : args['bundles'],

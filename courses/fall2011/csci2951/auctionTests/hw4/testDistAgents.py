@@ -62,6 +62,16 @@ class testDistAgents(unittest.TestCase):
             numpy.testing.assert_equal(randomMargDist.data[idx][1],
                                        randomMargDist2.data[idx][1], 
                                        err_msg = 'Pickling save/load failed')
+        
+        myStraightMU = straightMU(margDistPricePrediction = randomMargDist,name="myStraightMU")
+        
+        #make sure the data flows down super calls correctly
+        self.assertEqual("myStraightMU",myStraightMU.name)
+            
+        print ''
+        myStraightMU.printSummary()
+        print''
+        
 
     
         
