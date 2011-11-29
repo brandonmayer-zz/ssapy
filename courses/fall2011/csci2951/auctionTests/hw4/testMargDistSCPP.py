@@ -88,8 +88,7 @@ class testMargDistSCPP(unittest.TestCase):
         numpy.testing.assert_almost_equal( expectedPriceVector,
                                            self.mu,
                                            decimal = 2 )
-                                       
-        
+                                           
         #doing ok if we reach here w/o an exception
         return True
         

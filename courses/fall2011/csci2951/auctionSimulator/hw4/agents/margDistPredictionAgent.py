@@ -76,6 +76,49 @@ class margDistPredictionAgent(pricePredictionAgent):
         
         print 'Expected Price Vector = {0}'
         
+        
+    def bid(self, args={}):
+        """
+        Interface to bid.
+        Accepts an argument of margDistPrediction which
+        will take precidence over any stored prediction
+        """
+        
+        bundles = self.allBundles(self.m)
+        
+        if 'margDistPrediction' in args:
+            if isinstance(args['margDistPrediction'], margDistSCPP):
+                
+                return self.SS({'margDistPrediction':args['margDistPrediction'],
+                                'bundles':self.allBundles(self.m),
+                                'l':self.l,
+                                'valuation': simYW.valuation(bundles,self.v,self.l)})
+                
+            elif isinstance(args['margDistPrediction'],tuple):
+                
+                return self.SS({'margDistPrediction':margDistSCPP(args['margDistPrediction']),
+                                'bundles':self.allBundles(self.m),
+                                'l':self.l,
+                                'valuation': simYW.valuation(bundles,self.v,self.l)})
+                
+            else:
+                print '----ERROR----'
+                print 'pointPredictionAgent::bid'
+                print 'unkown pointPricePrediction type'
+                raise AssertionError
+            
+        else:
+            assert isinstance(self.pricePrediction,pointSCPP),\
+                "Must specify a price prediction to bid."
+            return self.SS({'pointPricePrediction':self.pricePrediction,
+                            'bundles':self.allBundles(self.m),
+                            'l':self.l,
+                            'valuation':simYW.valuation(bundles,self.v,self.l)})
+                             
+                
+            
+                                
+        
                                    
                 
                 
