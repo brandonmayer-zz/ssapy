@@ -9,6 +9,7 @@ This is just a wrapper around targetMV and accepts a price prediction distributi
 and calculates the mean(s) for price prediction
 """
 from margDistPredictionAgent import *
+from straightMV import *
 
 class straightMU(margDistPredictionAgent):
        
@@ -18,7 +19,56 @@ class straightMU(margDistPredictionAgent):
     
     @staticmethod
     def SS(args={}):
-        pass
+        """
+        Calculate the expected marginal price vector given marginal distributions
+        over good prices. 
+        
+        We consider in the average, the price associated with a bin to be the
+        bins center. The average is then calculated as summing the product 
+        of the bin centers multiplied by the bin probability.
+        """
+        
+        method = 'average'
+        if 'method' in args:
+            method = args['method']
+        
+        assert 'margDistPrediction' in args,\
+            "Must specify margDistPrediction in args parameter."
+            
+        assert isinstance(args['margDistPrediciton'],margDistSCPP) or\
+                isinstance(args['margDistPrediction'],tuple),\
+            "args['margDistPrediction'] must be an instance of type margDistSCPP or a python tuple."
+            
+        assert 'bundles' in args,\
+            "Must specify bundles in args parameter."
+            
+        assert 'valuation' in args,\
+            "Must specify the valuation of each bundle in the args parameter."
+            
+        assert 'l' in args,\
+            "Must specify l, the target number of goods in args parameter"
+            
+        if isinstance(args['margDistPrediciton'], margDistSCPP):
+                        
+            pricePrediction = args['margDistSCPP']
+            
+        elif isinstance(args['margDistPrediciton'], tuple):
+            
+            pricePrediction = margDistSCPP(args['margDistPrediciton'])
+            
+        else:
+            # this should never happen
+            pricePrediction = None
+            raise AssertionError
+        
+        if method == 'average':
+            expectedPrices = pricePrediciton.expectedPrices()
+        
+        return straightMV.SS({ 'pointPricePrediction' : expectedPrices,
+                               'bundles'              : args['bundles'],
+                               'l'                    : args['l'],
+                               'valuation'            : args['valuation'] })
+                              
     
 #    def SS(self,args={'method':'average'}):
 #        """
