@@ -67,7 +67,7 @@ class margDistSCPP(pointSCPP):
         
         numpy.testing.assert_equal( binEdges.shape[0], (hist.shape[0]+1) )
     
-        return numpy.dot(hist, .5*binEdges[:-1]+binEdges[1:])
+        return numpy.dot(hist, .5*(binEdges[:-1]+binEdges[1:]))
         
     def setPricePrediction(self, margDistData):
         if self.validateData(margDistData):

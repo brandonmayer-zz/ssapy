@@ -71,7 +71,10 @@ class margDistPredictionAgent(pricePredictionAgent):
         valuation = self.valuation(bundles = bundles,
                                    v       = self.v,
                                    l       = self.l )
-        expectedPriceVector = 
+        
+        expectePriceVector = pricePrediction.expectedPrices
+        
+        print 'Expected Price Vector = {0}'
         
                                    
                 

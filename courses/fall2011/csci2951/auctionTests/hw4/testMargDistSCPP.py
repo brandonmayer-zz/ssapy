@@ -26,12 +26,12 @@ class testMargDistSCPP(unittest.TestCase):
         self.m = 5
         self.randomPriceVector = numpy.random.random_integers(1,10,self.m)
         
-        mu = [5,3,2,1,1]
-        sigma = [.2]*self.m
+        self.mu = [5,3,2,1,1]
+        self.sigma = [.2]*self.m
         self.randomPriceDist = []
         self.randomPriceCount = []
         for good in xrange(self.m):
-            randomPrices = numpy.random.normal(loc=mu[good],scale=sigma[good],size=10000)
+            randomPrices = numpy.random.normal(loc=self.mu[good],scale=self.sigma[good],size=10000)
             self.randomPriceDist.append(numpy.histogram(randomPrices,bins=range(0,51),density=True))
         #test a single distribution
         
@@ -76,9 +76,22 @@ class testMargDistSCPP(unittest.TestCase):
             numpy.testing.assert_allclose(multiEmpty.data[idx][0], self.randomPriceDist[idx][0])
             numpy.testing.assert_allclose(multiEmpty.data[idx][1], self.randomPriceDist[idx][1])
             
-            
+        expectedPriceVector = multiEmpty.expectedPrices()
+        
+        print ''
+        print 'Expected Prices = {0}'.format(expectedPriceVector)  
+        print ''
+        
+        #due to the random nature of the data, this may fail
+        #every once in a while but it should pass most of the time
+        #especially at the low accuracy
+        numpy.testing.assert_almost_equal( expectedPriceVector,
+                                           self.mu,
+                                           decimal = 2 )
+                                       
+        
         #doing ok if we reach here w/o an exception
         return True
         
 if __name__ == "__main__":
-    unittest.main(verbosity=2)
+    unittest.main()
