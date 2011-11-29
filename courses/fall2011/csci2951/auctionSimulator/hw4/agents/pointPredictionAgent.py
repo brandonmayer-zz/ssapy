@@ -75,9 +75,6 @@ class pointPredictionAgent(pricePredictionAgent):
                                                           valuation[i],
                                                           cost[i],
                                                           surplus[i])
-            
-            optBundle = []
-            optSurplus = []
                         
             [optBundle, optSurplus] = self.acq(priceVector=pricePrediction)
             

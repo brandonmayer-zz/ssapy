@@ -72,9 +72,31 @@ class margDistPredictionAgent(pricePredictionAgent):
                                    v       = self.v,
                                    l       = self.l )
         
-        expectePriceVector = pricePrediction.expectedPrices
+        expectePriceVector = pricePrediction.expectedPrices()
         
         print 'Expected Price Vector = {0}'
+        
+        expectedSurplus = self.surplus(bundles     = bundles,
+                                       valuation   = valuation,
+                                       priceVector = expectePriceVector)
+        
+        expectedCost = self.cost(bundles = bundles, 
+                                 price   = expectePriceVector)
+        
+        print 'Bundle | Valuation | Expected Cost | Expected Surplus'
+        
+        for i in xrange(bundles.shape[0]):
+                print "{0}  {1:^5} {2:^5} {3:^5}".format( bundles[i].astype(numpy.int),
+                                                          valuation[i],
+                                                          cost[i],
+                                                          expectedSurplus[i])
+                
+        [expectedOptBundle, expectedOptSurplus] = self.acq(priceVector=expectedPriceVector)
+        
+        print "Expected Optimal Bundle acq(expectedPriceVector):     {0}".format(expectedOptBundle.astype(numpy.int))
+        print "Expected Surplus of Expected Optimal Bundle:          {0}".format(expectedOptSurplus)
+        print "Bid:                                                  {0}".format(self.bid({'margDistPrediction':pricePrediction}))
+        print ''
         
         
     def bid(self, args={}):
