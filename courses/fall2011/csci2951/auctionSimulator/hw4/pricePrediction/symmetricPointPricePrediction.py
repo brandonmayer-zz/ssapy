@@ -15,8 +15,11 @@ from auctionSimulator.hw4.agents.targetMV import *
 from auctionSimulator.hw4.agents.targetMVS import *
 from auctionSimulator.hw4.agents.straightMV import *
 
+from auctionSimulator.hw4.pricePrediction.pointSCPP import *
+
 import numpy
 import argparse
+from datetime import date
 import multiprocessing
 import time
 import itertools
@@ -35,6 +38,12 @@ class symmetricPPP(object):
     
     When this class is called, it instantiates a new agent (so that each concurrent process
     is run with a completely different agent) and returns a unique bid instance.
+    
+    Will output files with name = 
+    'pointPricePrediction_agentType_nSamples_year_month_day_time'
+    
+    where the time string is a floating point number expressed in seconds since the epoch, in UTC 
+    rounded to the nearest integer (the output of python's int(time.time()) function)
     """
     def __init__(self,agentType = 'baselineBidder', m = 5):
         # cache values for instance specific initialization
@@ -58,24 +67,25 @@ class symmetricPPP(object):
             agent = baselineBidder(m=self.m)    
                 
         
-        return numpy.array(agent.bid({'pricePrediction':pointPricePrediction})).astype('float64')
+        return numpy.array(agent.bid({'pointPricePrediction':pointPricePrediction})).astype('float64')
 
     
 
 def main():
-    desc = 'Asyncronious Self Confirmin Point Price Prediction (Yoon & Wellman 2011)'
+    desc = 'Parallel Implementation of Self Confirming Point Price Prediction (Yoon & Wellman 2011)'
     parser = argparse.ArgumentParser(description=desc)
     
-    parser.add_argument('--agentType',     action='store', dest='agentType',         default='baselineBider', nargs='+')
+    parser.add_argument('--agentType',     action='store', dest='agentType',              default='baselineBider', nargs='+')
     parser.add_argument('--allTypes',      action='store_true')
+
+    parser.add_argument('--outDir',        action='store', dest='outDir',                 default = os.curdir+'/pointPricePredicitons')
     
-    parser.add_argument('--outDir',        action='store', dest='outDir', required=True)
-    
-    parser.add_argument('--m',             action='store', dest='m',     type=int,   default = 5)
-    parser.add_argument('--L',             action='store', dest='L',     type=int,   default = 100)
-    parser.add_argument('--d',             action='store', dest='d',     type=float, default=0.05)
-    parser.add_argument('--g',             action='store', dest='g',                 default=1000)
-    parser.add_argument('--pInit',         action='store', dest='pInit', type=int)
+    parser.add_argument('--nproc',         action='store', dest='NUM_PROC', type = int,   default = multiprocessing.cpu_count() )
+    parser.add_argument('--m',             action='store', dest='m',        type = int,   default = 5)
+    parser.add_argument('--L',             action='store', dest='L',        type = int,   default = 100)
+    parser.add_argument('--d',             action='store', dest='d',        type = float, default=0.05)
+    parser.add_argument('--g',             action='store', dest='g',        type = int,   default=1000000)
+    parser.add_argument('--pInit',         action='store', dest='pInit',    type = int)
     
     parser.add_argument('--noDampen',      action='store_true')
     parser.add_argument('--supressOutput', action='store_true')
@@ -121,7 +131,9 @@ def main():
         
         print 'Using Dampining             = {0}'.format(args['noDampen'])
         
-        print'Number of Parallel Cores    = {0}'.format(multiprocessing.cpu_count())
+        print'Number of Parallel Cores    = {0}'.format(args['NUM_PROC'])
+        
+        print'Output Directory             = {0}'.format(args['outDir'])
         
     # Cache local variables that will be needed in loops
     # so we don't have to look up in args dictionary
@@ -153,17 +165,17 @@ def main():
         
         niter = 0
         kappa = 1
-        for t in xrange(0,L + 1):
+        for t in xrange(0,L):
                     
             print ""
-            pool = multiprocessing.Pool()
+            pool = multiprocessing.Pool(processes=args['NUM_PROC'])
             
             if verbose:
                 print 'Iteration: {0}'.format(t)
             
             # set up the dampining constant if so specified
             if dampen:
-                kappa = float(L-t+1)/L
+                kappa = float(L-t)/L
                        
                 
             if verbose:    
@@ -212,13 +224,26 @@ def main():
                     
             if dist[t] <= delta:
                 
-                pricePredictionBinFilename = os.path.join(args['outDir'],'pricePrediction_' + agentType + '.npy')
-                pricePredictionFile = open(pricePredictionBinFilename,'w')
-                numpy.save(pricePredictionFile, currentPricePrediction[-1])
-                pricePredictionFile.close()
+
+                pricePredictionPklFilename = os.path.join(args['outDir'], 
+                                                          'pointPricePrediction_{0}_{1}_{2}_{3}_{4}_{5}.pkl'.format(agentType,
+                                                                                                                    args['g'],
+                                                                                                                    date.today().year,
+                                                                                                                    date.today().month,
+                                                                                                                    date.today().day,
+                                                                                                                    int(time.time())))
+                                                          
+                pricePrediction = pointSCPP(currentPricePrediction[-1])
+                pricePrediction.savePickle(f=pricePredictionPklFilename)
                 
                 if args['writeTxt']:
-                    pricePredictionTxtFilename = os.path.join(args['outDir'],'pricePrediction_' + agentType + '.txt')
+                    pricePredictionTxtFilename = os.path.join(args['outDir'],
+                                                              'pointPricePrediction_{0}_{1}_{2}_{3}_{4}_{5}.txt'.format(agentType,
+                                                                                                                        args['g'],
+                                                                                                                        date.today().year,
+                                                                                                                        date.today().month,
+                                                                                                                        date.today().day,
+                                                                                                                        int(time.time())))
                     pricePredictionTxtFile = open(pricePredictionTxtFilename,'w')
                     numpy.savetxt(pricePredictionTxtFile,currentPricePrediction[-1])
                     pricePredictionTxtFile.close()

@@ -72,6 +72,15 @@ class testDistAgents(unittest.TestCase):
         myStraightMU.printSummary()
         print''
         
+        myStraightMU2 = straightMU(v=myStraightMU.v,l=myStraightMU.l)
+        myStraightMU2.setPricePrediction(randomMargDist2)
+        
+        bid = myStraightMU.bid()
+        
+        bid2 = myStraightMU2.bid()
+        
+        numpy.testing.assert_equal(bid,bid2)
+        
   
         
 if __name__ == "__main__":

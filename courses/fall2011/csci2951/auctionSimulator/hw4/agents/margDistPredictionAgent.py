@@ -95,7 +95,7 @@ class margDistPredictionAgent(pricePredictionAgent):
         
         print "Expected Optimal Bundle acq(expectedPriceVector):     {0}".format(expectedOptBundle.astype(numpy.int))
         print "Expected Surplus of Expected Optimal Bundle:          {0}".format(expectedOptSurplus)
-        print "Bid:                                                  {0}".format(self.bid({'margDistPrediction':pricePrediction}))
+        print "Bid:    {0}".format(self.bid({'margDistPrediction':pricePrediction}))
         print ''
         
         
