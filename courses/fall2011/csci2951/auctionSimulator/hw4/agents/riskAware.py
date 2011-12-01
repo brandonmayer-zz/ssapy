@@ -75,8 +75,8 @@ class riskAware(margDistPredictionAgent):
             upperPrices = binEdges[numpy.nonzero(binEdges > expectedValueVector[idx])]
             
             upperDiff = numpy.array( [d for d in itertools( operator.sub,
-                                                                    itertools.repeat(expectedPrices[goodIdx], times=upperPrices.shape[0]),
-                                                                    upperPrices ) ])
+                                                            itertools.repeat(expectedPrices[goodIdx], times=upperPrices.shape[0]),
+                                                            upperPrices ) ])
             
             #dot product will yeild sum of squares (variance)
             upv.append(numpy.dot(upperDiff,upperDiff))
@@ -145,10 +145,11 @@ class riskAware(margDistPredictionAgent):
         numpy.testing.assert_equal(margUpv.shape[0],
                                    bundles.shape[1])
         
-        #calculate the mupv utility
+        #calculate the mupv utility for each good
         util = []
         for bundleIdx in xrange(bundles.shape[0]):
-            util.append(expectedSurplust[bundleIdx] - .5*A*numpy.sum(margUpv[numpy.nonzero(bundles[bundlIdx])]))
+            util.append( expectedSurplust[bundleIdx] - .5*A*numpy.dot(margUpv,bundles[bundlIdx]) )
+        
         return numpy.atleast_1d(util)
                                                                                
     @staticmethod
