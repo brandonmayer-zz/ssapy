@@ -80,21 +80,27 @@ def ksStatistic(margDist1 = None, margDist2 = None):
                                margDist2.m)
     
     numpy.testing.assert_equal(margDist1.data.shape,
-                                   margDist1.data.shape)
+                               margDist1.data.shape)
     
     margKs = []
     for idx in xrange(margDist1.m):
         numpy.testing.assert_equal(margDist1.data[idx][0],
                                    margDist2.data[idx][1])
-        
+        # cumulative sum of first distribution
         cs1 = numpy.cumsum(margDist1.data[idx][0])
+        
+        # cumulative sum of second distribution
         cs2 = numpy.cumsum(margDist2.data[idx][0])
         
+        # record the maximum absoute difference between the 
+        # cumulative sum over price probabilities
         margKs.append(numpy.max(numpy.abs(cs1-cs2)))
-        
+    
+    # return the max over goods of the max absolute difference between
+    # the cumulative sum over price probabilities
     return numpy.max(numpy.atleast_1d(margKs)) 
 
-def updateDist(currDist = None, newDist = None, kappa = None, verbose = True):
+def updateDist(currDist = None, newDist = None, kappa = None, verbose = True, zeroEps = 0.00001):
     
     assert isinstance(currDist, margDistSCPP),\
         "margDist1 must be an instance of margDistSCPP"
@@ -108,7 +114,7 @@ def updateDist(currDist = None, newDist = None, kappa = None, verbose = True):
     #test there exists a marginal distribution for each good
     numpy.testing.assert_equal(currDist.m, newDist.m)
     
-    updatedDistData = []
+    updatedDist = []
     for idx in xrange(currDist.m):
         
         # test that the distributions are over the same bin indices
@@ -116,19 +122,27 @@ def updateDist(currDist = None, newDist = None, kappa = None, verbose = True):
         numpy.testing.assert_equal(currDist.data[idx][1],currDist.data[idx][1])
         
         #the update equation
-        updatedDistDataTemp = currDist.data[idx][0] + kappa*(currDist.data[idx][0] - newDist.data[idx][0])
+        histTemp = currDist.data[idx][0] + kappa*(currDist.data[idx][0] - newDist.data[idx][0])
         
-        #set all negative values to zero
-        updatedDistDataTemp[numpy.nonzero(updatedDistDataTemp < 0)] = 0
+        #set all negative values to a value close to zero 
+        #we don't want to set the price probability completely to zero
+        #that way there is still some (small) chance of realizing that price
+        histTemp[numpy.nonzero(histTemp < 0)] = zeroEps
         
         # re-normalize
-        updatedDistDataTemp.astype(numpy.float)/numpy.sum(updatedDistData*numpy.diff(currDist.data[idx][1]), dtype=numpy.float)
+        histTemp = histTemp.astype(numpy.float)/ \
+                numpy.sum(histTemp*numpy.diff(currDist.data[idx][1]), dtype=numpy.float)
+        
+        # a bit pedantic but better safe than sorry...
+        numpy.testing.assert_almost_equal(numpy.sum(histTemp*numpy.diff(currDist.data[idx][1]), dtype=numpy.float),
+                                          numpy.float(1.0),
+                                          err_msg = "Renomalization failed.")
         
         # make histogram, edge tuple
-        updataedDistData.append((updatedDistDataTemp, currDist.data[idx][1]))
+        updatedDist.append((histTemp, currDist.data[idx][1]))
     
     #insert into a marg dist wrapper and return
-    return margDistSCPP(updatedDistData)
+    return margDistSCPP(updatedDist)
     
 
 def main():
