@@ -51,7 +51,7 @@ class pointSCPP(object):
         """
         if isinstance(f,basestring):
             
-            temp = pickle.load(open(filename,'rb'))
+            temp = pickle.load(open(f,'rb'))
             if temp.type() == self.type():
                 self.data   = temp.data
                 self.m      = temp.m
