@@ -5,13 +5,8 @@ Author:    Brandon A. Mayer
 Date:      11/23/2011
 """
 
-from agentBase import *
-from straightMV import *
-from targetMV import *
-from targetMVS import *
-from targetPrice import *
-
 from margDistPredictionAgent import *
+
 class riskAware(margDistPredictionAgent):
     """
     Risk aware agent. This agent can adopt several strategies for bidding but
@@ -86,7 +81,7 @@ class riskAware(margDistPredictionAgent):
     @staticmethod
     def mUPV(bundles = None, valuation = None, l = None, A = None, margDist = None):
         """
-        Yet another helper. This function enumerates utility across bundles and does not
+        Yet another helper. This function enumerates utility over bundles but does not
         maximize.
         
         INPUTS:
@@ -153,7 +148,7 @@ class riskAware(margDistPredictionAgent):
         return numpy.atleast_1d(util)
                                                                                
     @staticmethod
-    def acqMeanUPV(bundles = None, valuation = None, l = None, A = None, margDist = None):
+    def acqMUPV(bundles = None, valuation = None, l = None, A = None, margDist = None):
         """
         Compute optimal bundle using Mean Utility uper-partial variance
         function.
@@ -228,39 +223,53 @@ class riskAware(margDistPredictionAgent):
     @staticmethod
     def SS(args={}):
         """
-        Default value of A if not spceified in args i 1
+        Default value of A if not spceified in args is 1
+        
+        Default bidding strategy if not specified is 'targetPrice'
+        which bids the expected value of goods if the good is included
+        in the optimal bundle under the mean upper-partial variance utility
         """
         
         #standard checks
         pricePrediction = margDistPredictionAgent.SS(args=args)
         
         #additional checks
-        numpy.testing.assert_equal( ('bidStrategy' in args),
-                                    True,
-                                    err_msg = 'Must specify \'bidStrategy\' in args.')
-        
-        numpy.testing.assert_equal( ('A' in args),
-                                    True,
-                                    err_msg = 'Must specify A parameter in args.')
+        bidStrategy = None
+        if 'bidStrategy' in args:
+            bidStrategy = args['bidStrategy']
+        else:
+            bidStrategy = 'targetPrice'
+            
+        A = None
+        if 'A' in args:
+            A = args['A']
+        else:
+            A = 1
         
         #enumerate stratgies as they are implemented
         numpy.testing.assert_equal( ('bidStrategy' == 'targetPrice'),
                                     True,
                                     err_msg='Unknown bidding strategy')
             
-        optBundle, optExpectedSurplus = acqMeanUtilUPS(marginalPriceDistributions=args['distributionPricePrediction'],
-                                                       A = args['A'])
-            
-        if self.bidStrategy == 'targetPrice':
+#        optBundle, optExpectedSurplus = acqMeanUtilUPS(marginalPriceDistributions=args['distributionPricePrediction'],
+#                                                       A = A)
+        optBundle, optExpectedSurplus = riskAware.acqMUPV(bundles = args['bundles'], 
+                                                          valuation = args['valuation'], 
+                                                          l = args['l'], 
+                                                          A = A, 
+                                                          margDist = args['margDistPrediction'])
+        
+        if bidStrategy == 'targetPrice':
             #bid the expected values for the optimal bundle according to mean - upper partial variance function
             expectedPrices = pricePrediciton.expectedValues()
-            bid = []
             
+            bid = []
             for goodIdx in xrange(optBundle.shape[0]):
                 if optBundle[goodIdx]:
                     bid.append(expectedPrices[goodIdx])
                 else:
                     bid.append(0)
+                    
             return bid
         else:
             #this shouldn't happen
