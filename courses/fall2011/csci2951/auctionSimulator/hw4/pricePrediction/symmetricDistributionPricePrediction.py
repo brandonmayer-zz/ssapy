@@ -271,7 +271,7 @@ def main():
             
         if verbose:
             histFinish = time.clock()
-            print 'Histogramed {0} marginal distributions of {1} games each in {2} seconds'.\
+            print 'Histogramed {0} marginal distributions of {1} games {2} seconds'.\
                 format(result.shape[1],g,histFinish-histStart)
                 
         if verbose:
@@ -294,7 +294,7 @@ def main():
         
         if verbose:
             ksFinish = time.clock()
-            print 'Calculated KS in {0} seconds.'.format(ksFinish-ksStart)
+            print 'Calculated KS Statistic in {0} seconds.'.format(ksFinish-ksStart)
         
         
         
