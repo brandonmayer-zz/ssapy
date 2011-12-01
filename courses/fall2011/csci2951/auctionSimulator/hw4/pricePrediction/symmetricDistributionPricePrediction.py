@@ -232,11 +232,13 @@ def main():
             print 'Histogramed {0} distributions of {1} games in {2} seconds'.\
                 format(result.shape[1],g,histFinish-histStart)
                 
-        newDist = margDistSCPP(histData)
         
-
+        updatedDist = updateDist(currDist = currentDist, 
+                                 newDist = margDistSCPP(histData), 
+                                 kappa = kappa, 
+                                 verbose = verbose)
         
-        ksStat[t] =  ksStatistic(margDist1 = currentDist, margDist2 = newDist)
+        ksStat[t] =  ksStatistic(margDist1 = currentDist, margDist2 = updatedDist)
         
         if verbose:
             print 'KS Statistic between Successive Iterations = {0}'.format(ksStat[t])
@@ -244,25 +246,39 @@ def main():
         if ksStat[t] <= delta:
             pricePredictionPklFilename = os.path.join(args['outDir'], 
                                                           'distPricePrediction_{0}_{1}_{2}_{3}_{4}_{5}.pkl'.format(agentType,
-                                                                                                                    args['g'],
-                                                                                                                    date.today().year,
-                                                                                                                    date.today().month,
-                                                                                                                    date.today().day,
-                                                                                                                    int(time.time())))
+                                                                                                                   args['g'],
+                                                                                                                   date.today().year,
+                                                                                                                   date.today().month,
+                                                                                                                   date.today().day,
+                                                                                                                   int(time.time())))
+            updatedDist.savePickle(pricePredictionPklFilename)
+            
+            if args['writeTxt']:
+                pricePredictionTxtFilename = os.path.join(args['outDir'],
+                                                              'distPricePrediction_{0}_{1}_{2}_{3}_{4}_{5}.txt'.format(agentType,
+                                                                                                                       args['g'],
+                                                                                                                       date.today().year,
+                                                                                                                       date.today().month,
+                                                                                                                       date.today().day,
+                                                                                                                       int(time.time())))
+                testdata = []
+                for m in xrange(updatedDist.m):
+                    if m == 0:
+                        textdata = numpy.vstack([updatedDist[m][0],updatedDist[m][1][:-1]])
+                    else:
+                        textdata = numpy.vstack([textdata, numpy.vstack([updatedDist[m][0],updatedDist[m][1][:-1]])])
+                        
+                numpy.savetxt(pricePredictionTxtFilename,textdata)
+            
+            termStatement = 'Terminated after {0} Iterations'.format(t)   
+            sys.exit(termStatement)
             
             
-            pass
+        else:
+            currentDist = updatedDist
+            del updatedDist
             
         
-        
-   
-        
-        
-            
-            
-                
-            
-    
 if __name__ == "__main__":
     main()
         
