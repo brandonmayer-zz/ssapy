@@ -72,7 +72,7 @@ class symmetricPPP(object):
     
 
 def main():
-    desc = 'Parallel Implementation of Self Confirming Point Price Prediction (Yoon & Wellman 2011)'
+    desc = 'Parallel Implementation of Self Confirming Point Price Predictions (Yoon & Wellman 2011)'
     parser = argparse.ArgumentParser(description=desc)
     
     parser.add_argument('--agentType',     action='store', dest='agentType',              default='baselineBider', nargs='+')
