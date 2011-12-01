@@ -46,7 +46,7 @@ class symmetricDPPworker(object):
         """
         agent = None
         
-        assert margDistPrediction != None,\
+        assert margDistPrediciton != None,\
             "Must provide a marginal distribution price prediciton"
         
         if self.agentType == 'straightMU':
@@ -78,12 +78,18 @@ def ksStatistic(margDist1 = None, margDist2 = None):
     #compile time
     numpy.testing.assert_equal(margDist1.m, 
                                margDist2.m)
+    
+    numpy.testing.assert_equal(margDist1.data.shape,
+                                   margDist1.data.shape)
+    
     margKs = []
     for idx in xrange(margDist1.m):
-        numpy.testing.assert_equal(margDist1.data.shape,
-                                   margDist1.data.shape)
+        numpy.testing.assert_equal(margDist1.data[idx][0],
+                                   margDist2.data[idx][1])
+        
         cs1 = numpy.cumsum(margDist1.data[idx][0])
         cs2 = numpy.cumsum(margDist2.data[idx][0])
+        
         margKs.append(numpy.max(numpy.abs(cs1-cs2)))
         
     return numpy.max(numpy.atleast_1d(margKs)) 
@@ -99,20 +105,29 @@ def updateDist(currDist = None, newDist = None, kappa = None, verbose = True):
     assert isinstance(kappa,float) or isinstance(kappa,int),\
         "kappa must be a floating point number or integer"        
     
+    #test there exists a marginal distribution for each good
     numpy.testing.assert_equal(currDist.m, newDist.m)
     
-    
-    
     updatedDistData = []
-    for idx in xrange(margDist.m):
+    for idx in xrange(currDist.m):
+        
         # test that the distributions are over the same bin indices
         # if they are not this calculation is meaninless
-        
         numpy.testing.assert_equal(currDist.data[idx][1],currDist.data[idx][1])
-        updatedDistData = currDist.data[idx][0] + kappa*(currDist.data[idx][0] - newDist.data[idx][0])
-        # re-normalize for safety
-        updatedDistData.astype(numpy.float)/numpy.sum(updatedDistData)
         
+        #the update equation
+        updatedDistDataTemp = currDist.data[idx][0] + kappa*(currDist.data[idx][0] - newDist.data[idx][0])
+        
+        #set all negative values to zero
+        updatedDistDataTemp[numpy.nonzero(updatedDistDataTemp < 0)] = 0
+        
+        # re-normalize
+        updatedDistDataTemp.astype(numpy.float)/numpy.sum(updatedDistData*numpy.diff(currDist.data[idx][1]), dtype=numpy.float)
+        
+        # make histogram, edge tuple
+        updataedDistData.append((updatedDistDataTemp, currDist.data[idx][1]))
+    
+    #insert into a marg dist wrapper and return
     return margDistSCPP(updatedDistData)
     
 
@@ -120,7 +135,7 @@ def main():
     desc = 'Parallel Implementation of Self Confirming Distribution Price Prediction (Yoon & Wellman 2011)'
     
     parser = argparse.ArgumentParser(description=desc)
-    parser.add_argument('--agentType',     action='store', dest='agentType',              default='baselineBider')
+    parser.add_argument('--agentType',     action='store', dest='agentType',              default='straightMU')
     
     parser.add_argument('--outDir',        action='store', dest='outDir',   required=True)
     
@@ -133,6 +148,7 @@ def main():
     parser.add_argument('--minPrice',      action='store', dest='minPrice', type = int,   default = 0)
     parser.add_argument('--maxPrice',      action='store', dest='maxPrice', type = int,   default = 50)
     
+    parser.add_argument('--serial',        action='store_true') #use serial implementation
     parser.add_argument('--noDampen',      action='store_true')
     parser.add_argument('--supressOutput', action='store_true')
     parser.add_argument('--writeTxt',      action='store_true')
@@ -144,6 +160,8 @@ def main():
     #add more agents as they are implemented
     assert args['agentType'] == 'straightMU',\
         "Unknown Agent Type {0}".format(args['agentType'])
+        
+    sDPP = symmetricDPPworker(args['agentType'], args['m'])
 
     verbose = not args['supressOutput']
     
@@ -160,7 +178,8 @@ def main():
     currentDist = margDistSCPP(tempDist)
     
     #clean up
-    del p,a,binEdges,tempDist
+    # keep the binEdges for later histograms
+    del p,a,tempDist
         
       
     if verbose:
@@ -168,7 +187,7 @@ def main():
         
         print'Agent Type                   = {0}'.format(args['agentType'])
         
-        print 'Termination Threshold (d)  = {0}'.format(args['d'])
+        print 'Termination Threshold (d)    = {0}'.format(args['d'])
         
         print'Number of Iterations        = {0}'.format(args['L'])
         
@@ -178,9 +197,13 @@ def main():
         
         print 'Using Dampining             = {0}'.format(args['noDampen'])
         
-        print'Number of Parallel Cores    = {0}'.format(args['NUM_PROC'])
+        if args['serial']:
+            print 'Using serial implementation'
+        else:
+            print'Number of Parallel Cores    = {0}'.format(args['NUM_PROC'])
+            
         
-        print'Output Directory             = {0}'.format(args['outDir'])
+        print'Output Directory            = {0}'.format(args['outDir'])
     
     
     # Store local variables that will be needed in loops
@@ -195,7 +218,6 @@ def main():
     kappa = 1
     for t in xrange(0,L):
         print ""
-        pool = multiprocessing.Pool(processes=args['NUM_PROC'])
         
         if verbose:
             print 'Iteration: {0}'.format(t)
@@ -204,32 +226,36 @@ def main():
         if dampen:
             kappa = float(L-t)/L
             
-        if verbose:
-            parallelStart = time.clock()
+        
                 
+        if verbose:
+            gamesStart = time.clock()
+            
+        result = []
+        if args['serial']:
+            # use serial 1 core implementation
+            result = numpy.atleast_2d([r for r in itertools.imap(sDPP, itertools.repeat(currentDist,times=g))]).astype(numpy.float)
+        else:
+            pool = multiprocessing.Pool(processes=args['NUM_PROC'])
             # Run all games in parallel
-            # use iterator object to conserve memory, the arguments 
-            # are only returned when needed instead of storeing the whole list
-        result = numpy.atleast_2d(pool.map(symmetricDPPworker, itertools.repeat(currentDist,times = g))).astype('float64')
-            
-        pool.close()
-            
-        pool.join()
+            result = numpy.atleast_2d( pool.map(sDPP, itertools.repeat(currentDist,times=g)) ).astype(numpy.float)
+            pool.close()
+            pool.join()
             
         if verbose:
-            parallelFinish = time.clock()
-            print 'Finished {0} games in {1} seconds.'.format(g, parallelFinish-parallelStart)
+            gamesFinish = time.clock()
+            print 'Finished {0} games in {1} seconds.'.format(g, gamesFinish-gamesStart)
    
         if verbose:
             histStart=time.clock()  
                    
         histData = [] 
         for m in xrange(result.shape[1]):
-            histData.append(numpy.histogram(result[:,m]))
+            histData.append(numpy.histogram(result[:,m],binEdges,density=True))
             
         if verbose:
-            histEnd = time.clock()
-            print 'Histogramed {0} distributions of {1} games in {2} seconds'.\
+            histFinish = time.clock()
+            print 'Histogramed {0} marginal distributions of {1} games each in {2} seconds'.\
                 format(result.shape[1],g,histFinish-histStart)
                 
         
