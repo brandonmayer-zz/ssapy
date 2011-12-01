@@ -16,6 +16,7 @@ directory
 from auctionSimulator.hw4.agents.straightMU import *
 
 import argparse
+from datetime import date
 import matplotlib.pyplot as plot
 import multiprocessing
 import numpy
@@ -78,14 +79,15 @@ def ksStatistic(margDist1 = None, margDist2 = None):
     #compile time
     numpy.testing.assert_equal(margDist1.m, 
                                margDist2.m)
-    
-    numpy.testing.assert_equal(margDist1.data.shape,
-                               margDist1.data.shape)
-    
+       
     margKs = []
     for idx in xrange(margDist1.m):
-        numpy.testing.assert_equal(margDist1.data[idx][0],
+        
+        # test that the distributions are over the same bin indices
+        # if they are not this calculation is meaninless
+        numpy.testing.assert_equal(margDist1.data[idx][1],
                                    margDist2.data[idx][1])
+        
         # cumulative sum of first distribution
         cs1 = numpy.cumsum(margDist1.data[idx][0])
         
@@ -171,16 +173,18 @@ def main():
     
     args = parser.parse_args().__dict__
     
+    if not os.path.isdir(args['outDir']):
+        os.makedirs(args['outDir'])
+    
     #add more agents as they are implemented
     assert args['agentType'] == 'straightMU',\
         "Unknown Agent Type {0}".format(args['agentType'])
         
+    #instantiate the worker object
     sDPP = symmetricDPPworker(args['agentType'], args['m'])
 
     verbose = not args['supressOutput']
     
-    
-
     #initial uniform distribution
     tempDist = []
     p = float(1)/round(args['maxPrice']-args['minPrice'])
@@ -239,9 +243,7 @@ def main():
         # set up the dampining constant if so specified
         if dampen:
             kappa = float(L-t)/L
-            
-        
-                
+                    
         if verbose:
             gamesStart = time.clock()
             
@@ -272,46 +274,68 @@ def main():
             print 'Histogramed {0} marginal distributions of {1} games each in {2} seconds'.\
                 format(result.shape[1],g,histFinish-histStart)
                 
-        
+        if verbose:
+            updateStart = time.clock()
+            
         updatedDist = updateDist(currDist = currentDist, 
                                  newDist = margDistSCPP(histData), 
                                  kappa = kappa, 
                                  verbose = verbose)
         
+        if verbose:
+            updateFinish = time.clock()
+            print 'Updated distribution in {0} seconds.'.format(updateFinish-updateStart)
+            
+        
+        if verbose:
+            ksStart = time.clock()
+                
         ksStat[t] =  ksStatistic(margDist1 = currentDist, margDist2 = updatedDist)
         
         if verbose:
+            ksFinish = time.clock()
+            print 'Calculated KS in {0} seconds.'.format(ksFinish-ksStart)
+        
+        
+        
+        if verbose:
+            print 'Previous Expected Prices = {0}'.format(currentDist.expectedPrices())
+            print 'New expected Prices      = {0}'.format(updatedDist.expectedPrices())
             print 'KS Statistic between Successive Iterations = {0}'.format(ksStat[t])
+            
         
         if ksStat[t] <= delta:
             pricePredictionPklFilename = os.path.join(args['outDir'], 
-                                                          'distPricePrediction_{0}_{1}_{2}_{3}_{4}_{5}.pkl'.format(agentType,
+                                                      'distPricePrediction_{0}_{1}_{2}_{3}_{4}_{5}.pkl'.format(args['agentType'],
+                                                                                                               args['g'],
+                                                                                                               date.today().year,
+                                                                                                               date.today().month,
+                                                                                                               date.today().day,
+                                                                                                               int(time.time())))
+            updatedDist.savePickle(pricePredictionPklFilename)
+            
+            if args['writeTxt']:
+                pricePredictionTxtFilename = os.path.join(args['outDir'],
+                                                          'distPricePrediction_{0}_{1}_{2}_{3}_{4}_{5}.txt'.format(args['agentType'],
                                                                                                                    args['g'],
                                                                                                                    date.today().year,
                                                                                                                    date.today().month,
                                                                                                                    date.today().day,
                                                                                                                    int(time.time())))
-            updatedDist.savePickle(pricePredictionPklFilename)
-            
-            if args['writeTxt']:
-                pricePredictionTxtFilename = os.path.join(args['outDir'],
-                                                              'distPricePrediction_{0}_{1}_{2}_{3}_{4}_{5}.txt'.format(agentType,
-                                                                                                                       args['g'],
-                                                                                                                       date.today().year,
-                                                                                                                       date.today().month,
-                                                                                                                       date.today().day,
-                                                                                                                       int(time.time())))
+                #this section could be improved....
                 testdata = []
                 for m in xrange(updatedDist.m):
                     if m == 0:
-                        textdata = numpy.vstack([updatedDist[m][0],updatedDist[m][1][:-1]])
+                        textdata = numpy.vstack([updatedDist.data[m][0],updatedDist.data[m][1][:-1]])
                     else:
-                        textdata = numpy.vstack([textdata, numpy.vstack([updatedDist[m][0],updatedDist[m][1][:-1]])])
+                        textdata = numpy.vstack([textdata, numpy.vstack([updatedDist.data[m][0],updatedDist.data[m][1][:-1]])])
                         
                 numpy.savetxt(pricePredictionTxtFilename,textdata)
             
-            termStatement = 'Terminated after {0} Iterations'.format(t)   
-            sys.exit(termStatement)
+            print ''
+            print'Terminated after {0} Iterations'.format(t)
+            print'Final Expected Price Vector = {0}'.format(updatedDist.expectedPrices())
+            sys.exit()
             
             
         else:
