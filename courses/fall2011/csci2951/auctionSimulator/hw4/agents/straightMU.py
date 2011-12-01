@@ -27,40 +27,14 @@ class straightMU(margDistPredictionAgent):
         bins center. The average is then calculated as summing the product 
         of the bin centers multiplied by the bin probability.
         """
+        #check validity of args
+        pricePrediction = margDistPredictionAgent.SS(args=args)
         
+        #AGENT SPECIFIC LOGIC
         method = 'average'
         if 'method' in args:
             method = args['method']
-        
-        assert 'margDistPrediction' in args,\
-            "Must specify margDistPrediction in args parameter."
             
-        assert isinstance(args['margDistPrediction'],margDistSCPP) or\
-                isinstance(args['margDistPrediction'],tuple),\
-            "args['margDistPrediction'] must be an instance of type margDistSCPP or a python tuple."
-            
-        assert 'bundles' in args,\
-            "Must specify bundles in args parameter."
-            
-        assert 'valuation' in args,\
-            "Must specify the valuation of each bundle in the args parameter."
-            
-        assert 'l' in args,\
-            "Must specify l, the target number of goods in args parameter"
-            
-        pricePrediction = None
-        if isinstance(args['margDistPrediction'], margDistSCPP):
-                        
-            pricePrediction = args['margDistPrediction']
-            
-        elif isinstance(args['margDistPrediction'], tuple):
-            
-            pricePrediction = margDistSCPP(args['margDistPrediction'])
-            
-        else:
-            # this should never happen
-            raise AssertionError
-        
         if method == 'average':
             expectedPrices = pricePrediction.expectedPrices()
         

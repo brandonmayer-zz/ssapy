@@ -34,6 +34,80 @@ class margDistPredictionAgent(pricePredictionAgent):
     def type():
         return "margDistPredictionAgent"
     
+    @staticmethod
+    def SS(args={}):
+      """
+      Standard SS checks for the margDistPrediciton agent.
+      """  
+      assert 'margDistPrediction' in args,\
+            "Must specify margDistPrediction in args parameter."
+            
+      assert isinstance(args['margDistPrediction'],margDistSCPP) or\
+                isinstance(args['margDistPrediction'],tuple),\
+            "args['margDistPrediction'] must be an instance of type margDistSCPP or a python tuple."
+            
+      assert 'bundles' in args,\
+            "Must specify bundles in args parameter."
+            
+      assert 'valuation' in args,\
+         "Must specify the valuation of each bundle in the args parameter."
+            
+      assert 'l' in args,\
+            "Must specify l, the target number of goods in args parameter"
+            
+      pricePrediction = None
+      if isinstance(args['margDistPrediction'], margDistSCPP):
+                        
+          pricePrediction = args['margDistPrediction']
+            
+      elif isinstance(args['margDistPrediction'], tuple):
+            
+          pricePrediction = margDistSCPP(args['margDistPrediction'])
+            
+      else:
+          # this should never happen
+          raise AssertionError
+      
+      return pricePrediction
+      
+    def bid(self, args={}):
+        """
+        Interface to bid.
+        Accepts an argument of margDistPrediction which
+        will take precidence over any stored prediction
+        """
+        
+        bundles = self.allBundles(self.m)
+        
+        if 'margDistPrediction' in args:
+            if isinstance(args['margDistPrediction'], margDistSCPP):
+                
+                return self.SS({'margDistPrediction':args['margDistPrediction'],
+                                'bundles':self.allBundles(self.m),
+                                'l':self.l,
+                                'valuation': simYW.valuation(bundles,self.v,self.l)})
+                
+            elif isinstance(args['margDistPrediction'],tuple):
+                
+                return self.SS({'margDistPrediction':margDistSCPP(args['margDistPrediction']),
+                                'bundles':self.allBundles(self.m),
+                                'l':self.l,
+                                'valuation': simYW.valuation(bundles,self.v,self.l)})
+                
+            else:
+                print '----ERROR----'
+                print 'pointPredictionAgent::bid'
+                print 'unkown pointPricePrediction type'
+                raise AssertionError
+            
+        else:
+            assert isinstance(self.pricePrediction,pointSCPP),\
+                "Must specify a price prediction to bid."
+            return self.SS({'margDistPrediction':self.pricePrediction,
+                            'bundles':self.allBundles(self.m),
+                            'l':self.l,
+                            'valuation':simYW.valuation(bundles,self.v,self.l)})
+    
     def printSummary(self,args={}):
         """
         Print a summary of the agent's state to standard output.
@@ -97,43 +171,3 @@ class margDistPredictionAgent(pricePredictionAgent):
         print "Expected Surplus of Expected Optimal Bundle:          {0}".format(expectedOptSurplus)
         print "Bid:    {0}".format(self.bid({'margDistPrediction':pricePrediction}))
         print ''
-        
-        
-    def bid(self, args={}):
-        """
-        Interface to bid.
-        Accepts an argument of margDistPrediction which
-        will take precidence over any stored prediction
-        """
-        
-        bundles = self.allBundles(self.m)
-        
-        if 'margDistPrediction' in args:
-            if isinstance(args['margDistPrediction'], margDistSCPP):
-                
-                return self.SS({'margDistPrediction':args['margDistPrediction'],
-                                'bundles':self.allBundles(self.m),
-                                'l':self.l,
-                                'valuation': simYW.valuation(bundles,self.v,self.l)})
-                
-            elif isinstance(args['margDistPrediction'],tuple):
-                
-                return self.SS({'margDistPrediction':margDistSCPP(args['margDistPrediction']),
-                                'bundles':self.allBundles(self.m),
-                                'l':self.l,
-                                'valuation': simYW.valuation(bundles,self.v,self.l)})
-                
-            else:
-                print '----ERROR----'
-                print 'pointPredictionAgent::bid'
-                print 'unkown pointPricePrediction type'
-                raise AssertionError
-            
-        else:
-            assert isinstance(self.pricePrediction,pointSCPP),\
-                "Must specify a price prediction to bid."
-            return self.SS({'margDistPrediction':self.pricePrediction,
-                            'bundles':self.allBundles(self.m),
-                            'l':self.l,
-                            'valuation':simYW.valuation(bundles,self.v,self.l)})
-                                 
