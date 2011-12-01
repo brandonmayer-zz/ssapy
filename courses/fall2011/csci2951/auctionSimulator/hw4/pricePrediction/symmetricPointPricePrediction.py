@@ -78,7 +78,7 @@ def main():
     parser.add_argument('--agentType',     action='store', dest='agentType',              default='baselineBider', nargs='+')
     parser.add_argument('--allTypes',      action='store_true')
 
-    parser.add_argument('--outDir',        action='store', dest='outDir',                 default = os.curdir+'/pointPricePredicitons')
+    parser.add_argument('--outDir',        action='store', dest='outDir',   required=True)
     
     parser.add_argument('--nproc',         action='store', dest='NUM_PROC', type = int,   default = multiprocessing.cpu_count() )
     parser.add_argument('--m',             action='store', dest='m',        type = int,   default = 5)
@@ -185,8 +185,6 @@ def main():
             # use iterator object to conserve memory, the arguments 
             # are only returned when needed instead of storeing the whole list
             result = numpy.atleast_2d(pool.map(mySymmetricPPP, itertools.repeat(currentPricePrediction[-1],times = g))).astype('float64')
-    #        result = pool.map(symmetricPPPtargetMV,itertools.repeat(currentPricePrediction,times = k))
-    #        result = pool.map(symmetricPPPtargetMV,[currentPricePrediction]*k)
             
             if verbose:
                 finish=time.clock()
