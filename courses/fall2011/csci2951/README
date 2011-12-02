@@ -14,8 +14,6 @@ I recommend downloading external python libraries from Christoph Gohlke at:
 
 http://www.lfd.uci.edu/~gohlke/pythonlibs/
 
-They are the "bees' knees" of python builds.
-
 The basic structure is that all libraries, class and functions are located in the directory
 auctionSimulator.
 
