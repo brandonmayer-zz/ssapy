@@ -105,6 +105,30 @@ class margDistSCPP(pointSCPP):
         # if you made it here you are good to go
         return True
     
+    def iTsample(self,nSamples = None):
+        """
+        Function to sample independently from marginal distributions
+        """
+        numpy.testing.assert_equal(isinstance(nSamples,int),
+                                   True)
+        m = len(self.data)
+        
+        samples = numpy.zeros( (nSamples,m) )
+        
+        for m in xrange(len(self.data)):
+            #calculate the cdf
+            hist,binEdges = self.data[m]
+            cdf = numpy.cumsum(hist)
+            
+            #get some random numbers (0.0,1.0]
+            randNumbers = numpy.random.random_sample(nSamples)
+            
+            for idx in xrange(randNumbers.shape[0]):
+                binIdx = numpy.nonzero(cdf > randNumbers[idx])[0][0]
+                samples[idx][m] = binEdges[binIdx]
+                
+        return samples
+                
     
         
     

@@ -14,6 +14,8 @@ directory
 """
 
 from auctionSimulator.hw4.agents.straightMU import *
+from auctionSimulator.hw4.agents.targetPriceDist import *
+from auctionSimulator.hw4.agents.riskAware import *
 
 import argparse
 from datetime import date
@@ -36,28 +38,57 @@ class symmetricDPPworker(object):
     When this class is called, it instantiates a new agent (so that each concurrent process
     is run with a completely different agent) and returns a unique bid instance.
     """
-    def __init__(self,agentType='straightMU', m = 5):
+    def __init__(self, args={}):
         # store values for specific initialization
-        self.agentType = agentType
-        self.m         = m
-
+        
+        numpy.testing.assert_('m' in args, 
+                              msg="Must Specify m in args")
+        numpy.testing.assert_('agentType' in args, 
+                              msg="Must specify the type of participating agents")
+        self.args = args
     def __call__(self, margDistPrediciton = None):
         """
         Make the class callable with a single argument for multiprocessing.Pool.map()
         """
         agent = None
-        
         assert margDistPrediciton != None,\
             "Must provide a marginal distribution price prediciton"
         
-        if self.agentType == 'straightMU':
-            agent = straightMU(m=self.m)
+        if self.args['agentType'] == 'straightMU':
+            
+            agent = straightMU(m = self.args['m'])
+            
+            return numpy.array(agent.bid({'margDistPrediction': margDistPrediciton})).astype('float')
+        
+        elif self.args['agentType'] == 'targetPriceDist':
+            
+            agent = targetPriceDist(m = self.args['m'])
+            
+            if 'method' in self.args:
+                if self.args['method'] == 'iTsample':
+                    numpy.testing.assert_('nSamples' in self.args, msg = "Must provide nSamples parameter")
+                    
+                    return agent.SS({'margDistPrediction': margDistPrediciton,
+                                     'bundles'           : agent.allBundles(agent.m),
+                                     'l'                 : agent.l,
+                                     'valuation'         : agent.valuation(agent.allBundles(agent.m), agent.v, agent.l),
+                                     'method'            : self.args['method'],
+                                     'nSamples'          : self.args['nSamples']})
+            
+            return numpy.array(agent.bid({'margDistPrediction': margDistPrediciton})).astype('float')
+            
+        elif self.args['agentType'] == 'riskAware':
+            
+            agent = riskAware(m = self.args['m'])
+            
+            return numpy.array(agent.bid({'margDistPrediction': margDistPrediciton})).astype('float')
+            
         else:
             print 'symmetricDPPworker.__call(self.margDistPrediction)'
             print 'Unknown Agent Type: {0}'.format(agentType)
             raise AssertionError
         
-        return numpy.array(agent.bid({'margDistPrediction': margDistPrediciton})).astype('float')
+        
     
 def ksStatistic(margDist1 = None, margDist2 = None):
     """
@@ -155,15 +186,16 @@ def main():
     
     parser.add_argument('--outDir',        action='store', dest='outDir',   required=True)
     
-    parser.add_argument('--nproc',         action='store', dest='NUM_PROC', type = int,   default = multiprocessing.cpu_count() )
-    parser.add_argument('--m',             action='store', dest='m',        type = int,   default = 5)
-    parser.add_argument('--L',             action='store', dest='L',        type = int,   default = 100)
-    parser.add_argument('--d',             action='store', dest='d',        type = float, default = 0.05)
-    parser.add_argument('--g',             action='store', dest='g',        type = int,   default = 1000000)
-    parser.add_argument('--pInitFile',     action='store', dest='pInitFile',type = int)
-    parser.add_argument('--minPrice',      action='store', dest='minPrice', type = int,   default = 0)
-    parser.add_argument('--maxPrice',      action='store', dest='maxPrice', type = int,   default = 50)
-    
+    parser.add_argument('--nproc',         action='store', dest='NUM_PROC', type=int,    default=multiprocessing.cpu_count() )
+    parser.add_argument('--m',             action='store', dest='m',        type=int,    default=5)
+    parser.add_argument('--L',             action='store', dest='L',        type=int,    default=100)
+    parser.add_argument('--d',             action='store', dest='d',        type=float,  default=0.05)
+    parser.add_argument('--g',             action='store', dest='g',        type=int,    default=1000000)
+    parser.add_argument('--pInitFile',     action='store', dest='pInitFile',type=int)
+    parser.add_argument('--minPrice',      action='store', dest='minPrice', type=int,    default=0)
+    parser.add_argument('--maxPrice',      action='store', dest='maxPrice', type=int,    default=50)
+    parser.add_argument('--method',        action='store', dest='method',                default='average')
+    parser.add_argument('--nSamples',      action='store', dest='nSamples', type=int,    default=8)
     parser.add_argument('--serial',        action='store_true') #use serial implementation
     parser.add_argument('--noDampen',      action='store_true')
     parser.add_argument('--supressOutput', action='store_true')
@@ -177,11 +209,17 @@ def main():
         os.makedirs(args['outDir'])
     
     #add more agents as they are implemented
-    assert args['agentType'] == 'straightMU',\
+    assert args['agentType'] == 'straightMU' or\
+           args['agentType'] == 'targetPriceDist' or\
+           args['agentType'] == 'riskAware',\
         "Unknown Agent Type {0}".format(args['agentType'])
         
     #instantiate the worker object
-    sDPP = symmetricDPPworker(args['agentType'], args['m'])
+#    sDPP = symmetricDPPworker(args['agentType'], args['m'])
+    sDPP = symmetricDPPworker({'agentType' : args['agentType'],
+                               'm'         : args['m'],
+                               'method'    : args['method'],
+                               'nSamples'  : args['nSamples']})
 
     verbose = not args['supressOutput']
     

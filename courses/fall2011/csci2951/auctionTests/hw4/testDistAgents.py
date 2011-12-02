@@ -5,6 +5,7 @@
 #from auctionSimulator.hw4.agents.riskAware import *
 from auctionSimulator.hw4.agents.targetMU import *
 from auctionSimulator.hw4.agents.straightMU import *
+from auctionSimulator.hw4.agents.riskAware import *
 
 
 import unittest
@@ -26,7 +27,8 @@ class testDistAgents(unittest.TestCase):
         self.randomPriceVector = numpy.random.random_integers(1,10,self.m)
         
         self.mu = [5,3,2,1,1]
-        self.sigma = [.2]*self.m
+#        self.sigma = [10]*self.m
+        self.sigma = numpy.random.random_integers(1,15,self.m)
         self.randomPriceDist = []
         self.randomPriceCount = []
         for good in xrange(self.m):
@@ -103,14 +105,26 @@ class testDistAgents(unittest.TestCase):
             numpy.testing.assert_allclose(margDistPrediction.data[idx][0], trueDist[idx])
         
         myRiskAware = riskAware(m = m,
-                                margDistPrediction = margDistPrediction)
+                                margDistPricePrediction = margDistPrediction,
+                                A=10)
+        
+        myRiskAware.printSummary()
         
         
-            
+        randomMargDist = margDistSCPP(self.randomPriceDist)
+        
+        myRiskAware.setPricePrediction(randomMargDist)
+        
+        print ''
+        
+        myRiskAware.printSummary()
         
         
+    def test_targetPriceDist(self):
+        m = 5
+
         
-  
+        
         
 if __name__ == "__main__":
     unittest.main()

@@ -87,7 +87,7 @@ class margDistPredictionAgent(pricePredictionAgent):
                                 'l':self.l,
                                 'valuation': simYW.valuation(bundles,self.v,self.l)})
                 
-            elif isinstance(args['margDistPrediction'],tuple):
+            elif isinstance(args['margDistPrediction'],list):
                 
                 return self.SS({'margDistPrediction':margDistSCPP(args['margDistPrediction']),
                                 'bundles':self.allBundles(self.m),
@@ -101,7 +101,7 @@ class margDistPredictionAgent(pricePredictionAgent):
                 raise AssertionError
             
         else:
-            assert isinstance(self.pricePrediction,pointSCPP),\
+            assert isinstance(self.pricePrediction, margDistSCPP),\
                 "Must specify a price prediction to bid."
             return self.SS({'margDistPrediction':self.pricePrediction,
                             'bundles':self.allBundles(self.m),
@@ -148,7 +148,7 @@ class margDistPredictionAgent(pricePredictionAgent):
         
         expectedPriceVector = pricePrediction.expectedPrices()
         
-        print 'Expected Price Vector = {0}'
+        print 'Expected Price Vector = {0}'.format(expectedPriceVector)
         
         expectedSurplus = self.surplus(bundles     = bundles,
                                        valuation   = valuation,
