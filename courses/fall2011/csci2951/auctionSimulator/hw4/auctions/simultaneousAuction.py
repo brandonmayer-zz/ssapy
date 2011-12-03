@@ -5,7 +5,9 @@ Date:      12/2/2011
 
 A class implementing a simultaneous auction.
 """
+from auctionSimulator.hw4.agents.agentBase import *
 from auctionBase import *
+
 
 import numpy
 
@@ -13,14 +15,19 @@ class simultaneousAuction(auctionBase):
     """
     A class for simulating simultaneous one shot auctions.
     """
-    def __init__(self, agentList = [], m = 5, name='simultaneousAuction'):
+    def __init__(self, agentList = [], m = 5, nPrice = 2, name='simultaneousAuction'):
         
         
         self.setAgentList(agentList=agentList)
         
         super(simultaneousAuction,self).__init__(name)
         
-        self.m = int(m)
+        self.m      = int(m)
+        self.nPrice = int(nPrice)
+        
+    @staticmethod
+    def type():
+        return 'simultaneousAuction'
         
     def setAgentList(self, agentList = []):
         """
@@ -37,7 +44,7 @@ class simultaneousAuction(auctionBase):
             
         self.agentList = agentList
         
-    def addAgents(self, agentList = []):
+    def attachAgents(self, agentList = []):
         """
         Add one or more agent to the list of participating agents.
         """        
@@ -60,12 +67,19 @@ class simultaneousAuction(auctionBase):
             self.agentList.remove(targetAgent)
             
     def runAuction(self,args={}):
-        bids = []
-        
-        for agent in self.agentList:
-            bids.append(agent.bid())
             
-        bids = numpy.atleast_2d(bids)
+        #collect the bids from the agents
+        bids = [agent.bid(args) for agent in self.agentList]
+        
+        # numpy.argmax(2darray,0) returns the argmax over
+        # columns
+        self.winners = numpy.argmax(bids,0)
+        
+        
+        
+        pass
+        
+
         
         
             

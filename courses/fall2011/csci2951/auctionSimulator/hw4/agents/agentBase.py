@@ -15,8 +15,8 @@ class agentBase(object):
     """
     nextId = 0
     def __init__(self, name="Anonymous"):
-        self.name = name
-        self.id = agentBase.nextId
+        self.name         = name
+        self.id           = agentBase.nextId
         agentBase.nextId += 1
 
     def id(self):

@@ -9,7 +9,7 @@ class auctionBase(object):
     nextId = 0
     def __init__(self, name = 'auctionBases'):
         self.name = name
-        self.id = nextId
+        self.id = auctionBase.nextId
         auctionBase.nextId +=1
         
     def id(self):
