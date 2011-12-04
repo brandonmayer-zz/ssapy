@@ -6,7 +6,6 @@ from auctionSimulator.hw4.agents.targetPriceDist import *
 import unittest
 import numpy
 import tempfile
-import copy
 
 class testAuctions(unittest.TestCase):
     """
@@ -35,11 +34,15 @@ class testAuctions(unittest.TestCase):
         #directly observe differences in bidding
         riskAware1 = riskAware(margDistPricePrediction = randomMargDist)
         
-        riskAware2 = copy.deepcopy(riskAware1)
+        riskAware2 = riskAware(margDistPricePrediction = randomMargDist,
+                               v = riskAware1.v,
+                               l = riskAware1.l)
         
         riskAware2.A = 5
         
-        riskAware3 = copy.deepcopy(riskAware1)
+        riskAware3 = riskAware(margDistPricePrediction = randomMargDist,
+                               v = riskAware1.v,
+                               l = riskAware1.l)
         
         riskAware3.A = 20
         
@@ -59,9 +62,24 @@ class testAuctions(unittest.TestCase):
         
         auction = simultaneousAuction(agentList)
         
-        auction.runAuction()
+        print auction.agentList
         
-        pass
+        auction.removeAgent(riskAware3.id)
+        
+        print auction.agentList
+        
+        winners, finalPrices, winningBids = auction.runAuction()
+        
+        print 'Winners = '.format(winners)
+        
+        print 'Final Prices = '.format(finalPrices)
+        
+        print 'winningBids = '.format(winningBids)
+        
+        
+        auction.notifyAgents()
+        
+        
         
 if __name__ == "__main__":
     unittest.main()

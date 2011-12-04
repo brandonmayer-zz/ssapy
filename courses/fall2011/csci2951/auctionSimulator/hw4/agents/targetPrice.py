@@ -48,9 +48,9 @@ class targetPrice(pointPredictionAgent):
         # solve acq for optimal bundle
         # size checks of parameters will be done in acq
         [optBundle, optSurplus] = simYW.acqYW(bundles=args['bundles'],
-                                            valuation=args['valuation'],
-                                            l=args['l'],
-                                            priceVector=args['pointPricePrediction'])
+                                              valuation=args['valuation'],
+                                              l=args['l'],
+                                              priceVector=args['pointPricePrediction'])
         
         #bid the prices for the optimal bundle
         bid = []

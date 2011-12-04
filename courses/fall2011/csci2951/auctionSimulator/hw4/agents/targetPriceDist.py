@@ -9,6 +9,7 @@ given a distirubtion price prediction, not a point price prediciton.
 """
 
 from margDistPredictionAgent import *
+from auctionSimulator.hw4.agents.targetPrice import *
 
 class targetPriceDist(margDistPredictionAgent):
     
@@ -28,12 +29,20 @@ class targetPriceDist(margDistPredictionAgent):
             method = args['method']
         
         if not method or method == 'average':
-            return pricePrediction.expectedPrices()
+#            return pricePrediction.expectedPrices()
+            return targetPrice.SS({'bundles'              : args['bundles'],
+                                   'valuation'            : args['valuation'],
+                                   'l'                    : args['l'],
+                                   'pointPricePrediction' : pricePrediction.expectedPrices()})
+            
         
         if method == 'iTsample':
             assert 'nSamples' in args,\
                 "Must specify the number of Samples."
             samples = numpy.atleast_2d(pricePrediction.iTsample(args['nSamples']))
             
-            return numpy.mean(samples,0)
+            return targetPrice.SS({'bundles'              : args['bundles'],
+                                   'valuation'            : args['valuation'],
+                                   'l'                    : args['l'],   
+                                   'pointPricePrediction' : numpy.mean(samples,0)})
             

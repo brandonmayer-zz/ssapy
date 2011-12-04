@@ -109,10 +109,15 @@ class simYW(agentBase):
                     "v.shape[0] = {0} must equal self.m = {1}".format(v.shape[0],self.m)
                                  
             self.v = numpy.atleast_1d(v)
+            
+        # a bit vector indicating which items where won
+        # at auction
+        self.bundleWon = numpy.zeros(self.m)
+        
+        # a vector of final prices for all goods
+        self.finalPrices = numpy.zeros(self.m)
         
         super(simYW,self).__init__(name)
-        
-
     
     def acq(self, priceVector = None):
         """
