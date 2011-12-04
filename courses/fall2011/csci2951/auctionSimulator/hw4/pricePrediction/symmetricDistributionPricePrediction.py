@@ -42,9 +42,11 @@ class symmetricDPPworker(object):
         # store values for specific initialization
         
         numpy.testing.assert_('m' in args, 
-                              msg="Must Specify m in args")
+                              msg="Must Specify m in args.")
         numpy.testing.assert_('agentType' in args, 
-                              msg="Must specify the type of participating agents")
+                              msg="Must specify the type of participating agents.")
+        numpy.testing.assert_('nAgents' in args,
+                              msg="Must specify the number of participating agents.")
         self.args = args
     def __call__(self, margDistPrediciton = None):
         """
@@ -56,32 +58,52 @@ class symmetricDPPworker(object):
         
         if self.args['agentType'] == 'straightMU':
             
-            agent = straightMU(m = self.args['m'])
+            agentList = []
+            for i in xrange(self.args['nAgents']):
+                agentList.append(straightMU(m=self.args['m']))
             
-            return numpy.array(agent.bid({'margDistPrediction': margDistPrediciton})).astype('float')
+            bids = numpy.atleast_2d([agent.bid({'margDistPrediction': margDistPrediciton}) for agent in agentList])
+            
+            #the winning bids at auction
+            return numpy.max(bids,0)
         
         elif self.args['agentType'] == 'targetPriceDist':
             
-            agent = targetPriceDist(m = self.args['m'])
+            agentList = []
+            for i in xrange(self.args['nAgents']):
+                agentList.append(targetPriceDist(m=self.args['m']))
             
+            
+            bids = []
             if 'method' in self.args:
                 if self.args['method'] == 'iTsample':
                     numpy.testing.assert_('nSamples' in self.args, msg = "Must provide nSamples parameter")
                     
-                    return agent.SS({'margDistPrediction': margDistPrediciton,
+                    bids = [agent.SS({'margDistPrediction': margDistPrediciton,
                                      'bundles'           : agent.allBundles(agent.m),
                                      'l'                 : agent.l,
                                      'valuation'         : agent.valuation(agent.allBundles(agent.m), agent.v, agent.l),
                                      'method'            : self.args['method'],
-                                     'nSamples'          : self.args['nSamples']})
+                                     'nSamples'          : self.args['nSamples']}) for agent in agentList]
+                else:
+                    bids =[numpy.array(agent.bid({'margDistPrediction': margDistPrediciton})).astype('float') for agent in agentList]
             
-            return numpy.array(agent.bid({'margDistPrediction': margDistPrediciton})).astype('float')
+#            print [agent.l for agent in agentList]
+            
+#            [agent.printSummary({'margDistPrediction': margDistPrediciton}) for agent in agentList]
+            
+            return numpy.max(bids,0)
             
         elif self.args['agentType'] == 'riskAware':
             
-            agent = riskAware(m = self.args['m'])
+#            agent = riskAware(m = self.args['m'])
+            agentList = []
+            for i in xrange(args['nAgents']):
+                agentList.append(riskAware(m=self.args['m']))
             
-            return numpy.array(agent.bid({'margDistPrediction': margDistPrediciton})).astype('float')
+            bids=[numpy.array(agent.bid({'margDistPrediction': margDistPrediciton})).astype('float') for agent in agentList]
+            
+            return numpy.max(bids,0)
             
         else:
             print 'symmetricDPPworker.__call(self.margDistPrediction)'
@@ -152,10 +174,10 @@ def updateDist(currDist = None, newDist = None, kappa = None, verbose = True, ze
         
         # test that the distributions are over the same bin indices
         # if they are not this calculation is meaninless
-        numpy.testing.assert_equal(currDist.data[idx][1],currDist.data[idx][1])
+        numpy.testing.assert_equal(currDist.data[idx][1],newDist.data[idx][1])
         
         #the update equation
-        histTemp = currDist.data[idx][0] + kappa*(currDist.data[idx][0] - newDist.data[idx][0])
+        histTemp = currDist.data[idx][0] + kappa*(newDist.data[idx][0] - currDist.data[idx][0])
         
         #set all negative values to a value close to zero 
         #we don't want to set the price probability completely to zero
@@ -196,11 +218,13 @@ def main():
     parser.add_argument('--maxPrice',      action='store', dest='maxPrice', type=int,    default=50)
     parser.add_argument('--method',        action='store', dest='method',                default='average')
     parser.add_argument('--nSamples',      action='store', dest='nSamples', type=int,    default=8)
+    parser.add_argument('--nAgents',       action='store', dest='nAgents',  type=int,    default=8)
     parser.add_argument('--serial',        action='store_true') #use serial implementation
     parser.add_argument('--noDampen',      action='store_true')
     parser.add_argument('--supressOutput', action='store_true')
     parser.add_argument('--writeTxt',      action='store_true')
     parser.add_argument('--plot',          action='store_true')
+    
     
     
     args = parser.parse_args().__dict__
@@ -219,7 +243,8 @@ def main():
     sDPP = symmetricDPPworker({'agentType' : args['agentType'],
                                'm'         : args['m'],
                                'method'    : args['method'],
-                               'nSamples'  : args['nSamples']})
+                               'nSamples'  : args['nSamples'],
+                               'nAgents'   : args['nAgents']})
 
     verbose = not args['supressOutput']
     
@@ -304,8 +329,10 @@ def main():
             histStart=time.clock()  
                    
         histData = [] 
+        histCount = []
         for m in xrange(result.shape[1]):
             histData.append(numpy.histogram(result[:,m],binEdges,density=True))
+            histCount.append(numpy.histogram(result[:,m],binEdges,density=False))
             
         if verbose:
             histFinish = time.clock()
@@ -373,6 +400,11 @@ def main():
             print ''
             print'Terminated after {0} Iterations'.format(t)
             print'Final Expected Price Vector = {0}'.format(updatedDist.expectedPrices())
+            
+            if args['plot']:
+                title = '{0} Self Confirming Price Distribution'.format(args['agentType'])
+                updatedDist.graphPdf({'title':title})
+                
             sys.exit()
             
             

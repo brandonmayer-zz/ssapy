@@ -1,6 +1,7 @@
 from pointSCPP import *
-
 from types import * #for type checking
+import matplotlib.pyplot as plt
+import itertools
 
 class margDistSCPP(pointSCPP):
     """
@@ -128,6 +129,91 @@ class margDistSCPP(pointSCPP):
                 samples[idx][m] = binEdges[binIdx]
                 
         return samples
+    
+    def graphPdf(self,args={}):
+        """
+        Function to plot the data using matplot lib
+        """
+        if 'colorStyles' in args:
+            numpy.testing.assert_(len(args['colorStyles']), len(self.data))
+            colorStyles = args['colorStyles']
+        else:
+            #pick some random styles
+            colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
+            lineStyles = ['-', '--', '-.', ':']
+            markerStyles = ['o', 'v', '^', '<', '>', 's', 'p', '*', 'h', 'H', 'x', '+', 'D']
+            colorStyles = [j[0] + j[1] for j in itertools.product(markerStyles,[i[0] + i[1] for i in itertools.product(colors,lineStyles)])]
+            numpy.random.shuffle(colorStyles)
+            colorStyles = colorStyles[:len(self.data)]
+        
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        
+        for i in xrange(len(self.data)):
+            ax.plot(.5*(self.data[i][1][:-1]+self.data[i][1][1:]),self.data[i][0],colorStyles[i],label='Slot {0}'.format(i))
+            
+        if 'xlabel' in args:
+            plt.xlabel(args['xlabel'])
+        else:
+            plt.xlabel('Prices')
+            
+        if 'ylabel' in args:
+            plt.ylabel(args['ylabel'])
+        else:
+            plt.ylabel('Probability')
+        
+        if 'title' in args:
+            plt.title(args['title'])
+        else:
+            plt.title('Price Distribution')
+            
+        plt.legend()
+        
+        plt.show()
+        
+    def graphCdf(self,args={}):
+        if 'colorStyles' in args:
+            numpy.testing.assert_(len(args['colorStyles']), len(self.data))
+            colorStyles = args['colorStyles']
+        else:
+            #pick some random styles
+            colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
+            lineStyles = ['-', '--', '-.', ':']
+            markerStyles = ['o', 'v', '^', '<', '>', 's', 'p', '*', 'h', 'H', 'x', '+', 'D']
+            colorStyles = [j[0] + j[1] for j in itertools.product(markerStyles,[i[0] + i[1] for i in itertools.product(colors,lineStyles)])]
+            numpy.random.shuffle(colorStyles)
+            colorStyles = colorStyles[:len(self.data)]
+        
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        
+        for i in xrange(len(self.data)):
+            ax.plot(.5*(self.data[i][1][:-1]+self.data[i][1][1:]),numpy.cumsum(self.data[i][0]),colorStyles[i],label='Slot {0}'.format(i))
+            
+        if 'xlabel' in args:
+            plt.xlabel(args['xlabel'])
+        else:
+            plt.xlabel('Prices')
+            
+        if 'ylabel' in args:
+            plt.ylabel(args['ylabel'])
+        else:
+            plt.ylabel('Probability')
+        
+        if 'title' in args:
+            plt.title(args['title'])
+        else:
+            plt.title('Price Distribution')
+            
+        plt.legend()
+        
+        plt.show()
+            
+            
+            
+        
+        
+        
                 
     
         

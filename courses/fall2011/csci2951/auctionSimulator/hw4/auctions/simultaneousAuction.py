@@ -127,25 +127,4 @@ class simultaneousAuction(auctionBase):
             
             #if self.winner is the agent index, set the agent's
             #bundleWon to 1 for those goods
-            self.agentList[agentIdx].bundleWon[self.winners == agentIdx] = 1
-            
-            pass
-            
-
-            
-#            #iterate through goods
-#            for bundleIdx in xrange(self.winners):
-#                
-#                
-#                #if the given agent won the good set the correct
-#                if self.winners[bundleIdx] == agentIdx:
-#                    
-#                    #set the correct bit to one
-#                    self.agentList[agentIdx].bundleWon[bundleIdx] = 1
-                    
-                    
-                
-            
-        
-        
-            
+            self.agentList[agentIdx].bundleWon[self.winners == agentIdx] = 1            

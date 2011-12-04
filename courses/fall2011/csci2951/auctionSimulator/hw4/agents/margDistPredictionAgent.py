@@ -114,24 +114,24 @@ class margDistPredictionAgent(pricePredictionAgent):
         """
         super(margDistPredictionAgent,self).printSummary()
         
-        assert 'margDistPricePrediction' in args or self.pricePrediction != None,\
+        assert 'margDistPrediction' in args or self.pricePrediction != None,\
             "Must specify a price prediction"
             
         pricePrediction = None
         
-        if 'margDistPricePrediction' in args:
+        if 'margDistPrediction' in args:
             
-            assert isinstance(args['margDistPricePrediction'],margDistSCPP) or\
-                isinstance(args['margDistPricePrediction'], tuple),\
-                    "args['margDistPricePrediction'] must be a margDistSCPP or numpy.ndarray"
+            assert isinstance(args['margDistPrediction'],margDistSCPP) or\
+                isinstance(args['margDistPrediction'], tuple),\
+                    "args['margDistPrediction'] must be a margDistSCPP or numpy.ndarray"
                     
-            if isinstance(args['margDistPricePrediction'], margDistSCPP):
+            if isinstance(args['margDistPrediction'], margDistSCPP):
                 
-                pricePredicton = args['margDistPricePrediciton']
+                pricePrediction = args['margDistPrediction']
                 
-            elif isinstance(args['margDistPricePrediction'], tuple):
+            elif isinstance(args['margDistPrediction'], tuple):
                 
-                pricePrediction = margDistSCPP(args['margDistPricePrediction'])
+                pricePrediction = margDistSCPP(args['margDistPrediction'])
                 
             else:
                 print 'Should never get here'
