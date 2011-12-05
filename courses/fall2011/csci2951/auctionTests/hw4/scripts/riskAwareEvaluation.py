@@ -5,8 +5,61 @@ from auctionSimulator.hw4.agents.targetPriceDist import *
 
 import numpy
 import matplotlib.pyplot as plt
+import multiprocessing
+import time
+import itertools
+
+class parallelWorker(object):
+    def __init__(self, margDistPrediction = None, nGames = 100):
+        numpy.testing.assert_(isinstance(margDistPrediction, margDistSCPP),
+                              msg='Must Specify a marginal price prediction distribution')
+        
+        self.margDistPrediction = margDistPrediction
+        self.nGames = nGames
+        
+    def __call__(self, dummy = 0):
+        
+        agentSurplus = []
+        agentSurplus = []
+        for i in xrange(self.nGames):
+#            print 'Iteration = {0}'.format(i)
+            
+            agentList = []
+            
+            riskAware1 = riskAware(margDistPricePrediction = self.margDistPrediction,
+                                   A                       = 0,
+                                   name                    = 'riskAware_A={0}'.format(0))
+        
+            
+            agentList.append(targetPriceDist(margDistPricePrediction = self.margDistPrediction,
+                                             v                       = riskAware1.v,
+                                             name                    = 'targetPrice',
+                                            l                        = riskAware1.l))
+            
+            agentList.append(riskAware1)
+        
+            for A in xrange(2,30,2):
+                agentList.append(riskAware(margDistPricePrediction = self.margDistPrediction,
+                                           A                       = A,
+                                           name                    = 'riskAware_A={0}'.format(A),
+                                           v                       = riskAware1.v,
+                                           l                       = riskAware1.l))
+                
+            auction = simultaneousAuction(agentList)
+            
+            auction.runAuction()
+            
+            auction.notifyAgents()
+            
+            agentSurplus.append(auction.agentSurplus())
+            
+        return numpy.atleast_2d(agentSurplus).astype(numpy.float)
+        
 
 def main():
+    nGames = 100
+    
+    NUM_PROC = 10
     
     margDistPkl = "C:\\bmProjects\\courses\\fall2011\\csci2951\\" +\
                   "auctionSimulator\\hw4\\pricePrediction\\margDistPredictions\\" +\
@@ -15,81 +68,49 @@ def main():
     margDistPrediction=margDistSCPP()
     
     margDistPrediction.loadPickle(margDistPkl)
-
-    # i know this looks weird but I wanted to shuffle the agents
-    # b/c we choose the winner of the auction by numpy.argmax(bids)
-    # which returns the first highest argmax unfairly biasing the results
-    # to whichever agent occupies the first spot in agentList
-    # therefore I rancomly shuffle the agents but record results in a dictionary
-        
     
-
-    for i in xrange(20):
-        print 'Iteration = {0}'.format(i)
-        
-        agentList = []
-        
-        riskAware1 = riskAware(margDistPricePrediction = margDistPrediction,
-                           A                       = 0,
-                           name                    = 'riskAware_A={0}'.format(0))
+    pw = parallelWorker(margDistPrediction = margDistPrediction, nGames=nGames)
     
+    pool = multiprocessing.Pool(processes = NUM_PROC)
     
+    parallel = True
     
-        agentList.append(targetPriceDist(margDistPricePrediction = margDistPrediction,
-                                     v                       = riskAware1.v,
-                                     name                    = 'targetPrice',
-                                     l                        = riskAware1.l))
+    print 'Computing Result'
     
-        agentDict[riskAware1.name] = []
-        agentList.append(riskAware1)
+    start = time.clock()    
+    if parallel:
+        result = numpy.atleast_2d( pool.map(pw,xrange(0,NUM_PROC)) ).astype(numpy.float)
+        
+        pool.close()
+        pool.join()
+    else:
+        result = numpy.atleast_2d([r for r in itertools.imap(pw,xrange(0,NUM_PROC))]).astype(numpy.float)
+    finish = time.clock()
     
-        for A in xrange(1,30,2):
-            agentList.append(riskAware(margDistPricePrediction = margDistPrediction,
-                                   A                       = A,
-                                   name                    = 'riskAware_A={0}'.format(A),
-                                   v                       = riskAware1.v,
-                                   l                       = riskAware1.l))
-            
-        if i == 0:
-            for agent in agentList:
-                agentDict[agent.name] = []
-                
-        numpy.random.shuffle(agentList)
-                     
-        auction = simultaneousAuction(agentList)
+    print 'Finished {0} games in {1}'.format(nGames*NUM_PROC,finish-start)
+     
+    result = numpy.reshape( result,(result.shape[0]*result.shape[1],result.shape[2]) )
         
-        auction.runAuction()
-        
-        auction.notifyAgents()
-        
-        for agent in agentList:
-            agentDict[agent.name].append(agent.finalSurplus())
-        
-
+    surplusMean = numpy.mean(result,0)
+    
+    # graph the results
     agentNames = []
-    agentMeans = []
-    
-    for agentName, surplusVector in agentDict.iteritems():
-        agentNames.append(agentName)
-        agentMeans.append(numpy.mean(surplusVector))
-        
-    
+    agentNames.append('targetPrice')
+    for A in xrange(0,30,2):
+        agentNames.append('riskAware_A={0}'.format(A)) 
+         
     ind = numpy.arange(len(agentNames))+.5
         
     width = 0.35
     
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    ax.bar(ind,agentMeans,width)
+    ax.bar(ind,surplusMean,width)
     plt.xticks(ind+width,tuple(agentNames))
+    plt.ylabel('Average Surplus')
+    plt.title('Symmetric Valuation, $\lambda$, and Distribution Prediction {0} games'.format(nGames*NUM_PROC))
     
     plt.show()
     
-    
-    
-    
-    
-    
-
 if __name__ == "__main__":
     main()
