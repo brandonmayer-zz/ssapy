@@ -308,6 +308,7 @@ def main():
             kappa = float(L-t)/L
                     
         if verbose:
+            print 'kappa = {0}'.format(kappa)
             gamesStart = time.clock()
             
         result = []
