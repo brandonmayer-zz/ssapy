@@ -26,7 +26,7 @@ class targetMU8(targetMU):
                             'method'             : 'iTsample',
                             'nSamples'           : 8,
                             'bundles'            : args['bundles'],
-                            'valuation'           : args['valuation'],
+                            'valuation'          : args['valuation'],
                             'l'                  : args['l']})
         
     def printSummary(self):
