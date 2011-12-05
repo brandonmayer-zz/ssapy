@@ -39,15 +39,56 @@ class margDistSCPP(pointSCPP):
         return "marginalDistributionSCPP"
     
     
-    def expectedPrices(self):
+    def expectedPrices(self,args={}):
         """
-        Calculate the expected price vector using the center bin avg method
-        """
-        e = []
-        for hist, binEdges in self.data:
-            e.append(self.centerBinAvg(hist,binEdges))
+        Calculate the marginal expected price vector.
+        
+        By default will calculate the expected value as a sum of probabilities time
+        bin centers
+        
+        iTsample will use the inverse transform sampling method to sample from the 
+        distribution then the expected value will be computed as an average of these
+        points
+        
+        Optional Inputs:
+            args['method'] = average or iTsample
             
-        return numpy.atleast_1d(e)
+            if args['method'] == iTsample 
+                the default number of samples is 8
+            
+            args['nSamples'] the number of samples to use
+                if args['method'] == iTsample
+        """
+        
+        method = None
+        if 'method' in args:
+            method = args['method']
+        else:
+            method = 'average'
+            
+            
+        if method == 'average':
+            e = []
+            for hist, binEdges in self.data:
+                e.append(self.centerBinAvg(hist,binEdges))
+                
+            return numpy.atleast_1d(e)
+        
+        elif method == 'iTsample':
+            
+            nSamples = 8
+            if 'nSamples' in args:
+                nSamples = args['nSamples']
+                
+                samples = self.iTsample(nSamples=nSamples)
+                
+                #return the mean over marginal samples
+                return mean(samples,0)
+            
+        else:
+            print 'margDistSCPP.expectedPrices()'
+            print 'Unknown method'
+            raise AssertionError
     
     @staticmethod
     def centerBinAvg(hist = None, binEdges = None):
@@ -106,7 +147,7 @@ class margDistSCPP(pointSCPP):
         # if you made it here you are good to go
         return True
     
-    def iTsample(self,nSamples = None):
+    def iTsample(self,nSamples = 8):
         """
         Function to sample independently from marginal distributions
         """
@@ -218,4 +259,5 @@ class margDistSCPP(pointSCPP):
     
         
     
+                
                 

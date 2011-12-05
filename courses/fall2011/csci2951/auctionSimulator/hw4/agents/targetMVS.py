@@ -12,16 +12,8 @@ from pointPredictionAgent import *
 
 class targetMVS(pointPredictionAgent):
     """
-    targetMVS is identical to targetMV so we can inherit from targetMV
-    and only override the helper bid strategy profile SS.
-    
     targetMVS assumes that "all goods outside the taget bundle
     are unavailable" (Yoon & Wellman 2011)
-    
-    NOTE:
-        Because this class inherits from targetMV which inherits from agent,
-        all of the usual member functions and variables are defined though not 
-        explicitly listed here, check those files.
     """
     
     @staticmethod
