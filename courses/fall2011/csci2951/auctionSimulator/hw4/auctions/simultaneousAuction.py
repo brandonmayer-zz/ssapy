@@ -86,10 +86,21 @@ class simultaneousAuction(auctionBase):
         #collect the bids from the agents
         bids = numpy.atleast_2d([agent.bid(args) for agent in self.agentList])
         
-        # numpy.argmax(2darray,0) returns the argmax over columns
-        winners = numpy.argmax(bids,0).astype(numpy.float)
-        
+        # the highest bids
         winningBids = numpy.max(bids,0)
+        
+        # if there is more than one agent bidding the highest price
+        # pick the winner at random.
+        winners = numpy.zeros(bids.shape[1],dtype=numpy.float)
+        for m in xrange(bids.shape[1]):
+            maxBids = numpy.nonzero(bids[:,m] == numpy.max(bids[:,m]))[0]
+            if maxBids.shape[0] > 1:
+                numpy.random.shuffle(maxBids)        
+            winners[m]=maxBids[0]
+                
+        
+        # numpy.argmax(2darray,0) returns the argmax over columns
+#        winners = numpy.argmax(bids,0).astype(numpy.float)
         
         #don't give away an item for free
         winners[winningBids == 0] = numpy.nan
@@ -121,12 +132,12 @@ class simultaneousAuction(auctionBase):
             #initialize agent's bundle notifications to zeros of appropriate shape
             self.agentList[agentIdx].bundleWon = numpy.zeros(self.winners.shape[0])
             
-            #let agent know of all final prices
-            self.agentList[agentIdx].finalPrices = self.finalPrices
-            
             #if self.winner is the agent index, set the agent's
             #bundleWon to 1 for those goods
             self.agentList[agentIdx].bundleWon[self.winners == agentIdx] = 1   
             
+            #let agent know of all final prices
+            self.agentList[agentIdx].finalPrices = self.finalPrices
+                 
     def agentSurplus(self,args={}):
         return numpy.atleast_1d([agent.finalSurplus() for agent in self.agentList])
