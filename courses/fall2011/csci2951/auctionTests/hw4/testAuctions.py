@@ -70,11 +70,11 @@ class testAuctions(unittest.TestCase):
         
         winners, finalPrices, winningBids = auction.runAuction()
         
-        print 'Winners = '.format(winners)
+        print 'Winners = {0}'.format(winners)
         
-        print 'Final Prices = '.format(finalPrices)
+        print 'Final Prices = {0}'.format(finalPrices)
         
-        print 'winningBids = '.format(winningBids)
+        print 'winningBids = {0}'.format(winningBids)
         
         
         auction.notifyAgents()

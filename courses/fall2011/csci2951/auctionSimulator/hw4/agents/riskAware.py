@@ -179,7 +179,7 @@ class riskAware(margDistPredictionAgent):
         #calculate the mupv utility for each good
         util = []
         for bundleIdx in xrange(bundles.shape[0]):
-            util.append( expectedSurplus[bundleIdx] - .5*A*numpy.dot(margUpv,bundles[bundleIdx]) )
+            util.append( expectedSurplus[bundleIdx] - A*numpy.exp(numpy.dot(margUpv,bundles[bundleIdx])) )
         
         return numpy.atleast_1d(util)
                                                                                
@@ -227,15 +227,37 @@ class riskAware(margDistPredictionAgent):
         #enumerate all bundles
         allBundles = riskAware.allBundles()
         
-        #return the mean - upper paritial variance utilities for all bundles
-        utility = riskAware.mUPV( bundles   = allBundles,
-                                  valuation = valuation,
-                                  l         = l,
-                                  A         = A, 
-                                  margDist  = margDist ) 
-        
-        
         expectedSurplus = riskAware.surplus(bundles, valuation, margDist.expectedPrices())
+        
+        
+        
+        #indicies of supluses that are greater than zero
+        posSurplusIdx = expectedSurplus > 0.0
+        
+        #if no bundle offers poitive expected utility, don't bid on anything
+        if not posSurplusIdx.any():
+            return numpy.zeros(allBundles.shape[1],dtype=bool), float(0.0)
+        
+        
+#        #return the mean - upper paritial variance utilities for all bundles
+#        utility = riskAware.mUPV( bundles   = allBundles,
+#                                  valuation = valuation,
+#                                  l         = l,
+#                                  A         = A, 
+#                                  margDist  = margDist )
+        
+        posSurplusUtil = riskAware.mUPV(bundles   = allBundles[posSurplusIdx],
+                                        valuation = valuation[posSurplusIdx],
+                                        l        = l,
+                                        A        = A, 
+                                        margDist = margDist )
+        
+        utility = numpy.array([numpy.float('-inf')]*allBundles.shape[0])
+        
+        utility[posSurplusIdx] = posSurplusUtil
+        
+        
+        
                                  
         
         #pick the bundle that maximizes utility
@@ -260,7 +282,7 @@ class riskAware(margDistPredictionAgent):
                         optBundle = allBundles[idx]
                         optExpectedSurplus = expectedSurplus[idx]
                         
-        return optBundle, optExpectedSurplus
+        return numpy.array(optBundle,dtype=bool), optExpectedSurplus
                             
 
         
@@ -455,6 +477,28 @@ class riskAware(margDistPredictionAgent):
                                                         l         = self.l,
                                                         A         = self.A,
                                                         margDist  = pricePrediction)
+        
+        
+        print ''
+        print ''
+        
+        
+        posIdx = expectedSurplus > 0.0
+        if posIdx.any():
+            print 'Bundles With Positive Expected surplus'
+            print 'Bundle      |    Surplus   |     UPV     |      A*exp(UPV)     |  M-UPV Utility'
+            
+            for i in xrange(numpy.nonzero(posIdx)[0].shape[0]):
+                print'{0}   {1:^5}   {2:^5}   {3:^5}    {4:^5}'.format(bundles[posIdx][i].astype(int), 
+                                                                       expectedSurplus[posIdx][i], 
+                                                                       numpy.dot(upv,bundles[posIdx][i]),
+                                                                       self.A*numpy.exp(numpy.dot(upv,bundles[posIdx][i])),
+                                                                       mupv[posIdx][i])
+                                                    
+        else:
+            print 'No bundles with positive expected surplus.'
+                                                    
+        print ''
         
         print 'Optimal Bundle ACQ:           {0}'.format(optBundleAcq.astype(numpy.int))
         print 'Optimal Expected Surplus ACQ: {0}'.format(optSurplusAcq)

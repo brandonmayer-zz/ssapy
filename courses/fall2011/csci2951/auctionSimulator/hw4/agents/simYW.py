@@ -250,6 +250,9 @@ class simYW(agentBase):
         else:
             return numpy.atleast_1d([numpy.dot(bundle,price) for bundle in bundles])
         
+    def finalSurplus(self):
+        return numpy.dot(self.bundleWon,self.finalPrices)
+        
     @staticmethod
     def surplus(bundles=None, valuation = None, priceVector = None,):
         """

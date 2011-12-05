@@ -16,17 +16,16 @@ class simultaneousAuction(auctionBase):
     """
     A class for simulating simultaneous one shot auctions.
     """
-    def __init__(self, agentList = [], m = 5, nPrice = 2, name='simultaneousAuction', reserve = 1):
+    def __init__(self, agentList = [], m = 5, nPrice = 2, name='simultaneousAuction', reserve = 0):
         
         
         self.setAgentList(agentList=agentList)
         
         super(simultaneousAuction,self).__init__(name)
         
-        self.m       = int(m)
-        self.nPrice  = int(nPrice)
-        self.reserve = reserve
-        
+        self.m          = int(m)
+        self.nPrice     = int(nPrice)
+        self.reserve    = reserve
         
     @staticmethod
     def type():
@@ -127,4 +126,7 @@ class simultaneousAuction(auctionBase):
             
             #if self.winner is the agent index, set the agent's
             #bundleWon to 1 for those goods
-            self.agentList[agentIdx].bundleWon[self.winners == agentIdx] = 1            
+            self.agentList[agentIdx].bundleWon[self.winners == agentIdx] = 1   
+            
+    def agentSurplus(self,args={}):
+        return numpy.atleast_1d([agent.finalSurplus() for agent in self.agentList])
