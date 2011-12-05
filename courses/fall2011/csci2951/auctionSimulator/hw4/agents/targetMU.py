@@ -25,30 +25,7 @@ class targetMU(margDistPredictionAgent):
         """
         pricePrediction = margDistPredictionAgent.SS(args=args)
                                                      
-        expectedPrices = None
-        method = 'average'
-        
-        if 'method' in args:
-            method = args['method']
-            
-        if method == 'average':
-            
-            expectedPrices = pricePrediction.expectedPrices()
-            
-        elif method == 'iTsample':
-            
-            nSamples = 8
-            
-            if 'nSamples' in args:
-                nSamples = args['nSamples']
-            
-            expectedPrices = pricePrediciton.expectedPrices({'method'   : 'iTsample',
-                                                             'nSamples' : nSamples})
-        else:
-            print '----ERROR----'
-            print 'targetMU.SS'
-            print 'Unkown method for calculating expected prices'
-            raise AssertionError
+        expectedPrices = pricePrediction.expectedPrices(args=args)
         
         return targetMV.SS({'pointPricePrediction' : expectedPrices,
                             'bundles'              : args['bundles'],

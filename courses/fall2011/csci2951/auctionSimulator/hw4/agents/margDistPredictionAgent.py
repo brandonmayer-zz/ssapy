@@ -146,7 +146,28 @@ class margDistPredictionAgent(pricePredictionAgent):
                                    v       = self.v,
                                    l       = self.l )
         
-        expectedPriceVector = pricePrediction.expectedPrices()
+        method = 'average'
+        if 'method' in args:
+            method = args['method']
+            
+        
+            
+        expectedPriceVector = None
+        if method == 'average':
+            expectedPriceVector = pricePrediction.expectedPrices()
+        elif method == 'iTsample':
+            nSamples = 8
+            if 'nSamples' in args:
+                nSamples = args['nSamples']
+                
+            expectedPriceVector = pricePrediction.expectedPrices({'method'   : 'iTsample',
+                                                                  'nSamples' : nSamples})
+        else:
+            print '----ERROR----'
+            print 'Unknown method to compute expected price vector'
+            raise AssertionError
+            
+                
         
         print 'Expected Price Vector = {0}'.format(expectedPriceVector)
         

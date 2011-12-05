@@ -83,7 +83,7 @@ class margDistSCPP(pointSCPP):
                 samples = self.iTsample(nSamples=nSamples)
                 
                 #return the mean over marginal samples
-                return mean(samples,0)
+                return numpy.mean(samples,0)
             
         else:
             print 'margDistSCPP.expectedPrices()'

@@ -31,12 +31,8 @@ class straightMU(margDistPredictionAgent):
         pricePrediction = margDistPredictionAgent.SS(args=args)
         
         #AGENT SPECIFIC LOGIC
-        method = 'average'
-        if 'method' in args:
-            method = args['method']
-            
-        if method == 'average':
-            expectedPrices = pricePrediction.expectedPrices()
+        expectedPrices = pricePrediction.expectedPrices(args=args)
+
         
         return straightMV.SS({ 'pointPricePrediction' : expectedPrices,
                                'bundles'              : args['bundles'],

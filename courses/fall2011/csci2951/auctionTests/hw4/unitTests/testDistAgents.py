@@ -5,6 +5,7 @@
 #from auctionSimulator.hw4.agents.riskAware import *
 from auctionSimulator.hw4.agents.targetMU import *
 from auctionSimulator.hw4.agents.straightMU import *
+from auctionSimulator.hw4.agents.straightMU8 import *
 from auctionSimulator.hw4.agents.riskAware import *
 
 
@@ -35,6 +36,13 @@ class testDistAgents(unittest.TestCase):
             randomPrices = numpy.random.normal(loc=self.mu[good],scale=self.sigma[good],size=10000)
             self.randomPriceDist.append(numpy.histogram(randomPrices,bins=range(0,51),density=True))
         #test a single distribution
+        
+    def test_straightMU8(self):
+        randomMargDist = margDistSCPP(self.randomPriceDist)
+        
+        myStraightMU8 = straightMU8(margDistPricePrediction = randomMargDist,name="myStraightMU8")
+        
+        myStraightMU8.printSummary()
         
     def test_straightMU(self):
         m = 5
@@ -118,13 +126,6 @@ class testDistAgents(unittest.TestCase):
         print ''
         
         myRiskAware.printSummary()
-        
-        
-    def test_targetPriceDist(self):
-        m = 5
-
-    
-        
         
         
 if __name__ == "__main__":
