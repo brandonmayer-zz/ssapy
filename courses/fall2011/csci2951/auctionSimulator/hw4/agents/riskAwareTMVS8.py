@@ -5,10 +5,10 @@ Author:    Brandon A. Mayer
 Date:      12/6/2011
 """
 
-from auctionSimulator.hw4.agents.riskAware import *
+from auctionSimulator.hw4.agents.riskAwareTP8 import *
 from auctionSimulator.hw4.agents.targetMVS import *
 
-class riskAwareTMVS8(riskAware):
+class riskAwareTMVS8(riskAwareTP8):
     @staticmethod
     def type():
         return "riskAwareMUS8"

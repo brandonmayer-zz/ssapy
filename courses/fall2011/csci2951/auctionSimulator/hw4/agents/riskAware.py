@@ -204,7 +204,7 @@ class riskAware(margDistPredictionAgent):
             if riskFunc == 'exponential':
                 util.append( expectedSurplus[bundleIdx] - A*numpy.exp(numpy.dot(margUpv,bundles[bundleIdx])) )
             elif riskFunc == 'linear':
-                util.append( expectedSurplus[bundleIdx] - A*numpy.exp(numpy.dot(margUpv,bundles[bundleIdx])) )
+                util.append( expectedSurplus[bundleIdx] - A*numpy.dot(margUpv,bundles[bundleIdx]) )
             else:
                 raise ValueError('Unknown value of riskFunc')
             

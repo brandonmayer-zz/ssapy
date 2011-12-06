@@ -122,7 +122,7 @@ class riskAwareTP8(riskAware):
         posIdx = expectedSurplus > 0.0
         if posIdx.any():
             print 'Bundles With Positive Expected surplus'
-            print 'Bundle      |    Surplus   |     UPV     |      A*exp(UPV)     |  M-UPV Utility'
+            print 'Bundle      |    Surplus   |     UPV     |       A*UPV      |  M-UPV Utility'
             
             for i in xrange(numpy.nonzero(posIdx)[0].shape[0]):
                 print'{0}   {1:^5}   {2:^5}   {3:^5}    {4:^5}'.format(bundles[posIdx][i].astype(int), 
