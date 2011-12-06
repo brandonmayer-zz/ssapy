@@ -20,7 +20,6 @@ class parallelWorker(object):
     def __call__(self, dummy = 0):
         
         agentSurplus = []
-        agentSurplus = []
         for i in xrange(self.nGames):
 #            print 'Iteration = {0}'.format(i)
             
@@ -69,7 +68,8 @@ def main():
     
     margDistPrediction.loadPickle(margDistPkl)
     
-    pw = parallelWorker(margDistPrediction = margDistPrediction, nGames=nGames)
+    pw = parallelWorker(margDistPrediction = margDistPrediction, 
+                        nGames             = nGames)
     
     pool = multiprocessing.Pool(processes = NUM_PROC)
     
