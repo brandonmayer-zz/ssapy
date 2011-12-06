@@ -21,6 +21,54 @@ class targetMVS(pointPredictionAgent):
         return "targetMVS"
     
     @staticmethod
+    def bundleBid(args={}):
+        pricePrediction = args['pointPricePrediction']
+        
+        bundle = args['bundle']
+        
+        valuation = args['valuation']
+        
+        l = args['l']
+        
+        # set the price of all goods not in the optimal bundle to infinity
+        # deep copy price to preserve original price vector
+        pricePredictionInf = numpy.array(pricePrediction).astype(numpy.float)
+        pricePredictionInf[ (numpy.atleast_1d(bundle) == 0) ] = float('inf')
+        
+        m = int(bundle.shape[0])
+        
+        allBundles = simYW.allBundles(m)
+        
+        marginalValueBid = []
+        for idx in xrange(m):
+            if bundle[idx] == 1:
+                tempPriceInf = pricePredictionInf.astype(numpy.float)
+                tempPriceInf[idx] = float('inf')
+                tempPriceZero = pricePredictionInf
+                tempPriceZero[idx] = 0
+                
+                [optBundleInf, predictedSurplusInf]   = targetMVS.acqYW(bundles     = allBundles,
+                                                                        valuation   = valuation,
+                                                                        l           = l,
+                                                                        priceVector = tempPriceInf)
+                
+                [optBundleZero, predictedSurplusZero] = targetMVS.acqYW(bundles     = allBundles,
+                                                                        valuation   = valuation,
+                                                                        l           = l,
+                                                                        priceVector = tempPriceZero)
+                #this shouldn't happend but just in case.
+                if predictedSurplusZero - predictedSurplusInf < 0:
+                    print '----WARNING----'
+                    print 'targetMVS.SS() predictedSurplusZero - predictedSurplusInf < 0'
+                    marginalValueBid.append(0)
+                else:
+                    marginalValueBid.append(predictedSurplusZero - predictedSurplusInf)
+            else:
+                marginalValueBid.append(0)
+                
+        return numpy.atleast_1d(marginalValueBid).astype('float')
+    
+    @staticmethod
     def SS(args = {}):
         """
         Calculate a vector of marginal values given a single bundle
@@ -66,40 +114,11 @@ class targetMVS(pointPredictionAgent):
         
         
         
-        # set the price of all goods not in the optimal bundle to infinity
-        # deep copy price to preserve original price vector
-        pricePredictionInf = numpy.array(pricePrediction).astype(numpy.float)
-        pricePredictionInf[ (numpy.atleast_1d(optBundle) == 0) ] = float('inf')
-        
-        
-        marginalValueBid = []
-        for idx in xrange(args['bundles'].shape[1]):
-            if optBundle[idx] == 1:
-                tempPriceInf = pricePredictionInf.astype(numpy.float)
-                tempPriceInf[idx] = float('inf')
-                tempPriceZero = pricePredictionInf
-                tempPriceZero[idx] = 0
-                
-                [optBundleInf, predictedSurplusInf]   = targetMVS.acqYW(bundles     = args['bundles'],
-                                                                        valuation   = args['valuation'],
-                                                                        l           = args['l'],
-                                                                        priceVector = tempPriceInf)
-                
-                [optBundleZero, predictedSurplusZero] = targetMVS.acqYW(bundles     = args['bundles'],
-                                                                        valuation   = args['valuation'],
-                                                                        l           = args['l'],
-                                                                        priceVector = tempPriceZero)
-                #this shouldn't happend but just in case.
-                if predictedSurplusZero - predictedSurplusInf < 0:
-                    print '----WARNING----'
-                    print 'targetMVS.SS() predictedSurplusZero - predictedSurplusInf < 0'
-                    marginalValueBid.append(0)
-                else:
-                    marginalValueBid.append(predictedSurplusZero - predictedSurplusInf)
-            else:
-                marginalValueBid.append(0)
-                
-        return numpy.atleast_1d(marginalValueBid).astype('float')
+                       
+        return targetMVS.bundleBid({ 'pointPricePrediction' : pricePrediction,
+                                     'bundle'               : optBundle,
+                                     'valuation'            : args['valuation'],
+                                     'l'                    : args['l'] })
         
             
         

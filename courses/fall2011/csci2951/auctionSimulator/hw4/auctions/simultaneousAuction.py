@@ -108,7 +108,7 @@ class simultaneousAuction(auctionBase):
         winners[winningBids < self.reserve] = numpy.nan
         
         #if the winning bids are not greater than the reserve,
-        finalPrices = numpy.atleast_1d([sorted(bids[:,i],reverse=True)[nPrice] for i in xrange(bids.shape[1])])
+        finalPrices = numpy.atleast_1d([sorted(bids[:,i],reverse=True)[nPrice-1] for i in xrange(bids.shape[1])])
         
         finalPrices[finalPrices < reserve] = reserve
         

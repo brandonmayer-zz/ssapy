@@ -28,13 +28,13 @@ class parallelWorker(object):
         
         agentList = []
         
+        agentList.append(targetPriceDist(margDistPricePrediction = self.margDistPrediction,
+                                         name                    = 'targetPrice'))
+        
         agentList.append(riskAware(margDistPricePrediction = self.margDistPrediction,
                                    A                       = self.A,
                                    name                    = 'riskAware_A={0}'.format(self.A)))
         
-        agentList.append(targetPriceDist(margDistPricePrediction = self.margDistPrediction,
-                                         name                    = 'targetPrice'))
-                                        
         agentList.append(straightMU8(margDistPricePrediction = self.margDistPrediction,
                                     name                    = 'straighMU8'))
         
@@ -94,8 +94,8 @@ def main():
     alpha = 0.8
      
     agentNames = []
-    agentNames.append('riskAware')
     agentNames.append('targetPrice')
+    agentNames.append('riskAware')
     agentNames.append('straighMU8')
     agentNames.append('targetMU8')
     agentNames.append('targetMUS8')

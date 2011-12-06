@@ -75,7 +75,7 @@ class riskAware(margDistPredictionAgent):
         return "riskAware"
     
     @staticmethod
-    def upv(margDist = None):
+    def upv(args={}):
         """
         Helper function to compute upper partial variance for each marginal distribution
         in margDist
@@ -83,16 +83,23 @@ class riskAware(margDistPredictionAgent):
         UPV = (E_F[price]-price)^2 if price > E_F[price]
                               0                 else
                               
+        INPUTS:
+            1. margDist            a margDispSCPP instance
+             
+            2. expectedPrices      precomputed expected prices either using sampling
+                                   or summaiton
+                              
         OUTPUTS:
             A 1d numpy.ndarray with size = number of bundles 
         """
         
-        # use numpy.testing so that assert can't be turned off at compile time
+        margDist = args['margDist']
+        
         numpy.testing.assert_equal(isinstance(margDist,margDistSCPP), 
                                    True, 
                                    err_msg = 'Must provide an instance of margDistSCPP')
-            
-        expectedPrices = margDist.expectedPrices()
+        
+        expectedPrices = args['expectedPrices']
         
         upv = []
         for idx in xrange(expectedPrices.shape[0]):
@@ -115,7 +122,7 @@ class riskAware(margDistPredictionAgent):
         return numpy.atleast_1d(upv)
             
     @staticmethod
-    def mUPV(bundles = None, valuation = None, l = None, A = None, margDist = None):
+    def mUPV(args={}):
         """
         Yet another helper. This function enumerates utility over bundles but does not
         maximize.
@@ -133,6 +140,18 @@ class riskAware(margDistPredictionAgent):
             marginalPriceDistributions  :=  marginal probability distributions over
                                             the prices of goods in the bundle
         """
+        bundles = args['bundles'] 
+        
+        valuation = args['valuation']
+        
+        l = args['l']
+        
+        A = args['A']
+        
+        margDist = args['margDist']
+        
+        expectedPrices = args['expectedPrices']
+         
         #check for valid inputs
         numpy.testing.assert_equal( isinstance(bundles,numpy.ndarray),
                                     True,
@@ -156,10 +175,7 @@ class riskAware(margDistPredictionAgent):
         numpy.testing.assert_equal( isinstance(margDist,margDistSCPP),
                                     True,
                                     err_msg='margDist must be an instance of margDistSCPP.' )
-        
-        #calculate the martinal expected prices
-        expectedPrices = margDist.expectedPrices()
-        
+               
         #assert that we have an expected value for brice for ever
         #good in the enumerated bundles
         numpy.testing.assert_equal(expectedPrices.shape[0],
@@ -169,7 +185,8 @@ class riskAware(margDistPredictionAgent):
         expectedSurplus = simYW.surplus(bundles, valuation, expectedPrices)
         
         #calculate the upper-partial variance over each marginal distribution
-        margUpv = riskAware.upv(margDist=margDist)
+        margUpv = riskAware.upv({'margDist'       : margDist,
+                                 'expectedPrices' : expectedPrices})
         
         #make sure we have an upv for all goods listed in
         #the bundles
@@ -178,13 +195,23 @@ class riskAware(margDistPredictionAgent):
         
         #calculate the mupv utility for each good
         util = []
-        for bundleIdx in xrange(bundles.shape[0]):
-            util.append( expectedSurplus[bundleIdx] - A*numpy.exp(numpy.dot(margUpv,bundles[bundleIdx])) )
         
+        riskFunc = 'linear'
+        if 'riskFunc' in args:
+            riskFunc = args['riskFunc']
+            
+        for bundleIdx in xrange(bundles.shape[0]):
+            if riskFunc == 'exponential':
+                util.append( expectedSurplus[bundleIdx] - A*numpy.exp(numpy.dot(margUpv,bundles[bundleIdx])) )
+            elif riskFunc == 'linear':
+                util.append( expectedSurplus[bundleIdx] - A*numpy.exp(numpy.dot(margUpv,bundles[bundleIdx])) )
+            else:
+                raise ValueError('Unknown value of riskFunc')
+            
         return numpy.atleast_1d(util)
                                                                                
     @staticmethod
-    def acqMUPV(bundles = None, valuation = None, l = None, A = None, margDist = None):
+    def acqMUPV(args={}):
         """
         Compute optimal bundle using Mean Utility uper-partial variance
         function.
@@ -201,6 +228,23 @@ class riskAware(margDistPredictionAgent):
         A > 0 -> risk adverse bidder, agent values safer bundles
         """
         #check for valid inputs
+        
+        bundles        = args['bundles']
+        
+        valuation      = args['valuation']
+        
+        l              = args['l']
+        
+        A              = args['A']
+        
+        margDist       = args['margDist']
+        
+        expectedPrices = args['expectedPrices']
+        
+        riskFunc = 'linear'
+        if 'riskFunc' in args:
+            riskFunc = args['riskFunc']
+        
         numpy.testing.assert_equal( isinstance(bundles,numpy.ndarray),
                                     True,
                                     err_msg='bundles must be an instance of numpy.ndarray.' )
@@ -225,11 +269,9 @@ class riskAware(margDistPredictionAgent):
                                     err_msg='margDist must be an instance of margDistSCPP.' )
     
         #enumerate all bundles
-        allBundles = riskAware.allBundles()
+        allBundles = riskAware.allBundles()        
         
-        expectedSurplus = riskAware.surplus(bundles, valuation, margDist.expectedPrices())
-        
-        
+        expectedSurplus = riskAware.surplus(bundles, valuation, expectedPrices)
         
         #indicies of supluses that are greater than zero
         posSurplusIdx = expectedSurplus > 0.0
@@ -246,19 +288,17 @@ class riskAware(margDistPredictionAgent):
 #                                  A         = A, 
 #                                  margDist  = margDist )
         
-        posSurplusUtil = riskAware.mUPV(bundles   = allBundles[posSurplusIdx],
-                                        valuation = valuation[posSurplusIdx],
-                                        l        = l,
-                                        A        = A, 
-                                        margDist = margDist )
+        posSurplusUtil = riskAware.mUPV({'bundles'        : allBundles[posSurplusIdx],
+                                         'valuation'      : valuation[posSurplusIdx],
+                                         'l'              : l,
+                                         'A'              : A, 
+                                         'margDist'       : margDist,
+                                         'expectedPrices' : expectedPrices,
+                                         'riskFunc'       : riskFunc })
         
         utility = numpy.array([numpy.float('-inf')]*allBundles.shape[0])
         
         utility[posSurplusIdx] = posSurplusUtil
-        
-        
-        
-                                 
         
         #pick the bundle that maximizes utility
         optBundleIdxList = numpy.nonzero(utility==numpy.max(utility))[0]
@@ -316,18 +356,20 @@ class riskAware(margDistPredictionAgent):
         numpy.testing.assert_equal( (bidStrategy == 'targetPrice'),
                                     True,
                                     err_msg='Unknown bidding strategy')
-            
-#        optBundle, optExpectedSurplus = acqMeanUtilUPS(marginalPriceDistributions=args['distributionPricePrediction'],
-#                                                       A = A)
-        optBundle, optExpectedSurplus = riskAware.acqMUPV(bundles = args['bundles'], 
-                                                          valuation = args['valuation'], 
-                                                          l = args['l'], 
-                                                          A = A, 
-                                                          margDist = args['margDistPrediction'])
+        
+        expectedPrices = pricePrediction.expectedPrices()
+                    
+
+        optBundle, optExpectedSurplus = riskAware.acqMUPV({'bundles'        : args['bundles'], 
+                                                           'valuation'      : args['valuation'], 
+                                                           'l'              : args['l'], 
+                                                           'A'              : A, 
+                                                           'margDist'       : args['margDistPrediction'],
+                                                           'expectedPrices' : expectedPrices})
         
         if bidStrategy == 'targetPrice':
             #bid the expected values for the optimal bundle according to mean - upper partial variance function
-            expectedPrices = pricePrediction.expectedPrices()
+            
             
             bid = []
             for goodIdx in xrange(optBundle.shape[0]):
@@ -384,18 +426,20 @@ class riskAware(margDistPredictionAgent):
             bidStrategy = args['bidStrategy']
         else:
             bidStrategy = self.bidStrategy
-                
-        return self.SS({'bundles':bundles,
-                        'l':self.l,
-                        'valuation':simYW.valuation(bundles, self.v, self.l),
-                        'margDistPrediction':pricePrediction,
-                        'bidStrategy':bidStrategy,
-                        'A':A})
-                
             
-        
-        
-
+        if 'riskFunc' in args:
+            riskFunc = args['riskFunc']
+        else:
+            riskFunc = 'linear'
+                
+        return self.SS({'bundles'            : bundles,
+                        'l'                  : self.l,
+                        'valuation'          : simYW.valuation(bundles, self.v, self.l),
+                        'margDistPrediction' : pricePrediction,
+                        'bidStrategy'        : bidStrategy,
+                        'A'                  : A,
+                        'riskFunc'           : riskFunc})
+            
     def printSummary(self, args = {}):
         """
         Print a summary of agent state to standard out.
@@ -437,17 +481,27 @@ class riskAware(margDistPredictionAgent):
                                    v       = self.v,
                                    l       = self.l )
         
-        mupv = self.mUPV( bundles   = bundles,
-                          valuation = valuation,
-                          l         = self.l,
-                          A         = self.A,
-                          margDist  = pricePrediction )
-        
+#        mupv = self.mUPV( bundles   = bundles,
+#                          valuation = valuation,
+#                          l         = self.l,
+#                          A         = self.A,
+#                          margDist  = pricePrediction )
+
         expectedPriceVector = pricePrediction.expectedPrices()
+
+        mupv = self.mUPV({'bundles'        : bundles,
+                          'valuation'      : valuation,
+                          'l'              : self.l,
+                          'margDist'       : pricePrediction,
+                          'expectedPrices' : expectedPriceVector,
+                          'A'              : self.A})
+        
+        
         
         print 'Expected Price Vector = {0}'.format(expectedPriceVector)
         
-        upv = self.upv(pricePrediction)
+        upv = self.upv({'margDist'       : pricePrediction,
+                        'expectedPrices' : expectedPriceVector})
         
         print 'Marginal Upper Partial Variance = {0}'.format(upv)
         
@@ -472,11 +526,12 @@ class riskAware(margDistPredictionAgent):
          
         [optBundleAcq, optSurplusAcq]   = self.acq(priceVector = expectedPriceVector)
         
-        [optBundleMupv, optSurplusMupv] = self.acqMUPV( bundles   = bundles,
-                                                        valuation = valuation,
-                                                        l         = self.l,
-                                                        A         = self.A,
-                                                        margDist  = pricePrediction)
+        [optBundleMupv, optSurplusMupv] = self.acqMUPV( {'bundles'        : bundles,
+                                                         'valuation'      : valuation,
+                                                         'l'              : self.l,
+                                                         'A'              : self.A,
+                                                         'margDist'       : pricePrediction,
+                                                         'expectedPrices' : expectedPriceVector})
         
         
         print ''

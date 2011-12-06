@@ -5,6 +5,8 @@ from auctionSimulator.hw4.agents.targetMU8 import *
 from auctionSimulator.hw4.agents.targetMUS import *
 from auctionSimulator.hw4.agents.targetMUS8 import *
 from auctionSimulator.hw4.agents.riskAware import *
+from auctionSimulator.hw4.agents.riskAwareTP8 import *
+from auctionSimulator.hw4.agents.riskAwareTMVS8 import *
 
 
 import unittest
@@ -137,5 +139,46 @@ class testDistAgents(unittest.TestCase):
         
         myRiskAware.printSummary()
         
+        print ''
+        print 'Bid Test, myRiskAware.bid()'
+        print myRiskAware.bid()
+        print ''
+        
+    def test_riskAwareTP8(self):
+        randomMargDist = margDistSCPP(self.randomPriceDist)
+        
+        myRiskAwareTP8 = riskAwareTP8(m = self.m,
+                                      margDistPricePrediction = margDistSCPP(self.randomPriceDist),
+                                      A                       = 10,
+                                      name                    = "riskAwareTP8")
+        
+        print ''
+        myRiskAwareTP8.printSummary()
+        
+        print ''
+        print 'Bid test, myRiskAwareTP8.bid()'
+        print myRiskAwareTP8.bid()
+        print ''
+        
+    def test_riskAwareTMVS8(self):
+        randomMargDist = margDistSCPP(self.randomPriceDist)
+        
+        print ''
+        myRiskAwareTMVS8 = riskAwareTMVS8(m = self.m,
+                                          margDistPricePrediction = margDistSCPP(self.randomPriceDist),
+                                          A                       = 10,
+                                          name                    = "riskAwareTMVS8") 
+        
+        print ''
+        print myRiskAwareTMVS8.printSummary()
+        print ''
+        print 'Bid function test, myRiskAwareTMVS8.bid()'
+        print myRiskAwareTMVS8.bid()
+        print ''
+        
+        
+        
 if __name__ == "__main__":
     unittest.main()
+    
+    

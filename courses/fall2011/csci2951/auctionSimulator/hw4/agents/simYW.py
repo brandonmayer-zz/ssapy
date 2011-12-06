@@ -176,7 +176,7 @@ class simYW(agentBase):
         Return bundles as booleans for storage and computational efficiency
         """
         assert isinstance(nGoods,int) and nGoods >=0,\
-            "nGoods must be a positive integer"
+            "nGoods = {0} is not a positive integer".format(nGoods)
         return numpy.atleast_2d([bin for bin in itertools.product([False,True],repeat=nGoods)]).astype(bool)
     
     

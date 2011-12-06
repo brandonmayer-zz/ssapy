@@ -30,7 +30,29 @@ class targetPrice(pointPredictionAgent):
     @staticmethod
     def type():
         return "targetPrice"
-                                 
+    
+    @staticmethod
+    def bundleBid(args={}):
+        """
+        Given a price prediciton and an optimal bundle,
+        place construct a bid vector
+        """
+        pointPricePrediction = args['pointPricePrediction']
+        
+        bundle = args['bundle']
+        
+        numpy.testing.assert_(isinstance(bundle,numpy.ndarray))
+        
+        #bid the predicted prices for the optimal bundle
+        bid = []
+        for idx in xrange(bundle.shape[0]):
+            if bundle[idx]:
+                bid.append(pointPricePrediction[idx])
+            else:
+                bid.append(0)
+                
+        return numpy.atleast_1d(bid)
+                      
     @staticmethod
     def SS(args={}):
         assert 'pointPricePrediction' in args,\
@@ -51,14 +73,7 @@ class targetPrice(pointPredictionAgent):
                                               valuation=args['valuation'],
                                               l=args['l'],
                                               priceVector=args['pointPricePrediction'])
-        
-        #bid the prices for the optimal bundle
-        bid = []
-        for idx in xrange(optBundle.shape[0]):
-            if optBundle[idx]:
-                bid.append(args['pointPricePrediction'][idx])
-            else:
-                bid.append(0)
-                
-        return numpy.atleast_1d(bid)
+                    
+        return targetPrice.bundleBid({'pointPricePrediction' : args['pointPricePrediction'],
+                                      'bundle'               : optBundle})
         
