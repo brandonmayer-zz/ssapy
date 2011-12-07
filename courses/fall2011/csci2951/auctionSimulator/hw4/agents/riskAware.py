@@ -315,7 +315,7 @@ class riskAware(margDistPredictionAgent):
             for idx in optBundleIdxList:
                 tempBinList = allBundles[idx]
                 cs = numpy.cumsum(tempBinList)
-                tNew = (numpy.array(cs) >= self.l).nonzero()
+                tNew = (numpy.array(cs) >= l).nonzero()
                 if tNew[0].any():
                     tNew = tNew[0][0]
                     if tNew < t:

@@ -11,21 +11,21 @@ Yoon and Wellman (2011)
 from auctionSimulator.hw4.agents.pointPredictionAgent import *
 
 class targetPrice(pointPredictionAgent):
-    def __init__(self,
-                 m = 5,
-                 v = None,
-                 l = None,
-                 vmin = 0,
-                 vmax = 50,
-                 pointPricePrediction = None,
-                 name = "Anonymous"):
-        super(targetPrice,self).__init__(m=m,
-                                         v=v,
-                                         l=l,
-                                         vmin=vmin,
-                                         vmax=vmax,
-                                         pointPricePrediction=pointPricePrediction,
-                                         name=name)
+#    def __init__(self,
+#                 m = 5,
+#                 v = None,
+#                 l = None,
+#                 vmin = 0,
+#                 vmax = 50,
+#                 pointPricePrediction = None,
+#                 name = "Anonymous"):
+#        super(targetPrice,self).__init__(m=m,
+#                                         v=v,
+#                                         l=l,
+#                                         vmin=vmin,
+#                                         vmax=vmax,
+#                                         pointPricePrediction=pointPricePrediction,
+#                                         name=name)
         
     @staticmethod
     def type():

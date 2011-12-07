@@ -106,7 +106,7 @@ class targetMV(pointPredictionAgent):
                                               priceVector   = pricePrediction)
             
         return targetMV.bundleBid({'pointPricePrediction' : pricePrediction,
-                                   'bundle'               : optBundle,
-                                   'valuation'             : args['valuation'],
+                                   'bundle'               : numpy.atleast_1d(optBundle),
+                                   'valuation'            : args['valuation'],
                                    'l'                    : args['l']})
           

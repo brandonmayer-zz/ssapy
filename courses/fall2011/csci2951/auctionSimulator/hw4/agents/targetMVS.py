@@ -24,7 +24,8 @@ class targetMVS(pointPredictionAgent):
     def bundleBid(args={}):
         pricePrediction = args['pointPricePrediction']
         
-        bundle = args['bundle']
+        bundle = numpy.atleast_1d(args['bundle'])
+                                  
         
         valuation = args['valuation']
         
