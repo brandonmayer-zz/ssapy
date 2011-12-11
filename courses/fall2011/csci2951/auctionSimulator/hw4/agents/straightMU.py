@@ -37,3 +37,37 @@ class straightMU(margDistPredictionAgent):
                              bundles              = kwargs['bundles'],
                              l                    = kwargs['l'],
                              valuation            = kwargs['valuation'])
+        
+class straightMU8(margDistPredictionAgent):
+    """
+    A concrete class for straightMU8
+    """
+    @staticmethod
+    def type():
+        return "straightMU8"
+    
+    @staticmethod
+    def SS(**kwargs):
+        """
+        Calculate the expected using inverse sampling method and 8 samples
+        Then bid via straightMV with the resulting expected prices
+        """
+        
+        pricePrediction = margDistPredictionAgent.SS(**kwargs)
+        
+        expectedPrices = pricePrediction.expectedPrices( method   = 'iTsample',
+                                                         nSamples = 8)
+        
+        return straightMV.SS( pointPricePrediction = expectedPrices,
+                              bundles              = kwargs['bundles'],
+                              valuation            = kwargs['valuation'],
+                              l                    = kwargs['l'])
+        
+    def printSummary(self,**kwargs):
+        
+        if 'expectedPrices' not in kwargs:
+            
+            kwargs['method']   = 'iTsample'
+            kwargs['nSamples'] = 8
+            
+        super(straightMU8,self).printSummary(**kwargs)

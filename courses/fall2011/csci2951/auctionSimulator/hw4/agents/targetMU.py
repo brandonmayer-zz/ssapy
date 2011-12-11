@@ -31,3 +31,28 @@ class targetMU(margDistPredictionAgent):
                             bundles              = kwargs['bundles'],
                             valuation            = kwargs['valuation'],
                             l                    = kwargs['l'])     
+        
+class targetMU8(margDistPredictionAgent):
+    """
+    A concrete class for targetMU8
+    """
+    
+    @staticmethod
+    def type():
+        return "targetMU8"
+    
+    @staticmethod
+    def SS(**kwargs):        
+        pricePrediction = margDistPredictionAgent.SS(**kwargs)
+        
+        kwargs['pointPricePrediction'] = pricePrediction.expectedPrices(method   = 'iTsample',
+                                                                        nSamples = 8)
+        return targetMV.SS(**kwargs)
+        
+    def printSummary(self, **kwargs):
+        if 'expectedPrices' not in kwargs:
+            
+            kwargs['method']   = 'iTsample'
+            kwargs['nSamples'] = 8
+            
+        super(targetMU8,self).printSummary(**kwargs)

@@ -34,3 +34,56 @@ class targetMUS(margDistPredictionAgent):
                              bundles              = kwargs['bundles'],
                              l                    = kwargs['l'],
                              valuation            = kwargs['valuation'])
+        
+class targetMUS8(margDistPredictionAgent):
+    """
+    A concrete class for targetMUS8
+    """
+    @staticmethod
+    def type():
+        return "targetMUS8"
+    
+    @staticmethod
+    def SS(**kwargs):
+
+        pricePrediction = margDistPredictionAgent.SS(**kwargs)
+        
+        kwargs['pointPricePrediction'] = pricePrediction.expectedPrices( method   = 'iTsample',
+                                                                         nSamples = 8)
+        
+        return targetMVS.SS(**kwargs)
+        
+    def printSummary(self, **kwargs):
+        
+        if 'expectedPrices' not in kwargs:
+            kwargs['method']   = 'iTsample'
+            kwargs['nSamples'] = 8
+            
+        super(targetMUS8,self).printSummary(**kwargs)
+        
+        
+class targetMUS64(margDistPredictionAgent):
+    @staticmethod
+    def type():
+        return "targetMUS64"
+    
+    @staticmethod
+    def SS(**kwargs):
+        pricePrediction = margDistPredictionAgent.SS(**kwargs)
+        
+        tkwargs = dict(kwargs)
+        
+        tkwargs['pointPricePrediction'] = pricePrediction.expectedPrices(method   = 'iTsample',
+                                                                         nSamples = 64)
+        
+        return targetMVS.SS(**tkwargs)
+    
+    def printSummary(self, **kwargs):
+        tkwargs = dict(kwargs)
+        
+        if 'expectedPrices' not in tkwargs:
+            tkwargs['method']   = 'iTsample'
+            tkwargs['nSamples'] = 8
+            
+        super(targetMUS64,self).printSummary(**tkwargs)
+        

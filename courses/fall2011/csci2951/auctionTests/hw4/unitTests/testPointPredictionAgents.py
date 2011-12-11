@@ -216,7 +216,7 @@ class testPointPredictionAgents(unittest.TestCase):
         
         numpy.testing.assert_equal(bid,bid2)
         
-        myTargetMVS.printSummary({'pointPricePrediction' : randomPointPrediction})
+        myTargetMVS.printSummary(pointPricePrediction = randomPointPrediction)
         
 if __name__ == "__main__":
     unittest.main()

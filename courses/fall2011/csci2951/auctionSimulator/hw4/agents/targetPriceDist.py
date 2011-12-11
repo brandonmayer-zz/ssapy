@@ -24,13 +24,72 @@ class targetPriceDist(margDistPredictionAgent):
         """
         pricePrediction = margDistPredictionAgent.SS(**kwargs)
         
-
-
-        return targetPrice.SS(bundles               = kwargs['bundles'],
+        expectedPrices = kwargs.get('expectedPrices',
+                    pricePrediction.expectedPrices(method = 'average'))
+        
+        bundles = kwargs.get('bundles', simYW.allBundles(pricePrediction.m))
+        
+        return targetPrice.SS(bundles               = bundles,
                               valuation             = kwargs['valuation'],
                               l                     = kwargs['l'],
-                              pointPricePrediction  = pricePrediction.expectedPrices())
+                              pointPricePrediction  = expectedPrices)
             
+class targetPrice8(margDistPredictionAgent):
+    @staticmethod
+    def type():
+        return "targetPrice8"
+    
+    @staticmethod
+    def SS(**kwargs):
+        """
+        Interface for bid
+        """
+        pricePrediction = margDistPredictionAgent.SS(**kwargs)
         
+        bundles = kwargs.get('bundles',simYW.allBundles(pricePrediction.m))
+        
+        expectedPrices = kwargs.get('expectedPrices',
+            pricePrediction.expectedPrices(method   = 'iTsample', nSamples = 8))
 
-            
+        return targetPrice.SS(bundles              = bundles,
+                              valuation            = kwargs['valuation'],
+                              l                    = kwargs['l'],
+                              pointPricePrediction = expectedPrices)       
+        
+class targetPrice64(margDistPredictionAgent):
+    @staticmethod
+    def type():
+        return "targetPrice64"
+    
+    @staticmethod
+    def SS(**kwargs):
+        pricePrediction = margDistPrediction.SS(**kwargs)
+        
+        bundles = kwargs.get('bundles', simYW.allBundles(pricePrediction.m))
+        
+        expectedPrices = kwargs.get('expectedPrices',
+            pricePrediction.expectedPrices(method   = 'iTsample', nSamples = 64))
+        
+        return targetPrice.SS(bundles              = bundles,
+                              valuation            = kwargs['valuation'],
+                              l                    = kwargs['l'],
+                              pointPricePrediction = expectedPrices)
+        
+class targetPrice256(margDistPredictionAgent):
+    @staticmethod
+    def type():
+        return "targetPrice256"
+    
+    @staticmethod
+    def SS(**kwargs):
+        pricePrediction = margDistPrediction.SS(**kwargs)
+        
+        bundles = kwargs.get('bundles', simYW.allBundles(pricePrediction.m))
+        
+        expectedPrices = kwargs.get('expectedPrices',
+            pricePrediction.expectedPrices(method   = 'iTsample', nSamples = 256))
+        
+        return targetPrice.SS(bundles              = bundles,
+                              valuation            = kwargs['valuation'],
+                              l                    = kwargs['l'],
+                              pointPricePrediction = expectedPrices)

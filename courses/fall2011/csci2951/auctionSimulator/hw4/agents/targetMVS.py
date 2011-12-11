@@ -26,7 +26,6 @@ class targetMVS(pointPredictionAgent):
         
         bundle = numpy.atleast_1d(kwargs['bundle'])
                                   
-        
         valuation = kwargs['valuation']
         
         l = kwargs['l']

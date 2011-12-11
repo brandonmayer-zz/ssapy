@@ -60,13 +60,8 @@ class margDistSCPP(pointSCPP):
                 if kwargs['method'] == iTsample
         """
         
-        method = None
-        if 'method' in kwargs:
-            method = kwargs['method']
-        else:
-            method = 'average'
-            
-            
+        method = kwargs.get('method','average')
+                        
         if method == 'average':
             e = []
             for hist, binEdges in self.data:
@@ -77,14 +72,12 @@ class margDistSCPP(pointSCPP):
         
         elif method == 'iTsample':
             
-            nSamples = 8
-            if 'nSamples' in kwargs:
-                nSamples = kwargs['nSamples']
+            nSamples = kwargs.get('nSamples',8)
+                            
+            samples = self.iTsample(nSamples=nSamples)
                 
-                samples = self.iTsample(nSamples=nSamples)
-                
-                #return the mean over marginal samples
-                return numpy.mean(samples,0)
+            #return the mean over marginal samples
+            return numpy.mean(samples,0)
             
         else:
             print 'margDistSCPP.expectedPrices()'

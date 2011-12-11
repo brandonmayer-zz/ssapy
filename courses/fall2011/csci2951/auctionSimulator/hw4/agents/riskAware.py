@@ -7,6 +7,9 @@ Date:      11/23/2011
 
 from margDistPredictionAgent import *
 from auctionSimulator.hw4.agents.targetPrice import *
+from auctionSimulator.hw4.agents.targetMVS import *
+from auctionSimulator.hw4.agents.targetMV import *
+import copy
 
 class riskAware(margDistPredictionAgent):
     """
@@ -43,10 +46,7 @@ class riskAware(margDistPredictionAgent):
     """
     def __init__(self, **kwargs):
         #set the member variables
-        if 'A' in kwargs:
-            self.A = kwargs['A']
-        else:
-            self.A = 1
+        self.A = kwargs.get('A', 1)
         
         #pass the remaining arguments upstream
         super(riskAware,self).__init__(**kwargs)
@@ -290,8 +290,7 @@ class riskAware(margDistPredictionAgent):
                                                             utility[optBundleIdxList])
                              
         return numpy.array(optBundle,dtype=bool), optExpectedUtility
-                            
-
+                    
         
     @staticmethod
     def SS(**kwargs):
@@ -304,15 +303,12 @@ class riskAware(margDistPredictionAgent):
         """
         
         #standard checks
-        pricePrediction = margDistPredictionAgent.SS(**kwargs)
-            
-        A = None
-        if 'A' in kwargs:
-            A = kwargs['A']
-        else:
-            A = 1
-                
-        expectedPrices = pricePrediction.expectedPrices()
+        numpy.testing.assert_('A' in kwargs,
+                              msg="Must specify A parameter.")
+        
+        pricePrediction = margDistPredictionAgent.SS(**kwargs)    
+        
+        expectedPrices = kwargs.get('expectedPrices',pricePrediction.expectedPrices())
         
         upperPartialStd = pricePrediction.margUps(expectedPrices = expectedPrices)
                     
@@ -324,7 +320,7 @@ class riskAware(margDistPredictionAgent):
                                                expectedSurplus = expectedSurplus,
                                                upperPartialStd = upperPartialStd,
                                                l               = kwargs['l'],
-                                               A               = A)
+                                               A               = kwargs['A'])
         
         return targetPrice.bundleBid(pointPricePrediction = expectedPrices,
                                      bundle               = optBundle)
@@ -362,12 +358,8 @@ class riskAware(margDistPredictionAgent):
         valuation = self.valuation(bundles = bundles,
                                    v       = self.v,
                                    l       = self.l )
-
-        expectedPrices = None
-        if 'expectedPrices' not in kwargs:
-            expectedPrices = pricePrediction.expectedPrices()
-        else:
-            expectedPrices = kwargs['expectedPrices']
+        
+        expectedPrices = kwargs.get('expectedPrices', pricePrediction.expectedPrices())
 
         expectedSurplus = self.surplus(bundles, valuation, expectedPrices)
         
@@ -424,3 +416,216 @@ class riskAware(margDistPredictionAgent):
         
         print ''
         
+       
+class riskAwareTP8(riskAware):
+    @staticmethod
+    def type():
+        return "riskAwareTP8"
+    
+    @staticmethod
+    def SS(**kwargs):
+        pricePrediction = margDistPredictionAgent.SS(**kwargs)
+        
+        tkwargs = copy.deepcopy(kwargs)
+        
+        tkwargs['expectedPrices'] = pricePrediction.expectedPrices(method   = 'iTsample',
+                                                                   nSamples = 8)
+        
+        return riskAware.SS(**tkwargs)
+        
+    def printSummary(self,**kwargs):
+        
+        tkwargs = copy.deepcopy(kwargs)
+        
+        tkwargs['expectedPrices'] = kwargs.get('expectedPrices', 
+                                               self.pricePrediction.\
+                                               expectedPrices(method   = 'iTsample',
+                                                              nSamples = 8))
+        
+        super(riskAwareTP8,self).printSummary(**tkwargs)
+        
+class riskAwareTP64(riskAware):
+    @staticmethod
+    def type():
+        return "riskAwareTP64"
+    
+    @staticmethod
+    def SS(**kwargs):
+        pricePrediction = margDistPredictionAgent.SS(**kwargs)
+        
+        tkwargs = copy.deepcopy(kwargs)
+        
+        tkwargs['expectedPrices'] = pricePrediction.expectedPrices(method   = 'iTsample',
+                                                                   nSamples = 64)
+        
+        return riskAware.SS(**tkwargs)
+        
+    def printSummary(self,**kwargs):
+        
+        tkwargs = copy.deepcopy(kwargs)
+        
+        tkwargs['expectedPrices'] = kwargs.get('expectedPrices', 
+                                               self.pricePrediction.\
+                                               expectedPrices(method   = 'iTsample',
+                                                              nSamples = 64))
+        
+        super(riskAwareTP64,self).printSummary(**tkwargs)
+        
+class riskAwareTP256(riskAware):
+    @staticmethod
+    def type():
+        return "riskAwareTP256"
+    
+    @staticmethod
+    def SS(**kwargs):
+        pricePrediction = margDistPredictionAgent.SS(**kwargs)
+        
+        tkwargs = copy.deepcopy(kwargs)
+        
+        tkwargs['expectedPrices'] = pricePrediction.expectedPrices(method   = 'iTsample',
+                                                                   nSamples = 256)
+        
+        return riskAware.SS(**tkwargs)
+        
+    def printSummary(self,**kwargs):
+        
+        tkwargs = copy.deepcopy(kwargs)
+        
+        tkwargs['expectedPrices'] = kwargs.get('expectedPrices', 
+                                               self.pricePrediction.\
+                                               expectedPrices(method   = 'iTsample',
+                                                              nSamples = 256))
+        
+        super(riskAwareTP256,self).printSummary(**tkwargs)
+        
+    
+    
+        
+class riskAwareTMUS(riskAware):
+    @staticmethod
+    def type():
+        return "riskAwareTMUS"
+    
+    @staticmethod
+    def SS(**kwargs):
+        
+        numpy.testing.assert_('A' in kwargs,
+                              msg="Must specify A parameter.")
+        
+        numpy.testing.assert_('l' in kwargs,
+                              msg="Must specify l, the target number of goods.")
+        
+        pricePrediction = margDistPredictionAgent.SS(**kwargs)
+        
+        bundles = kwargs.get('bundles', simYW.allBundles(pricePrediction.m))
+        
+        expectedPrices = kwargs.get( 'expectedPrices', 
+                pricePrediction.expectedPrices() )
+        
+        expectedSurplus = kwargs.get('expectedSurplus',
+                riskAware.surplus(bundles, kwargs['valuation'], expectedPrices))
+        
+        upperPartialStd = kwargs.get('upperPartialStd',
+                pricePrediction.margUps(expectedPrices = expectedPrices))
+        
+        optBundle, optups = riskAware.acqMups( bundles         = bundles, 
+                                               l               = kwargs['l'],
+                                               A               = kwargs['A'],
+                                               upperPartialStd = upperPartialStd, 
+                                               expectedSurplus = expectedSurplus )
+        
+        return targetMVS.bundleBid(bundle               = optBundle,
+                                   pointPricePrediction = expectedPrices,
+                                   valuation            = kwargs['valuation'],
+                                   l                    = kwargs['l'])
+                                                                                     
+        
+        
+class riskAwareTMUS8(riskAware):
+    @staticmethod
+    def type():
+        return "riskAwareTMUS8"
+    
+    @staticmethod
+    def SS(**kwargs):
+        pricePrediction = margDistPredictionAgent.SS(**kwargs)
+        
+        #so as not to mutate the original arguments
+        tkwargs = copy.deepcopy(kwargs)
+        
+        tkwargs['expectedPrices'] = pricePrediction.expectedPrices(method   = 'iTsample', 
+                                                                   nSamples = 8)
+        
+        return riskAwareTMUS.SS(**tkwargs)
+                                                                    
+        
+    def printSummary(self,**kwargs):
+        """
+        Print a summary of agent state to standard out.
+        """
+        tkwargs = copy.deepcopy(kwargs)
+        
+        tkwargs['expectedPrices'] = kwargs.get('expectedPrices', 
+                                               self.pricePrediction.\
+                                               expectedPrices(method   ='iTsample', nSamples = 8))
+                                                                        
+        super(riskAwareTMUS8,self).printSummary(**tkwargs)
+        
+        
+class riskAwareTMUS64(riskAware):
+    @staticmethod
+    def type():
+        return "riskAwareTMUS64"
+    
+    @staticmethod
+    def SS(**kwargs):
+        pricePrediction = margDistPredictionAgent.SS(**kwargs)
+        
+        tkwargs = copy.deepcopy(kwargs)
+        
+        tkwargs['expectedPrices'] = pricePrediction.expectedPrices(method   = 'iTsample',
+                                                                   nSamples = 64)
+        
+        return riskAwareTMUS.SS(**tkwargs)
+        
+    def printSummary(self,**kwargs):
+        """
+        Print a summary of agent state to standard out.
+        """
+        tkwargs = copy.deepcopy(kwargs)
+        
+        tkwargs['expectedPrices'] = kwargs.get('expectedPrices', 
+                                               self.pricePrediction.\
+                                               expectedPrices(method   ='iTsample', 
+                                                              nSamples = 64))
+                                                                        
+        super(riskAwareTMUS64,self).printSummary(**tkwargs)  
+        
+class riskAwareTMUS256(riskAware):
+    @staticmethod
+    def type():
+        return "riskAwareTMUS256"
+    
+    @staticmethod
+    def SS(**kwargs):
+        pricePrediction = margDistPredictionAgent.SS(**kwargs)
+        
+        tkwargs = copy.deepcopy(kwargs)
+        
+        tkwargs['expectedPrices'] = pricePrediction.expectedPrices(method   = 'iTsample',
+                                                                   nSamples = 256)
+        return riskAwareTMUS.SS(**tkwargs)
+    
+    def printSummary(self,**kwargs):
+        """
+        Print a summary of agent state to standard out.
+        """
+        tkwargs = copy.deepcopy(kwargs)
+        
+        tkwargs['expectedPrices'] = kwargs.get('expectedPrices', 
+                                               self.pricePrediction.\
+                                               expectedPrices(method   ='iTsample', 
+                                                              nSamples = 256))
+                                                                        
+        super(riskAwareTMUS256,self).printSummary(**tkwargs)  
+    

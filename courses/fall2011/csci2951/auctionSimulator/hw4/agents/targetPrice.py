@@ -63,3 +63,5 @@ class targetPrice(pointPredictionAgent):
         return targetPrice.bundleBid(pointPricePrediction = kwargs['pointPricePrediction'],
                                      bundle               = optBundle)
         
+
+        

@@ -407,13 +407,13 @@ class simYW(agentBase):
         
         """    
         bundles     = numpy.atleast_2d(kwargs['bundles'])
-        valuation   = numpy.atleast_1d(kwargs['valuation'])
+#        valuation   = numpy.atleast_1d(kwargs['valuation'])
         priceVector = numpy.atleast_1d(kwargs['priceVector'])
         l           = kwargs['l']
         
-        numpy.testing.assert_equal(bundles.shape[0], 
-                                   valuation.shape[0], 
-                                   err_msg="simYW::acq There must be a single valuation for each bundle")
+#        numpy.testing.assert_equal(bundles.shape[0], 
+#                                   valuation.shape[0], 
+#                                   err_msg="simYW::acq There must be a single valuation for each bundle")
             
         numpy.testing.assert_equal(priceVector.shape[0],
                                    bundles.shape[1],
@@ -423,9 +423,16 @@ class simYW(agentBase):
                               msg="simYW::acq l must be a positive integer less than the total number of available goods.\n"+\
                                   "l = {0}, bundles.shape[1] = {1}".format(l,bundles.shape[1]))
 
-        surplus = simYW.surplus(bundles     = bundles,
-                                valuation   = valuation,
-                                priceVector = priceVector)
+#        surplus = simYW.surplus(bundles     = bundles,
+#                                valuation   = valuation,
+#                                priceVector = priceVector)
+        
+        surplus = numpy.atleast_1d( kwargs.get('surplus', simYW.surplus(bundles     = bundles,
+                                                                        valuation   = kwargs['valuation'],
+                                                                        priceVector = priceVector)) )
+        
+        numpy.testing.assert_equal(surplus.shape[0], bundles.shape[0],
+                                   err_msg="There must be one surplus value per bundle.")
         
         # initialize to the null bundle
         optBundle = [0]*bundles.shape[1]
