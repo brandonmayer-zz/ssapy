@@ -18,7 +18,7 @@ class targetMUS(margDistPredictionAgent):
         return "targetMUS"
     
     @staticmethod
-    def SS(args={}):
+    def SS(**kwargs):
         """
         Calculate the expected marginal price vector given marginal distributions
         over good prices. 
@@ -26,11 +26,11 @@ class targetMUS(margDistPredictionAgent):
         targetMUS assumes that "all goods outside the taget bundle
         are unavailable" (Yoon & Wellman 2011)
         """
-        pricePrediction = margDistPredictionAgent.SS(args=args)
+        pricePrediction = margDistPredictionAgent.SS(**kwargs)
                                                      
-        expectedPrices = pricePrediction.expectedPrices(args=args)
+        expectedPrices = pricePrediction.expectedPrices(**kwargs)
         
-        return targetMVS.SS({'pointPricePrediction' : expectedPrices,
-                             'bundles'              : args['bundles'],
-                             'l'                    : args['l'],
-                             'valuation'            : args['valuation']})
+        return targetMVS.SS( pointPricePrediction = expectedPrices,
+                             bundles              = kwargs['bundles'],
+                             l                    = kwargs['l'],
+                             valuation            = kwargs['valuation'])

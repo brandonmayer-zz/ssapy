@@ -18,7 +18,7 @@ class straightMU(margDistPredictionAgent):
         return "straightMU"
     
     @staticmethod
-    def SS(args={}):
+    def SS(**kwargs):
         """
         Calculate the expected marginal price vector given marginal distributions
         over good prices. 
@@ -28,13 +28,12 @@ class straightMU(margDistPredictionAgent):
         of the bin centers multiplied by the bin probability.
         """
         #check validity of args
-        pricePrediction = margDistPredictionAgent.SS(args=args)
+        pricePrediction = margDistPredictionAgent.SS(**kwargs)
         
         #AGENT SPECIFIC LOGIC
-        expectedPrices = pricePrediction.expectedPrices(args=args)
+        expectedPrices = pricePrediction.expectedPrices(**kwargs)
 
-        
-        return straightMV.SS({ 'pointPricePrediction' : expectedPrices,
-                               'bundles'              : args['bundles'],
-                               'l'                    : args['l'],
-                               'valuation'            : args['valuation'] })
+        return straightMV.SS(pointPricePrediction = expectedPrices,
+                             bundles              = kwargs['bundles'],
+                             l                    = kwargs['l'],
+                             valuation            = kwargs['valuation'])

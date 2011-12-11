@@ -14,10 +14,17 @@ class agentBase(object):
     Assigned each instantiated agent with a unique id
     """
     nextId = 0
-    def __init__(self, name="Anonymous"):
-        self.name         = name
-        self.id           = agentBase.nextId
-        agentBase.nextId += 1
+    def __init__(self, **kwargs):
+        if 'name' in kwargs:
+            self.name = kwargs['name']
+        else:
+            self.name = 'Anonymous'
+        
+        if 'id' in kwargs:
+            self.id = kwargs['id']
+        else:
+            self.id           = agentBase.nextId
+            agentBase.nextId += 1
 
     def id(self):
         return self.id

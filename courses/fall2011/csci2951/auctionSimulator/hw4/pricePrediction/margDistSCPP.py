@@ -39,7 +39,7 @@ class margDistSCPP(pointSCPP):
         return "marginalDistributionSCPP"
     
     
-    def expectedPrices(self,args={}):
+    def expectedPrices(self,**kwargs):
         """
         Calculate the marginal expected price vector.
         
@@ -51,18 +51,18 @@ class margDistSCPP(pointSCPP):
         points
         
         Optional Inputs:
-            args['method'] = average or iTsample
+            kwargs['method'] = average or iTsample
             
-            if args['method'] == iTsample 
+            if kwargs['method'] == iTsample 
                 the default number of samples is 8
             
-            args['nSamples'] the number of samples to use
-                if args['method'] == iTsample
+            kwargs['nSamples'] the number of samples to use
+                if kwargs['method'] == iTsample
         """
         
         method = None
-        if 'method' in args:
-            method = args['method']
+        if 'method' in kwargs:
+            method = kwargs['method']
         else:
             method = 'average'
             
@@ -70,15 +70,16 @@ class margDistSCPP(pointSCPP):
         if method == 'average':
             e = []
             for hist, binEdges in self.data:
-                e.append(self.centerBinAvg(hist,binEdges))
+                e.append(self.centerBinAvg(hist     = hist,
+                                           binEdges = binEdges))
                 
             return numpy.atleast_1d(e)
         
         elif method == 'iTsample':
             
             nSamples = 8
-            if 'nSamples' in args:
-                nSamples = args['nSamples']
+            if 'nSamples' in kwargs:
+                nSamples = kwargs['nSamples']
                 
                 samples = self.iTsample(nSamples=nSamples)
                 
@@ -91,7 +92,7 @@ class margDistSCPP(pointSCPP):
             raise AssertionError
     
     @staticmethod
-    def centerBinAvg(hist = None, binEdges = None):
+    def centerBinAvg(**kwargs):
         """
         A helper function for computing averages with a histogram
         take the value of a histogram bin to be equal to its center than 
@@ -100,6 +101,8 @@ class margDistSCPP(pointSCPP):
         Note:
             The histograms must be properly normalized.
         """
+        hist     = kwargs['hist']
+        binEdges = kwargs['binEdges']
         
         assert isinstance(hist,numpy.ndarray) or isinstance(binEdges,numpy.ndarray),\
             "hist and binEdges must be of type numpy.ndarray"
@@ -147,10 +150,55 @@ class margDistSCPP(pointSCPP):
         # if you made it here you are good to go
         return True
     
-    def iTsample(self,nSamples = 8):
+    def margUps(self,**kwargs):
+        """
+        Will be in units of prices
+        """
+        expectedPrices = kwargs['expectedPrices']
+        return numpy.sqrt(self.margUpv(expectedPrices = expectedPrices))
+    
+    def margUpv(self,**kwargs):
+        """
+        Given a vector of marginal expected prices, computed either by sampling or
+        arithmetically, calculate the upper partial 
+        variance associated with each marginal distribution.
+        
+        will be in units of price**2
+        """
+        expectedPrices = kwargs['expectedPrices']
+        
+        numpy.testing.assert_(expectedPrices.shape[0] == len(self.data), 
+                              msg = "expectedPrice.shape[0] = {0} != len(self.data) = {1}".\
+                              format(expectedPrices.shape[0],len(self.data)))
+        
+        upv = []
+        for idx in xrange(expectedPrices.shape[0]):
+            #get the prices
+            binEdges = numpy.atleast_1d(self.data[idx][1])
+            
+            #get all bin indicies with prices greated than marginal expected value
+            upperPriceIndicies = numpy.nonzero(binEdges>expectedPrices[idx])[0]
+            
+            #convert from indicies to prices
+            upperPrices = numpy.atleast_1d(binEdges[upperPriceIndicies[:-1]])
+            
+            #the probability associated with each upper price
+            upperPriceProb = numpy.atleast_1d(self.data[idx][0][upperPriceIndicies[:-1]])
+            
+            upv.append( numpy.sum( ((upperPrices-expectedPrices[idx])**2)*upperPriceProb ) )
+            
+        return numpy.array(upv)
+    
+    def iTsample(self, **kwargs):
         """
         Function to sample independently from marginal distributions
         """
+        nSamples = None
+        if 'nSamples' not in kwargs:
+            nSamples = 8
+        else:
+            nSamples = kwargs['nSamples']
+            
         numpy.testing.assert_equal(isinstance(nSamples,int),
                                    True)
         m = len(self.data)
@@ -171,13 +219,13 @@ class margDistSCPP(pointSCPP):
                 
         return samples
     
-    def graphPdf(self,args={}):
+    def graphPdf(self,**kwargs):
         """
         Function to plot the data using matplot lib
         """
-        if 'colorStyles' in args:
-            numpy.testing.assert_(len(args['colorStyles']), len(self.data))
-            colorStyles = args['colorStyles']
+        if 'colorStyles' in kwargs:
+            numpy.testing.assert_(len(kwargs['colorStyles']), len(self.data))
+            colorStyles = kwargs['colorStyles']
         else:
             #pick some random styles
             colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
@@ -193,18 +241,18 @@ class margDistSCPP(pointSCPP):
         for i in xrange(len(self.data)):
             ax.plot(.5*(self.data[i][1][:-1]+self.data[i][1][1:]),self.data[i][0],colorStyles[i],label='Slot {0}'.format(i))
             
-        if 'xlabel' in args:
-            plt.xlabel(args['xlabel'])
+        if 'xlabel' in kwargs:
+            plt.xlabel(kwargs['xlabel'])
         else:
             plt.xlabel('Prices')
             
-        if 'ylabel' in args:
-            plt.ylabel(args['ylabel'])
+        if 'ylabel' in kwargs:
+            plt.ylabel(kwargs['ylabel'])
         else:
             plt.ylabel('Probability')
         
-        if 'title' in args:
-            plt.title(args['title'])
+        if 'title' in kwargs:
+            plt.title(kwargs['title'])
         else:
             plt.title('Price Distribution')
             
@@ -212,10 +260,10 @@ class margDistSCPP(pointSCPP):
         
         plt.show()
         
-    def graphCdf(self,args={}):
-        if 'colorStyles' in args:
-            numpy.testing.assert_(len(args['colorStyles']), len(self.data))
-            colorStyles = args['colorStyles']
+    def graphCdf(self,**kwargs):
+        if 'colorStyles' in kwargs:
+            numpy.testing.assert_(len(kwargs['colorStyles']), len(self.data))
+            colorStyles = kwargs['colorStyles']
         else:
             #pick some random styles
             colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
@@ -231,18 +279,18 @@ class margDistSCPP(pointSCPP):
         for i in xrange(len(self.data)):
             ax.plot(.5*(self.data[i][1][:-1]+self.data[i][1][1:]),numpy.cumsum(self.data[i][0]),colorStyles[i],label='Slot {0}'.format(i))
             
-        if 'xlabel' in args:
-            plt.xlabel(args['xlabel'])
+        if 'xlabel' in kwargs:
+            plt.xlabel(kwargs['xlabel'])
         else:
             plt.xlabel('Prices')
             
-        if 'ylabel' in args:
-            plt.ylabel(args['ylabel'])
+        if 'ylabel' in kwargs:
+            plt.ylabel(kwargs['ylabel'])
         else:
             plt.ylabel('Probability')
         
-        if 'title' in args:
-            plt.title(args['title'])
+        if 'title' in kwargs:
+            plt.title(kwargs['title'])
         else:
             plt.title('Price Distribution')
             

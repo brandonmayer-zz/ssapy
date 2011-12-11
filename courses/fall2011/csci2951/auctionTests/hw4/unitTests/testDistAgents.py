@@ -1,15 +1,14 @@
 from auctionSimulator.hw4.agents.straightMU        import *
 from auctionSimulator.hw4.agents.straightMU8       import *
-from auctionSimulator.hw4.agents.targetPriceDist   import * 
+from auctionSimulator.hw4.agents.targetPriceDist   import *
+from auctionSimulator.hw4.agents.targetPrice8      import *  
 from auctionSimulator.hw4.agents.targetMU          import *
 from auctionSimulator.hw4.agents.targetMU8         import *
 from auctionSimulator.hw4.agents.targetMUS         import *
 from auctionSimulator.hw4.agents.targetMUS8        import *
-from auctionSimulator.hw4.agents.riskAware         import *
 from auctionSimulator.hw4.agents.riskAwareTP8      import *
-from auctionSimulator.hw4.agents.riskAwareExpTP8   import *
 from auctionSimulator.hw4.agents.riskAwareTMVS8    import *
-from auctionSimulator.hw4.agents.riskAwareExpTMVS8 import *
+
 
 import unittest
 import numpy
@@ -47,6 +46,16 @@ class testDistAgents(unittest.TestCase):
         print''
         
         myTargetPriceDist.printSummary()
+        
+    def test_targetPrice8(self):
+        randomMargDist = margDistSCPP(self.randomPriceDist)
+        
+        myTP8 = targetPrice8(margDistPricePrediction = randomMargDist)
+        
+        print ''
+        
+        myTP8.printSummary()
+        
         
     def test_straightMU(self):
         m = 5
@@ -139,22 +148,7 @@ class testDistAgents(unittest.TestCase):
         print''
         
         myTargetMUS8.printSummary()
-        
-    def test_riskAware(self):
-        
-        randomMargDist = margDistSCPP(self.randomPriceDist)
-        
-        myRiskAware = riskAware(m                       = self.m,
-                                margDistPricePrediction = margDistSCPP(self.randomPriceDist),
-                                A                       = 10)
-        
-        myRiskAware.printSummary()
-        
-        print ''
-        print 'Bid Test, myRiskAware.bid()'
-        print myRiskAware.bid()
-        print ''
-        
+#        
     def test_riskAwareTP8(self):
         randomMargDist = margDistSCPP(self.randomPriceDist)
         
@@ -171,58 +165,21 @@ class testDistAgents(unittest.TestCase):
         print myRiskAwareTP8.bid()
         print ''
         
-    def test_riskAwareTMVS8(self):
-        randomMargDist = margDistSCPP(self.randomPriceDist)
-        
-        print ''
-        myRiskAwareTMVS8 = riskAwareTMVS8(m                       = self.m,
-                                          margDistPricePrediction = margDistSCPP(self.randomPriceDist),
-                                          A                       = numpy.random.random_integers(1,10,1)[0],
-                                          name                    = "riskAwareTMVS8") 
-        
-        print ''
-        print myRiskAwareTMVS8.printSummary()
-        print ''
-        print 'Bid function test, myRiskAwareTMVS8.bid()'
-        print myRiskAwareTMVS8.bid()
-        print ''
-        
-        
-    def test_riskAWareExpTP8(self):
-        randomMargDist = margDistSCPP(self.randomPriceDist)
-        
-        print ''
-        
-        myRiskAwareExpTP8 = riskAwareExpTP8(m                       = self.m,
-                                            margDistPricePrediction = margDistSCPP(self.randomPriceDist),
-                                            A                       = numpy.random.random_integers(1,10,1)[0],
-                                            name                    = "riskAwareExpTMVS8")
-        
-        print ''
-        print myRiskAwareExpTP8.printSummary()
-        print ''
-        print 'Bid function test, myRiskAwareExpTP8.bid()'
-        print myRiskAwareExpTP8.bid()
-        print ''
-        
-        
-        
-    def test_riskAwareExpTMVS8(self):
-        randomMargDist = margDistSCPP(self.randomPriceDist)
-        
-        print ''
-        
-        myRiskAwareExpTMVS8 = riskAwareExpTMVS8(m                       = self.m,
-                                                margDistPricePrediction = margDistSCPP(self.randomPriceDist),
-                                                A                       = numpy.random.random_integers(1,10,1)[0],
-                                                name                    = "riskAwareExpTMVS8") 
-        
-        print ''
-        print myRiskAwareExpTMVS8.printSummary()
-        print ''
-        print 'Bid function test, myRiskAwareTMVS8.bid()'
-        print myRiskAwareExpTMVS8.bid()
-        print ''
+#    def test_riskAwareTMVS8(self):
+#        randomMargDist = margDistSCPP(self.randomPriceDist)
+#        
+#        print ''
+#        myRiskAwareTMVS8 = riskAwareTMVS8(m                       = self.m,
+#                                          margDistPricePrediction = margDistSCPP(self.randomPriceDist),
+#                                          A                       = numpy.random.random_integers(1,10,1)[0],
+#                                          name                    = "riskAwareTMVS8") 
+#        
+#        print ''
+#        print myRiskAwareTMVS8.printSummary()
+#        print ''
+#        print 'Bid function test, myRiskAwareTMVS8.bid()'
+#        print myRiskAwareTMVS8.bid()
+#        print ''
         
         
 if __name__ == "__main__":

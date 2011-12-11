@@ -18,16 +18,16 @@ class targetMU(margDistPredictionAgent):
         return "targetMU"
             
     @staticmethod
-    def SS(args={}):
+    def SS(**kwargs):
         """
         Calculate the expected marginal price vector given marginal distributions
         over good prices. 
         """
-        pricePrediction = margDistPredictionAgent.SS(args=args)
+        pricePrediction = margDistPredictionAgent.SS(**kwargs)
                                                      
-        expectedPrices = pricePrediction.expectedPrices(args=args)
-        
-        return targetMV.SS({'pointPricePrediction' : expectedPrices,
-                            'bundles'              : args['bundles'],
-                            'l'                    : args['l'],
-                            'valuation'            : args['valuation']})        
+        expectedPrices = pricePrediction.expectedPrices(**kwargs)
+           
+        return targetMV.SS( pointPricePrediction = expectedPrices,
+                            bundles              = kwargs['bundles'],
+                            valuation            = kwargs['valuation'],
+                            l                    = kwargs['l'])     

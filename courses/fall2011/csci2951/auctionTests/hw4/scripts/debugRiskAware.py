@@ -17,23 +17,10 @@ def main():
     agentList = []
     
     riskAware1 = riskAware(margDistPricePrediction = margDistPrediction,
-                           A                       = 10)
+                           A                       = 3)
     
     
-    riskAware1.printSummary()
-    
-#    agentSurplus = []
-#    
-#    for i in xrange(100):
-#        auction = simultaneousAuction(agentList)
-#        
-#        agentSurplus.append(auction.agentSurplus())
-#        
-#    agentSurplus = numpy.atleast_2d(agentSurplus)
-    
-    
-    
-    
+    riskAware1.printSummary()    
 
 if __name__ == "__main__":
     main()

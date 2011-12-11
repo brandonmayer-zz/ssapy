@@ -9,9 +9,10 @@ marginal distributions using the inverse transform method using 8 samples
 per marginal distribution
 """
 
-from auctionSimulator.hw4.agents.straightMU import *
+from margDistPredictionAgent import *
+from auctionSimulator.hw4.agents.straightMV import *
 
-class straightMU8(straightMU):
+class straightMU8(margDistPredictionAgent):
     """
     A concrete class for straightMU8
     """
@@ -20,15 +21,30 @@ class straightMU8(straightMU):
         return "straightMU8"
     
     @staticmethod
-    def SS(args={}):
+    def SS(**kwargs):
+        """
+        Calculate the expected using inverse sampling method and 8 samples
+        Then bid via straightMV with the resulting expected prices
+        """
         
-        return straightMU.SS( {'margDistPrediction' : args['margDistPrediction'],
-                               'method'             : 'iTsample',
-                               'nSamples'           : 8,
-                               'bundles'            : args['bundles'],
-                               'valuation'           : args['valuation'],
-                               'l'                  : args['l']} )
+        pricePrediction = margDistPredictionAgent.SS(**kwargs)
         
-    def printSummary(self):
-        super(straightMU8,self).printSummary({'method'   : 'iTsample',
-                                              'nSamples' : 8})
+        expectedPrices = pricePrediction.expectedPrices( method   = 'iTsample',
+                                                         nSamples = 8)
+        
+        return straightMV.SS( pointPricePrediction = expectedPrices,
+                              bundles              = kwargs['bundles'],
+                              valuation            = kwargs['valuation'],
+                              l                    = kwargs['l'])
+        
+        
+        
+    def printSummary(self,**kwargs):
+        
+        if 'expectedPrices' not in kwargs:
+            
+            kwargs['method']   = 'iTsample'
+            kwargs['nSamples'] = 8
+            
+        super(straightMU8,self).printSummary(**kwargs)
+                                              

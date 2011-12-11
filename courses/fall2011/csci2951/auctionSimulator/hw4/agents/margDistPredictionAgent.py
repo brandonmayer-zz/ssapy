@@ -8,23 +8,16 @@ A base class for agents who utilize a distribution price prediction.
 """
 from pricePredictionAgent import *
 from auctionSimulator.hw4.pricePrediction.margDistSCPP import *
+from auctionSimulator.hw4.padnums import pprint_table as ppt
+
+import sys
 
 class margDistPredictionAgent(pricePredictionAgent):
-    def __init__(self,
-                 m = 5,
-                 v = None,
-                 l = None,
-                 vmin = 0,
-                 vmax = 50,
-                 margDistPricePrediction = None,
-                 name = "Anonymous"):
-        super(margDistPredictionAgent,self).__init__(m    = m,
-                                                     v    = v,
-                                                     l    = l,
-                                                     vmin = vmin,
-                                                     vmax = vmax,
-                                                     name = name,
-                                                     pricePrediction = margDistPricePrediction)
+    def __init__(self,**kwargs):
+        if 'margDistPricePrediction' in  kwargs:
+            kwargs['pricePrediction'] = kwargs['margDistPricePrediction']
+            
+        super(margDistPredictionAgent,self).__init__(**kwargs)
             
     @staticmethod
     def predictionType():
@@ -35,34 +28,25 @@ class margDistPredictionAgent(pricePredictionAgent):
         return "margDistPredictionAgent"
     
     @staticmethod
-    def SS(args={}):
+    def SS(**kwargs):
       """
       Standard SS checks for the margDistPrediciton agent.
       """  
-      assert 'margDistPrediction' in args,\
-            "Must specify margDistPrediction in args parameter."
+      assert 'margDistPrediction' in kwargs,\
+            "Must specify margDistPrediction in kwargs parameter."
             
-      assert isinstance(args['margDistPrediction'],margDistSCPP) or\
-                isinstance(args['margDistPrediction'],tuple),\
-            "args['margDistPrediction'] must be an instance of type margDistSCPP or a python tuple."
-            
-      assert 'bundles' in args,\
-            "Must specify bundles in args parameter."
-            
-      assert 'valuation' in args,\
-         "Must specify the valuation of each bundle in the args parameter."
-            
-      assert 'l' in args,\
-            "Must specify l, the target number of goods in args parameter"
+      assert isinstance(kwargs['margDistPrediction'],margDistSCPP) or\
+                isinstance(kwargs['margDistPrediction'],tuple),\
+            "kwargs['margDistPrediction'] must be an instance of type margDistSCPP or a python tuple."
             
       pricePrediction = None
-      if isinstance(args['margDistPrediction'], margDistSCPP):
+      if isinstance(kwargs['margDistPrediction'], margDistSCPP):
                         
-          pricePrediction = args['margDistPrediction']
+          pricePrediction = kwargs['margDistPrediction']
             
-      elif isinstance(args['margDistPrediction'], tuple):
+      elif isinstance(kwargs['margDistPrediction'], tuple):
             
-          pricePrediction = margDistSCPP(args['margDistPrediction'])
+          pricePrediction = margDistSCPP(kwargs['margDistPrediction'])
             
       else:
           # this should never happen
@@ -70,72 +54,68 @@ class margDistPredictionAgent(pricePredictionAgent):
       
       return pricePrediction
       
-    def bid(self, args={}):
+    def bid(self, **kwargs):
         """
         Interface to bid.
         Accepts an argument of margDistPrediction which
         will take precidence over any stored prediction
         """
-        
         bundles = self.allBundles(self.m)
-        
-        if 'margDistPrediction' in args:
-            if isinstance(args['margDistPrediction'], margDistSCPP):
+        if 'margDistPrediction' in kwargs:
+                            
+                return self.SS(margDistPrediction = kwargs['margDistPrediction'],
+                               bundles            = bundles,
+                               l                  = self.l,
+                               valuation          = simYW.valuation(bundles, self.v, self.l))
                 
-                return self.SS({'margDistPrediction':args['margDistPrediction'],
-                                'bundles':self.allBundles(self.m),
-                                'l':self.l,
-                                'valuation': simYW.valuation(bundles,self.v,self.l)})
-                
-            elif isinstance(args['margDistPrediction'],list):
-                
-                return self.SS({'margDistPrediction':margDistSCPP(args['margDistPrediction']),
-                                'bundles':self.allBundles(self.m),
-                                'l':self.l,
-                                'valuation': simYW.valuation(bundles,self.v,self.l)})
-                
-            else:
-                print '----ERROR----'
-                print 'pointPredictionAgent::bid'
-                print 'unkown pointPricePrediction type'
-                raise AssertionError
-            
+                           
         else:
             assert isinstance(self.pricePrediction, margDistSCPP),\
                 "Must specify a price prediction to bid."
-            return self.SS({'margDistPrediction':self.pricePrediction,
-                            'bundles':self.allBundles(self.m),
-                            'l':self.l,
-                            'valuation':simYW.valuation(bundles,self.v,self.l)})
+                
+            return self.SS(margDistPrediction = self.pricePrediction,
+                           bundles            = bundles,
+                           l                  = self.l,
+                           valuation          = simYW.valuation(bundles,self.v,self.l))
     
-    def printSummary(self,args={}):
+    def printSummary(self,**kwargs):
         """
         Print a summary of the agent's state to standard output.
+        
+        Can provide an expected price vector else one will be generated.
+        The method of computing the expected prices is controled by the
+        method parameter
+        
+        method   := 'average' uses arithmetic average (default)
+        
+        method   := 'iTsample' uses inverse transform sampling
+        
+        nSamples := if 'iTsample' is specified this parameter controls the number
+                    of samples used, the default is 8
         """
         super(margDistPredictionAgent,self).printSummary()
         
-        assert 'margDistPrediction' in args or self.pricePrediction != None,\
+        assert 'margDistPrediction' in kwargs or self.pricePrediction != None,\
             "Must specify a price prediction"
             
         pricePrediction = None
         
-        if 'margDistPrediction' in args:
+        if 'margDistPrediction' in kwargs:
             
-            assert isinstance(args['margDistPrediction'],margDistSCPP) or\
-                isinstance(args['margDistPrediction'], tuple),\
-                    "args['margDistPrediction'] must be a margDistSCPP or numpy.ndarray"
+            assert isinstance(kwargs['margDistPrediction'],margDistSCPP) or\
+                isinstance(kwargs['margDistPrediction'], tuple),\
+                    "kwargs['margDistPrediction'] must be a margDistSCPP or numpy.ndarray"
                     
-            if isinstance(args['margDistPrediction'], margDistSCPP):
+            if isinstance(kwargs['margDistPrediction'], margDistSCPP):
                 
-                pricePrediction = args['margDistPrediction']
+                pricePrediction = kwargs['margDistPrediction']
                 
-            elif isinstance(args['margDistPrediction'], tuple):
+            elif isinstance(kwargs['margDistPrediction'], tuple):
                 
-                pricePrediction = margDistSCPP(args['margDistPrediction'])
+                pricePrediction = margDistSCPP(kwargs['margDistPrediction'])
                 
             else:
-                print 'Should never get here'
-                raise AssertionError
+                raise AssertionError('Should never get here')
                 
         else:
             pricePrediction = self.pricePrediction
@@ -146,26 +126,31 @@ class margDistPredictionAgent(pricePredictionAgent):
                                    v       = self.v,
                                    l       = self.l )
         
-        method = 'average'
-        if 'method' in args:
-            method = args['method']
-            
-        
-            
         expectedPriceVector = None
-        if method == 'average':
-            expectedPriceVector = pricePrediction.expectedPrices()
-        elif method == 'iTsample':
-            nSamples = 8
-            if 'nSamples' in args:
-                nSamples = args['nSamples']
-                
-            expectedPriceVector = pricePrediction.expectedPrices({'method'   : 'iTsample',
-                                                                  'nSamples' : nSamples})
+        
+        if 'expectedPriceVector' in kwargs:
+            expectedPriceVector = kwargs['expectedPriceVector']
         else:
-            print '----ERROR----'
-            print 'Unknown method to compute expected price vector'
-            raise AssertionError
+            method = 'average'
+            if 'method' in kwargs:
+                method = kwargs['method']
+    
+            if method == 'average':
+                expectedPriceVector = pricePrediction.expectedPrices()
+                
+            elif method == 'iTsample':
+                
+                nSamples = 8
+                
+                if 'nSamples' in kwargs:
+                    nSamples = kwargs['nSamples']
+                    
+                expectedPriceVector = pricePrediction.expectedPrices( method   = 'iTsample',
+                                                                      nSamples = nSamples)
+            else:
+                print '----ERROR----'
+                print 'Unknown method to compute expected price vector'
+                raise AssertionError
             
                 
         
@@ -180,15 +165,16 @@ class margDistPredictionAgent(pricePredictionAgent):
         
         print 'Bundle | Valuation | Expected Cost | Expected Surplus'
         
+        table = [['Bundle', 'Valuation', 'Expected Cost', 'Expected Surplus']]
+        
         for i in xrange(bundles.shape[0]):
-                print "{0}  {1:^5} {2:^5} {3:^5}".format( bundles[i].astype(numpy.int),
-                                                          valuation[i],
-                                                          expectedCost[i],
-                                                          expectedSurplus[i])
+            table.append([str(bundles[i].astype(numpy.int)), valuation[i], expectedCost[i], expectedSurplus[i]])
+            
+        ppt(sys.stdout, table)
                 
         [expectedOptBundle, expectedOptSurplus] = self.acq(priceVector=expectedPriceVector)
         
         print "Expected Optimal Bundle acq(expectedPriceVector):     {0}".format(expectedOptBundle.astype(numpy.int))
         print "Expected Surplus of Expected Optimal Bundle:          {0}".format(expectedOptSurplus)
-        print "Bid:    {0}".format(self.bid({'margDistPrediction':pricePrediction}))
+        print "Bid:    {0}".format(self.bid(margDistPrediction = pricePrediction))
         print ''

@@ -79,14 +79,14 @@ class testPointPredictionAgents(unittest.TestCase):
         
         bundles = simYW.allBundles(m)
         
-        valuation = simYW.valuation(bundles=bundles, 
-                                    v=myTargetPrice.v, 
-                                    l=myTargetPrice.l)
+        valuation = simYW.valuation(bundles = bundles, 
+                                    v       = myTargetPrice.v, 
+                                    l       = myTargetPrice.l)
         
-        [optBundle, optSurplus] = simYW.acqYW(bundles,
-                                              valuation,
-                                              myTargetPrice.l,
-                                              randomPointPrediction.data)
+        [optBundle, optSurplus] = simYW.acqYW(bundles     = bundles,
+                                              valuation   = valuation,
+                                              l           = myTargetPrice.l,
+                                              priceVector = randomPointPrediction.data)
         
         targetBid = []
         for idx in xrange(optBundle.shape[0]):
@@ -125,7 +125,8 @@ class testPointPredictionAgents(unittest.TestCase):
                                    randomPointPrediction2.data, 
                                    err_msg = 'Pickling save/load failed')
         
-        myStraightMV = straightMV(pointPricePrediction = randomPointPrediction)
+        myStraightMV = straightMV(pricePrediction = randomPointPrediction,
+                                  name= 'myStraightMV')
         
         numpy.testing.assert_equal( myStraightMV.pricePrediction.data,
                                     randomPointPrediction.data,
@@ -136,9 +137,9 @@ class testPointPredictionAgents(unittest.TestCase):
         
         bid = myStraightMV.bid()
         
-        bid2 = myStraightMV.bid({'pointPricePrediciton':randomPointPrediction})
+        bid2 = myStraightMV.bid(pricePrediction = randomPointPrediction)
         
-        bid3 = myStraightMV.bid({'pointPricePrediction':randomPointPrediction.data})
+        bid3 = myStraightMV.bid(pricePrediction = randomPointPrediction.data)
         
         numpy.testing.assert_equal(bid, bid2)
         
@@ -146,9 +147,11 @@ class testPointPredictionAgents(unittest.TestCase):
         
         #test that a bid with a different instance but same parameters
         #yields expected results
-        myStraightMV2 = straightMV(l=myStraightMV.l,v=myStraightMV.v,m=myStraightMV.m)
+        myStraightMV2 = straightMV(l = myStraightMV.l,
+                                   v = myStraightMV.v, 
+                                   m = myStraightMV.m)
         
-        bid4 = myStraightMV2.bid({'pointPricePrediction':randomPointPrediction})
+        bid4 = myStraightMV2.bid(pointPricePrediction = randomPointPrediction)
         
         numpy.testing.assert_equal(bid4, bid)
         
@@ -157,10 +160,10 @@ class testPointPredictionAgents(unittest.TestCase):
         bundles = simYW.allBundles(m)
         v = myStraightMV.v
         l = myStraightMV.l
-        bid5 = straightMV.SS({'bundles':simYW.allBundles(m),
-                              'valuation': myStraightMV.valuation(bundles = bundles, v = v, l = l),
-                              'pointPricePrediction':randomPointPrediction2.data,
-                              'l':l})
+        bid5 = straightMV.SS( bundles              = simYW.allBundles(m),
+                              valuation            = myStraightMV.valuation(bundles = bundles, v = v, l = l),
+                              pointPricePrediction = randomPointPrediction2.data,
+                              l                    = l)
         
         numpy.testing.assert_equal(bid, bid5)
         
@@ -172,7 +175,7 @@ class testPointPredictionAgents(unittest.TestCase):
         
         randomPointPrediction = pointSCPP(numpy.random.random_integers(1,10,m))
         
-        myTargetMV = targetMV(pointPricePrediction = randomPointPrediction)
+        myTargetMV = targetMV(pricePrediction = randomPointPrediction)
         
         numpy.testing.assert_equal(myTargetMV.pricePrediction.data,
                                    randomPointPrediction.data)
@@ -190,10 +193,10 @@ class testPointPredictionAgents(unittest.TestCase):
         
         valuation = targetMV.valuation(bundles, v, l)
         
-        bid2 = targetMV.SS({'pointPricePrediction':randomPointPrediction.data,
-                            'valuation':valuation,
-                            'l':l,
-                            'bundles':bundles})
+        bid2 = targetMV.SS(pointPricePrediction = randomPointPrediction.data,
+                           valuation            = valuation,
+                           l                    = l,
+                           bundles              = bundles)
         
         numpy.testing.assert_equal(bid,bid2)
         
@@ -207,15 +210,13 @@ class testPointPredictionAgents(unittest.TestCase):
         
         myTargetMVS = targetMVS()
         
-        bid = myTargetMVS.bid({'pointPricePrediction':randomPointPrediction})
+        bid = myTargetMVS.bid(pointPricePrediction = randomPointPrediction)
         
-        bid2 = myTargetMVS.bid({'pointPricePrediction':randomPointPrediction.data})
+        bid2 = myTargetMVS.bid(pointPricePrediction = randomPointPrediction.data)
         
         numpy.testing.assert_equal(bid,bid2)
         
-        myTargetMVS.printSummary({'pointPricePrediction':randomPointPrediction})
-        
-        
+        myTargetMVS.printSummary({'pointPricePrediction' : randomPointPrediction})
         
 if __name__ == "__main__":
     unittest.main()

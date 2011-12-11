@@ -9,9 +9,10 @@ marginal distributions using the inverse transform method using 8 samples
 per marginal distribution
 """
 
-from auctionSimulator.hw4.agents.targetMU import *
+from margDistPredictionAgent import *
+from targetMV import *
 
-class targetMU8(targetMU):
+class targetMU8(margDistPredictionAgent):
     """
     A concrete class for targetMU8
     """
@@ -21,14 +22,17 @@ class targetMU8(targetMU):
         return "targetMU8"
     
     @staticmethod
-    def SS(args={}):
-        return targetMU.SS({'margDistPrediction' : args['margDistPrediction'],
-                            'method'             : 'iTsample',
-                            'nSamples'           : 8,
-                            'bundles'            : args['bundles'],
-                            'valuation'          : args['valuation'],
-                            'l'                  : args['l']})
+    def SS(**kwargs):        
+        pricePrediction = margDistPredictionAgent.SS(**kwargs)
         
-    def printSummary(self):
-        super(targetMU8,self).printSummary({'method'   : 'iTsample',
-                                              'nSamples' : 8})
+        kwargs['pointPricePrediction'] = pricePrediction.expectedPrices(method   = 'iTsample',
+                                                                        nSamples = 8)
+        return targetMV.SS(**kwargs)
+        
+    def printSummary(self, **kwargs):
+        if 'expectedPrices' not in kwargs:
+            
+            kwargs['method']   = 'iTsample'
+            kwargs['nSamples'] = 8
+            
+        super(targetMU8,self).printSummary(**kwargs)

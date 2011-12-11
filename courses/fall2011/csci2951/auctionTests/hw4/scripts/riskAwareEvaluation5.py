@@ -32,16 +32,28 @@ class parallelWorker(object):
         
         agentList = []
         
-        agentList.append(targetPriceDist(margDistPricePrediction = self.margDistPrediction,
-                                         name                    = 'targetPrice'))
+        
         
         agentList.append(riskAwareTMVS8(margDistPricePrediction = self.margDistPrediction,
                                         A                       = self.A,
                                         name                    = 'riskAware_A={0}'.format(self.A)))
+
+#        agentList.append(riskAwareTP8(margDistPricePrediction = self.margDistPrediction,
+#                                      A                       = self.A,
+#                                      name                    = 'riskAware_A={0}'.format(self.A)))
         
-        agentList.append(straightMU8(margDistPricePrediction = self.margDistPrediction,
-                                    name                    = 'straighMU8'))
-    
+        agentList.append(targetMUS8(margDistPricePrediction = self.margDistPrediction,
+                                    name                    = 'targetMUS8'))
+        
+        agentList.append(targetMUS8(margDistPricePrediction = self.margDistPrediction,
+                                    name                    = 'targetMUS8'))
+        
+        agentList.append(targetMUS8(margDistPricePrediction = self.margDistPrediction,
+                                    name                    = 'targetMUS8'))
+        
+        agentList.append(targetMUS8(margDistPricePrediction = self.margDistPrediction,
+                                    name                    = 'targetMUS8'))
+        
         agentList.append(targetMUS8(margDistPricePrediction = self.margDistPrediction,
                                     name                    = 'targetMUS8'))
         
@@ -85,6 +97,8 @@ def main():
     NUM_PROC = 10
     
 #    A = 20
+
+    outDir = 'F:\\courses\\fall2011\\csci2951\\hw4\\exp5'
     
     margDistPkl = "C:\\bmProjects\\courses\\fall2011\\csci2951\\" +\
                   "auctionSimulator\\hw4\\pricePrediction\\margDistPredictions\\" +\
@@ -98,19 +112,25 @@ def main():
     
     colors = ['r','g','b','k','c','y']
     
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    alpha = 0.8
+    
      
     agentNames = []
-    agentNames.append('targetPrice')
+
     agentNames.append('riskAwareTMVS8')
-    agentNames.append('straightMU8')
+#    agentNames.append('riskAwareTP8')
+    agentNames.append('targetMUS8')
+    agentNames.append('targetMUS8')
+    agentNames.append('targetMUS8')
+    agentNames.append('targetMUS8')
     agentNames.append('targetMUS8')
     agentNames.append('targetMUS8')
     agentNames.append('targetMUS8')
     
     ind = numpy.arange(len(agentNames))
+    
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    alpha = 0.8
     
     for A in xrange(0,100,10):
         
@@ -138,10 +158,17 @@ def main():
         
         result = numpy.reshape( result,(result.shape[0]*result.shape[1],result.shape[2]) )
         
+        textFile = outDir + '\\result_A_{0}.txt'.format(A)
+        
+        numpy.savetxt(textFile,result)
+        
         surplusMean = numpy.mean(result,0)
+        
+        variance = numpy.var(result,0)
         
         #
   
+        
         #pick a color randomly
         c = colors[numpy.random.random_integers(0,len(colors)-1)]
         

@@ -37,13 +37,7 @@ class simYW(agentBase):
         than compute for class specific instances.
     """
     
-    def __init__(self, 
-                 m = 5, 
-                 v = None,
-                 l = None, 
-                 vmin=0,
-                 vmax=50, 
-                 name="Anonymous"):
+    def __init__(self, **kwargs):
         """
             INPUTS:
                 m            := the total number of time slots up for auction
@@ -82,33 +76,37 @@ class simYW(agentBase):
                 and create the appropriately sized list, padding with zeros as necessary and 
                 dictated by self.m
         """    
-        self.m = m
         
-        
-        if l == None:
-            self.l = numpy.random.random_integers(low=1,high=m)
+        if 'm' in kwargs:    
+            self.m = kwargs['m']
         else:
-            assert isinstance(l,int),\
-                "parameter l must be an integer number of slots."
-            self.l = l
+            self.m = 5
         
-        if v == None:
-            self.v = numpy.random.random_integers(low=vmin,high=vmax,size=self.m)
-            self.v.sort() 
-            #sort is in ascending order, 
-            #switch around for descending
-            self.v = self.v[::-1]
+        if 'l' in kwargs:
+            self.l = kwargs['l']
         else:
-            if self.m == 1:
-                assert isinstance(v,int),\
-                    "For an auction with 1 slot, the valuation must be for 1 slot."
+            self.l = numpy.random.random_integers(low=1,high = self.m)
+        
+        if 'v' in kwargs:    
+            self.v = numpy.atleast_1d(kwargs['v'])
+            numpy.testing.assert_equal(self.v.shape[0], self.m,
+                                       err_msg="self.v.shape[0] = {0} != self.m = {1}".format(self.v.shape[0],self.m))
+        else:
+            vmin = None
+            if 'vmin' in kwargs:
+                vmin = kwargs['vmin']
             else:
-                v = numpy.atleast_1d(v)
+                vmin = 0
                 
-                assert v.shape[0] == self.m,\
-                    "v.shape[0] = {0} must equal self.m = {1}".format(v.shape[0],self.m)
-                                 
-            self.v = numpy.atleast_1d(v)
+            vmax = None
+            if 'vmax' in kwargs:
+                vmax = kwargs['vmax']
+            else:
+                vmax = 50
+                
+            self.v = self.randomValueVector(vmin = vmin, 
+                                            vmax = vmax, 
+                                            m    = self.m)
             
         # a bit vector indicating which items where won
         # at auction
@@ -117,18 +115,90 @@ class simYW(agentBase):
         # a vector of final prices for all goods
         self.finalPrices = numpy.zeros(self.m)
         
-        super(simYW,self).__init__(name)
+        super(simYW,self).__init__(**kwargs)
+        
+    @staticmethod
+    def randomValueVector(vmin = 1, vmax = 50, m = 5):
+        v = numpy.random.random_integers(low = vmin, high = vmax, size = m)
+        v.sort()
+        v = v[::-1]
+        
+        return v
     
-    def acq(self, priceVector = None):
+    def acq(self, **kwargs):
         """
         Calculate the optimal bundle for this class instance.
         """
+        priceVector = kwargs['priceVector']
         bundles = simYW.allBundles(self.m)
         valuation = simYW.valuation(bundles,self.v,self.l)
-        return simYW.acqYW(bundles=bundles,valuation=valuation,l=self.l,priceVector=priceVector)
+        return simYW.acqYW(bundles     = bundles,
+                           valuation   = valuation,
+                           priceVector = priceVector,
+                           l           = self.l)
+    
+    @staticmethod
+    def minMaxBundle(**kwargs):
+        """
+        A function to compute the "minimal" bundle given a list of
+        bundles.
+        
+        If there are bundles with equal "value" to the agent pick the one
+        that completes the taks first, e.g.
+        
+        if $\lambda$ = 2 and m = 5 [1 1 0 0 0 ] should be prefered to [1 0 0 0 1]
+        given both have equal utility
+        """
+        #will raise assertions if not in kwargs
+        bundles = numpy.atleast_2d(kwargs['bundles'])
+        utility    = numpy.atleast_1d(kwargs['utility'])
+        
+        numpy.testing.assert_equal(bundles.shape[0], utility.shape[0],
+                                   err_msg="Each bundle must have a corresponding utility.")
+        
+        
+        def helper(_bundles,_utility,_l):
+                if _bundles.shape[0] == 1:
+                #if there is one bundle and utility
+                    _optBundle   = _bundles[0]
+                    _optUtility  = _utility[0]
+                    return _optBundle, _optUtility
+                else:
+                    t = numpy.float('inf')
+                    _optBundle  = None
+                    _optUtility = None
+                    for idx in xrange(_bundles.shape[0]):
+                        tempBinList = _bundles[idx]
+                        cs          = numpy.cumsum(tempBinList)
+                        tNew        = (numpy.array(cs) >= _l).nonzero()
+                        if tNew[0].any():
+                            tNew = tNew[0][0]
+                            if tNew < t:
+                                t = tNew
+                                _optBundle        = _bundles[idx]
+                                _optUtility       = _utility[idx]
+                                
+                    return _optBundle, _optUtility
+        
+        optBundle = None
+        optUtility = None
+        
+        if 'l' in kwargs:
+            optBundle, optUtility = helper(bundles,utility,kwargs['l'])
+            if optBundle == None:
+                #return the minimum bundle that finishes earliest
+                lmin = numpy.min([numpy.sum(bundles[bundleIdx]) for bundleIdx in xrange(bundles.shape[0])])
+                optBundle, optUtility = helper(bundles,utility,lmin)
+        else:
+            #pick the smallest bundle that finishes first
+            lmin = numpy.min([numpy.sum(bundles[bundleIdx]) for bundleIdx in xrange(bundles.shape[0])])
+            optBundle,optUtility = helper(bundles,utility,lmin)
+            
+             
+        return numpy.atleast_1d(optBundle).astype(bool), optUtility      
         
 
-    def printSummary(self, args = {}):
+    def printSummary(self, **kwargs):
         """
         Print a summary of agent state to standard out.
         """
@@ -139,7 +209,7 @@ class simYW(agentBase):
         print "Agent Valuation Vector = {0}".format(self.v)
         
     @staticmethod
-    def SS(self,args={}):
+    def SS(self,**kwargs):
         """
         An agents' strategy profile. Computes the optimal bid given the
         agent's status and arguments to SS. Should be implmented for each
@@ -152,7 +222,7 @@ class simYW(agentBase):
         print "Please instantiate a concrete agent"
         raise AssertionError
     
-    def bid(self, args={}):
+    def bid(self, **kwargs):
         """
         An interface to trigger the agent to bid.
         Though this function should be called to return a specific agent's bid,
@@ -276,7 +346,7 @@ class simYW(agentBase):
         return numpy.atleast_1d([c for c in itertools.imap(operator.sub,valuation, simYW.cost(bundles=bundles, price=price))])
     
     @staticmethod
-    def bundleFromIndex(index=None, nGoods = 5):
+    def idx2bundle(index=None, nGoods = 5):
         # convert to decimal rather than enumerating power set
         # and selecting correct bundle
         
@@ -304,9 +374,22 @@ class simYW(agentBase):
             
         return numpy.atleast_1d(binList)
     
+    @staticmethod
+    def bundle2idx(bundle = None):
+        numpy.testing.assert_(bundle.dtype == bool,
+                              msg="bundle.dtype = {0} != bool".format(bundle.dtype))
+        idx = 0
+        for i in xrange(bundle.shape[0]):
+            idx = (2**((bundle.shape[0]-1)-i))*bundle[i]
+    
+
+        
+        
+    
         
     @staticmethod
-    def acqYW(bundles = None, valuation = None, l = None, priceVector = None):
+    def acqYW(**kwargs):
+#    def acqYW(bundles = None, valuation = None, l = None, priceVector = None):
         """
         Given the number of goods, a price vector over each good
         and a valuation for each good, compute the optimal acquisition
@@ -323,21 +406,26 @@ class simYW(agentBase):
             valuation     :=     an numpy array of valuations, one for each bundle
         
         """    
-        bundles = numpy.atleast_2d(bundles)
-        priceVector = numpy.atleast_1d(priceVector)
-        valuation = numpy.atleast_1d(valuation)
+        bundles     = numpy.atleast_2d(kwargs['bundles'])
+        valuation   = numpy.atleast_1d(kwargs['valuation'])
+        priceVector = numpy.atleast_1d(kwargs['priceVector'])
+        l           = kwargs['l']
         
-        assert bundles.shape[0] == valuation.shape[0],\
-            "simYW::acq There must be a single valuation for each bundle"
+        numpy.testing.assert_equal(bundles.shape[0], 
+                                   valuation.shape[0], 
+                                   err_msg="simYW::acq There must be a single valuation for each bundle")
             
-        assert priceVector.shape[0] == bundles.shape[1],\
-            "simYW::acq there must be a price for each good in a bundle"
-            
-        assert isinstance(l,int) and l >= 0 and l <= bundles.shape[1],\
-            "simYW::acq l must be a positive integer less than the total number of available goods.\n"+\
-            "l = {0}, bundles.shape[1] = {1}".format(l,bundles.shape[1])
-                 
-        surplus = simYW.surplus(bundles=bundles,valuation=valuation,priceVector=priceVector)
+        numpy.testing.assert_equal(priceVector.shape[0],
+                                   bundles.shape[1],
+                                   err_msg="simYW::acq there must be a price for each good in a bundle")
+        
+        numpy.testing.assert_(isinstance(l,int) and l <= bundles.shape[1] and l>=0,
+                              msg="simYW::acq l must be a positive integer less than the total number of available goods.\n"+\
+                                  "l = {0}, bundles.shape[1] = {1}".format(l,bundles.shape[1]))
+
+        surplus = simYW.surplus(bundles     = bundles,
+                                valuation   = valuation,
+                                priceVector = priceVector)
         
         # initialize to the null bundle
         optBundle = [0]*bundles.shape[1]
@@ -346,28 +434,9 @@ class simYW(agentBase):
         # the same maximal surplus
         optBundleIdxList = numpy.nonzero(surplus == numpy.max(surplus))[0]
         
-        if len(optBundleIdxList) == 1:
-            optBundle = bundles[optBundleIdxList[0]]
-            optSurplus = surplus[optBundleIdxList[0]]
-        else:
-            # there is more than one optimal bundle,
-            # we want to choose the bundle that completes its' task first,
-            # the so-called "minimally maximal" bundle
-            t = float('inf')
-            
-            for idx in optBundleIdxList:
-                #get the bundle in question
-                tempBundle = bundles[idx]
-                cs = numpy.cumsum(tempBundle)
-                tNew = (numpy.array(cs) >= l ).nonzero()
-                if tNew[0].any():
-                    tNew = tNew[0][0]
-                    if tNew < t:
-                        t = tNew
-                        optBundle = tempBundle
-                        optSurplus = surplus[idx]
-                        
-        return optBundle, optSurplus
+        return simYW.minMaxBundle(bundles = bundles[optBundleIdxList],
+                                  utility = surplus[optBundleIdxList],
+                                  l       = l)
             
     def validatePriceVector(self,priceVector):
         """

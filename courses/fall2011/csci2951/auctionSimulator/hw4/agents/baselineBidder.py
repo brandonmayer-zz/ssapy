@@ -13,19 +13,6 @@ class baselineBidder(simYW):
     """
     Replicated BaselineBidding agent from Yoon & Wellman 2011
     """
-    def __init__(self, 
-                 m = 5,
-                 v = None,
-                 l = None,
-                 vmin = 1, 
-                 vmax = 50,
-                 name = "Anonymous baselineBidder"): 
-        super(baselineBidder,self).__init__(m = m,
-                                            v = v,
-                                            l = l, 
-                                            vmin = vmin,
-                                            vmax = vmax,
-                                            name = name)
         
     def type(self):
         return "baselineBidder" 

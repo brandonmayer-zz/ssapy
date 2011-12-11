@@ -21,15 +21,15 @@ class targetMVS(pointPredictionAgent):
         return "targetMVS"
     
     @staticmethod
-    def bundleBid(args={}):
-        pricePrediction = args['pointPricePrediction']
+    def bundleBid(**kwargs):
+        pricePrediction = kwargs['pointPricePrediction']
         
-        bundle = numpy.atleast_1d(args['bundle'])
+        bundle = numpy.atleast_1d(kwargs['bundle'])
                                   
         
-        valuation = args['valuation']
+        valuation = kwargs['valuation']
         
-        l = args['l']
+        l = kwargs['l']
         
         # set the price of all goods not in the optimal bundle to infinity
         # deep copy price to preserve original price vector
@@ -70,36 +70,35 @@ class targetMVS(pointPredictionAgent):
         return numpy.atleast_1d(marginalValueBid).astype('float')
     
     @staticmethod
-    def SS(args = {}):
+    def SS(**kwargs):
         """
         Calculate a vector of marginal values given a single bundle
         and price vector assuming the price off all goods not in the bundle
         are infinite (unobtainable).
         """
         
-        assert 'pointPricePrediction' in args,\
-            "Must specify pointPricePrediction in args parameter."
+        numpy.testing.assert_('bundles' in kwargs,
+                              msg = "Must provide bundles argument")
+        
+        numpy.testing.assert_('valuation' in kwargs,
+                              msg = "Must provide valuation argument")
+        
+        numpy.testing.assert_('l' in kwargs,
+                              msg = "Must provide l, target number of goods argument")
+        
             
-        assert isinstance(args['pointPricePrediction'],pointSCPP) or\
-                isinstance(args['pointPricePrediction'], numpy.ndarray),\
-               "args['pointPricePrediction'] must be either a pointSCPP or numpy.ndarray"
+        assert isinstance(kwargs['pointPricePrediction'],pointSCPP) or\
+                isinstance(kwargs['pointPricePrediction'], numpy.ndarray),\
+               "kwargs['pointPricePrediction'] must be either a pointSCPP or numpy.ndarray"
             
-        assert 'bundles' in args,\
-            "Must specify bundles in args parameter."
             
-        assert 'valuation' in args,\
-            "Must specify the valuation of each bundle in the args parameter."
-            
-        assert 'l' in args,\
-            "Must specify l, the target number of goods in args parameter."
-            
-        if isinstance(args['pointPricePrediction'], pointSCPP):
+        if isinstance(kwargs['pointPricePrediction'], pointSCPP):
                         
-            pricePrediction = args['pointPricePrediction'].data
+            pricePrediction = kwargs['pointPricePrediction'].data
             
-        elif isinstance(args['pointPricePrediction'],numpy.ndarray):
+        elif isinstance(kwargs['pointPricePrediction'],numpy.ndarray):
             
-            pricePrediction = numpy.atleast_1d(args['pointPricePrediction'])
+            pricePrediction = numpy.atleast_1d(kwargs['pointPricePrediction'])
             
         else:
             # this should never happen
@@ -108,18 +107,18 @@ class targetMVS(pointPredictionAgent):
                
 #        [optBundleIdx, optBundle, optSurplus] = self.acq(pricePrediction,validate=False)
     
-        optBundle,optSurplus = targetMVS.acqYW(bundles      = args['bundles'],
-                                               valuation    = args['valuation'],
-                                               l            = args['l'],
+        optBundle,optSurplus = targetMVS.acqYW(bundles      = kwargs['bundles'],
+                                               valuation    = kwargs['valuation'],
+                                               l            = kwargs['l'],
                                                priceVector  = pricePrediction)
         
         
         
                        
-        return targetMVS.bundleBid({ 'pointPricePrediction' : pricePrediction,
-                                     'bundle'               : optBundle,
-                                     'valuation'            : args['valuation'],
-                                     'l'                    : args['l'] })
+        return targetMVS.bundleBid(pointPricePrediction = pricePrediction,
+                                   bundle               = optBundle,
+                                   valuation            = kwargs['valuation'],
+                                   l                    = kwargs['l'] )
         
             
         

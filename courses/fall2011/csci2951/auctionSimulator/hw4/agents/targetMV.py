@@ -16,10 +16,10 @@ class targetMV(pointPredictionAgent):
         return "targetMV"
     
     @staticmethod
-    def bundleBid(args={}):
-        pricePrediction = args['pointPricePrediction']
+    def bundleBid(**kwargs):
+        pricePrediction = kwargs['pointPricePrediction']
         
-        bundle = args['bundle']
+        bundle = kwargs['bundle']
         
         m = int(bundle.shape[0])
         
@@ -37,13 +37,13 @@ class targetMV(pointPredictionAgent):
 #                [optIdxZero, optBundleZero, predictedSurplusZero] = self.acq(tempPriceZero,validate=False)
 
                 optBundleInf, predictedSurplusInf = simYW.acqYW(bundles     = allBundles,
-                                                                valuation   = args['valuation'],
-                                                                l           = args['l'],
+                                                                valuation   = kwargs['valuation'],
+                                                                l           = kwargs['l'],
                                                                 priceVector = tempPriceInf)
                 
                 optBundleZero, predictedSurplusZero = simYW.acqYW(bundles     = allBundles,
-                                                                  valuation   = args['valuation'],
-                                                                  l           = args['l'],
+                                                                  valuation   = kwargs['valuation'],
+                                                                  l           = kwargs['l'],
                                                                   priceVector = tempPriceZero)
                 
                 # this shouldn't happen but just in case       
@@ -61,36 +61,37 @@ class targetMV(pointPredictionAgent):
         
         
     @staticmethod
-    def SS(args={}):
+    def SS(**kwargs):
         """
         Calculate a vector of marginal values given a price
         vector.
         """
-        assert 'pointPricePrediction' in args,\
-            "Must specify pointPricePrediciton in args parameter."
+        
+        assert 'pointPricePrediction' in kwargs,\
+            "Must specify pointPricePrediciton in kwargs parameter."
             
-        assert isinstance(args['pointPricePrediction'],pointSCPP) or\
-                isinstance(args['pointPricePrediction'], numpy.ndarray),\
-               "args['pointPricePrediction'] must be either a pointSCPP or numpy.ndarray"
+        assert isinstance(kwargs['pointPricePrediction'],pointSCPP) or\
+                isinstance(kwargs['pointPricePrediction'], numpy.ndarray),\
+               "kwargs['pointPricePrediction'] must be either a pointSCPP or numpy.ndarray"
             
-        assert 'bundles' in args,\
-            "Must specify bundles in args parameter."
+        assert 'bundles' in kwargs,\
+            "Must specify bundles in kwargs parameter."
             
-        assert 'valuation' in args,\
-            "Must specify the valuation of each bundle in args parameter."
+        assert 'valuation' in kwargs,\
+            "Must specify the valuation of each bundle in kwargs parameter."
             
-        assert 'l' in args,\
-            "Must specify l, the target number of goods in args parameter."
+        assert 'l' in kwargs,\
+            "Must specify l, the target number of goods in kwargs parameter."
         
         pricePrediction = None
 
-        if isinstance(args['pointPricePrediction'], pointSCPP):
+        if isinstance(kwargs['pointPricePrediction'], pointSCPP):
                         
-            pricePrediction = args['pointPricePrediction'].data
+            pricePrediction = kwargs['pointPricePrediction'].data
             
-        elif isinstance(args['pointPricePrediction'],numpy.ndarray):
+        elif isinstance(kwargs['pointPricePrediction'],numpy.ndarray):
             
-            pricePrediction = numpy.atleast_1d(args['pointPricePrediction'])
+            pricePrediction = numpy.atleast_1d(kwargs['pointPricePrediction'])
             
         else:
             # this should never happen
@@ -100,13 +101,13 @@ class targetMV(pointPredictionAgent):
                 
         # solve acq for optimal bundle
         # size checks of parameters will be done in acq
-        [optBundle, optSurplus] = simYW.acqYW(bundles       = args['bundles'],
-                                              valuation     = args['valuation'],
-                                              l             = args['l'],
+        [optBundle, optSurplus] = simYW.acqYW(bundles       = kwargs['bundles'],
+                                              valuation     = kwargs['valuation'],
+                                              l             = kwargs['l'],
                                               priceVector   = pricePrediction)
             
-        return targetMV.bundleBid({'pointPricePrediction' : pricePrediction,
-                                   'bundle'               : numpy.atleast_1d(optBundle),
-                                   'valuation'            : args['valuation'],
-                                   'l'                    : args['l']})
+        return targetMV.bundleBid(pointPricePrediction      = pricePrediction,
+                                  bundle                    = numpy.atleast_1d(optBundle),
+                                  valuation                 = kwargs['valuation'],
+                                  l                         = kwargs['l'])
           

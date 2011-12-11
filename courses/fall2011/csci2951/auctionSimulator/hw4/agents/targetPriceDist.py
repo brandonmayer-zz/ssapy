@@ -18,31 +18,19 @@ class targetPriceDist(margDistPredictionAgent):
         return "targetPriceDist"
     
     @staticmethod
-    def SS(args={}):
+    def SS(**kwargs):
         """
         Calculate and bid the expected value of marginal distributions
         """
-        pricePrediction = margDistPredictionAgent.SS(args=args)
+        pricePrediction = margDistPredictionAgent.SS(**kwargs)
         
-        method = None
-        if 'method' in args:
-            method = args['method']
-        
-        if not method or method == 'average':
-#            return pricePrediction.expectedPrices()
-            return targetPrice.SS({'bundles'              : args['bundles'],
-                                   'valuation'            : args['valuation'],
-                                   'l'                    : args['l'],
-                                   'pointPricePrediction' : pricePrediction.expectedPrices()})
+
+
+        return targetPrice.SS(bundles               = kwargs['bundles'],
+                              valuation             = kwargs['valuation'],
+                              l                     = kwargs['l'],
+                              pointPricePrediction  = pricePrediction.expectedPrices())
             
         
-        if method == 'iTsample':
-            assert 'nSamples' in args,\
-                "Must specify the number of Samples."
-            samples = numpy.atleast_2d(pricePrediction.iTsample(args['nSamples']))
-            
-            return targetPrice.SS({'bundles'              : args['bundles'],
-                                   'valuation'            : args['valuation'],
-                                   'l'                    : args['l'],   
-                                   'pointPricePrediction' : numpy.mean(samples,0)})
+
             

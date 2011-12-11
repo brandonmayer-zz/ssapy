@@ -22,16 +22,19 @@ class pricePredictionAgent(simYW):
     
     This level of abstraction may be superfluous but I'll keep it for now.
     """
-    def __init__(self,m = 5, v = None, l = None, vmin=0, vmax=50, name="Anonymous",pricePrediction = None ):
+    def __init__(self,**kwargs):
         
-        super(pricePredictionAgent,self).__init__(m=m,v=v,l=l,vmin=vmin,vmax=vmax,name=name)
+        super(pricePredictionAgent,self).__init__(**kwargs)
         
         # defines the pricePrediciton member variable common to point and distribution
         # price prediction schemes
-        self.pricePrediction = None
+        if 'pricePrediction' in kwargs:
+            self.loadOrSetPrediction(kwargs['pricePrediction'])
+        else:
+            self.pricePrediction = None
         
-        if pricePrediction != None:
-            self.loadOrSetPrediction(pricePrediction)
+        
+            
             
     def loadOrSetPrediction(self,pricePrediction):
         if isinstance(pricePrediction,basestring)\
@@ -39,8 +42,8 @@ class pricePredictionAgent(simYW):
             
             self.loadPricePredictionPickle(self,pricePrediction)
             
-        elif isinstance(pricePrediction,pointSCPP):
-            
+        elif isinstance(pricePrediction,pointSCPP) or\
+             isinstance(pricePrediction,margSCPP):
             self.setPricePrediction(pricePrediction)
             
         else:

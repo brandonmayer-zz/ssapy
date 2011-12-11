@@ -18,37 +18,44 @@ class straightMV(pointPredictionAgent):
         return "straightMV"
     
     @staticmethod
-    def SS(args={}):
+    def SS(**kwargs):
         """
         Calculate the marginal values of all goods for auction
         given the predicted prices.
         
         NOTE:
             Bid on all available goods, don't solve acq for overall best bundle.
+            
+        Parameters:
+            pointPricePrediction     A point price prediction
+            bundles                  The available bundles to bid on
+            valuation                A vector of valuations (one valuation per bundle)
+            l                        The target number of goods
         """
-        assert 'pointPricePrediction' in args,\
-            "Must specify pointPricePrediction in args parameter."
+
+        assert 'pointPricePrediction' in kwargs,\
+            "Must specify pointPricePrediction in kwargs parameter."
             
-        assert isinstance(args['pointPricePrediction'],pointSCPP) or\
-                isinstance(args['pointPricePrediction'], numpy.ndarray),\
-               "args['pointPricePrediction'] must be either a pointSCPP or numpy.ndarray"
+        assert isinstance(kwargs['pointPricePrediction'],pointSCPP) or\
+                isinstance(kwargs['pointPricePrediction'], numpy.ndarray),\
+               "kwargs['pointPricePrediction'] must be either a pointSCPP or numpy.ndarray"
             
-        assert 'bundles' in args,\
-            "Must specify bundles in args parameter."
+        assert 'bundles' in kwargs,\
+            "Must specify bundles in kwargs parameter."
             
-        assert 'valuation' in args,\
-            "Must specify the valuation of each bundle in the args parameter."
+        assert 'valuation' in kwargs,\
+            "Must specify the valuation of each bundle in the kwargs parameter."
             
-        assert 'l' in args,\
-            "Must specify l, the target number of goods in args parameter."
+        assert 'l' in kwargs,\
+            "Must specify l, the target number of goods in kwargs parameter."
             
-        if isinstance(args['pointPricePrediction'], pointSCPP):
+        if isinstance(kwargs['pointPricePrediction'], pointSCPP):
                         
-            pricePrediction = args['pointPricePrediction'].data
+            pricePrediction = kwargs['pointPricePrediction'].data
             
-        elif isinstance(args['pointPricePrediction'],numpy.ndarray):
+        elif isinstance(kwargs['pointPricePrediction'],numpy.ndarray):
             
-            pricePrediction = numpy.atleast_1d(args['pointPricePrediction'])
+            pricePrediction = numpy.atleast_1d(kwargs['pointPricePrediction'])
             
         else:
             # this should never happen
@@ -56,20 +63,20 @@ class straightMV(pointPredictionAgent):
             raise AssertionError
         
         marginalValueBid = []
-        for idx in xrange(args['bundles'].shape[1]):
+        for idx in xrange(kwargs['bundles'].shape[1]):
             tempPriceInf = numpy.array(pricePrediction).astype(numpy.float)
             tempPriceInf[idx] = float('inf')
             tempPriceZero = numpy.array(pricePrediction)
             tempPriceZero[idx] = 0 
             
-            optBundleInf, predictedSurplusInf = simYW.acqYW(bundles     = args['bundles'],
-                                                            valuation   = args['valuation'],
-                                                            l           = args['l'],
+            optBundleInf, predictedSurplusInf = simYW.acqYW(bundles     = kwargs['bundles'],
+                                                            valuation   = kwargs['valuation'],
+                                                            l           = kwargs['l'],
                                                             priceVector = tempPriceInf)
             
-            optBundleZero, predictedSurplusZero = simYW.acqYW(bundles     = args['bundles'],
-                                                              valuation   = args['valuation'],
-                                                              l           = args['l'], 
+            optBundleZero, predictedSurplusZero = simYW.acqYW(bundles     = kwargs['bundles'],
+                                                              valuation   = kwargs['valuation'],
+                                                              l           = kwargs['l'], 
                                                               priceVector = tempPriceZero)
                 
             #this shouldn't happend but just in case.

@@ -8,9 +8,11 @@ Specialized agent to bid by targetMUS strategy but sampling from
 marginal distributions using the inverse transform method using 8 samples
 per marginal distribution
 """
-from auctionSimulator.hw4.agents.targetMUS import *
 
-class targetMUS8(targetMUS):
+from auctionSimulator.hw4.agents.targetMVS import *
+from margDistPredictionAgent import *
+
+class targetMUS8(margDistPredictionAgent):
     """
     A concrete class for targetMUS8
     """
@@ -19,14 +21,19 @@ class targetMUS8(targetMUS):
         return "targetMUS8"
     
     @staticmethod
-    def SS(args={}):
-        return targetMUS.SS({'margDistPrediction' : args['margDistPrediction'],
-                              'method'            : 'iTsample',
-                              'nSamples'          : 8,
-                              'bundles'           : args['bundles'],
-                              'valuation'         : args['valuation'],
-                              'l'                 : args['l']})
+    def SS(**kwargs):
+
+        pricePrediction = margDistPredictionAgent.SS(**kwargs)
         
-    def printSummary(self):
-        super(targetMUS8,self).printSummary({'method'   : 'iTsample',
-                                             'nSamples' : 8})
+        kwargs['pointPricePrediction'] = pricePrediction.expectedPrices( method   = 'iTsample',
+                                                                         nSamples = 8)
+        
+        return targetMVS.SS(**kwargs)
+        
+    def printSummary(self, **kwargs):
+        
+        if 'expectedPrices' not in kwargs:
+            kwargs['method']   = 'iTsample'
+            kwargs['nSamples'] = 8
+            
+        super(targetMUS8,self).printSummary(**kwargs)
