@@ -76,33 +76,19 @@ class simYW(agentBase):
                 and create the appropriately sized list, padding with zeros as necessary and 
                 dictated by self.m
         """    
+        self.m = kwargs.get('m',5)
         
-        if 'm' in kwargs:    
-            self.m = kwargs['m']
-        else:
-            self.m = 5
+        self.l = kwargs.get('l',numpy.random.random_integers(low = 1, high = self.m))        
         
-        if 'l' in kwargs:
-            self.l = kwargs['l']
-        else:
-            self.l = numpy.random.random_integers(low=1,high = self.m)
-        
+                
         if 'v' in kwargs:    
             self.v = numpy.atleast_1d(kwargs['v'])
             numpy.testing.assert_equal(self.v.shape[0], self.m,
                                        err_msg="self.v.shape[0] = {0} != self.m = {1}".format(self.v.shape[0],self.m))
         else:
-            vmin = None
-            if 'vmin' in kwargs:
-                vmin = kwargs['vmin']
-            else:
-                vmin = 0
-                
-            vmax = None
-            if 'vmax' in kwargs:
-                vmax = kwargs['vmax']
-            else:
-                vmax = 50
+            vmin = kwargs.get('vmin',0)
+            
+            vmax = kwargs.get('vmax',50)
                 
             self.v = self.randomValueVector(vmin = vmin, 
                                             vmax = vmax, 
@@ -110,10 +96,10 @@ class simYW(agentBase):
             
         # a bit vector indicating which items where won
         # at auction
-        self.bundleWon = numpy.zeros(self.m)
+        self.bundleWon = None
         
         # a vector of final prices for all goods
-        self.finalPrices = numpy.zeros(self.m)
+        self.finalPrices = None
         
         super(simYW,self).__init__(**kwargs)
         
@@ -320,8 +306,7 @@ class simYW(agentBase):
         else:
             return numpy.atleast_1d([numpy.dot(bundle,price) for bundle in bundles])
         
-    def finalSurplus(self):
-        return numpy.dot(self.bundleWon,self.finalPrices)
+
         
     @staticmethod
     def surplus(bundles=None, valuation = None, priceVector = None,):
@@ -344,6 +329,17 @@ class simYW(agentBase):
         assert bundles.shape[1] == priceVector.shape[0]
             
         return numpy.atleast_1d([c for c in itertools.imap(operator.sub,valuation, simYW.cost(bundles=bundles, price=price))])
+    
+    def finalSurplus(self):
+        numpy.testing.assert_(isinstance(self.bundleWon,numpy.ndarray),
+            msg="invalid self.bundleWon")
+        
+        numpy.testing.assert_(isinstance(self.finalPrices,numpy.ndarray),
+            msg="invalid self.finalPrices")
+        
+        return self.surplus(self.bundleWon, 
+                            self.valuation(self.bundleWon, self.v, self.l),
+                            self.finalPrices)
     
     @staticmethod
     def idx2bundle(index=None, nGoods = 5):
@@ -382,11 +378,6 @@ class simYW(agentBase):
         for i in xrange(bundle.shape[0]):
             idx = (2**((bundle.shape[0]-1)-i))*bundle[i]
     
-
-        
-        
-    
-        
     @staticmethod
     def acqYW(**kwargs):
 #    def acqYW(bundles = None, valuation = None, l = None, priceVector = None):

@@ -46,12 +46,12 @@ class testAuctions(unittest.TestCase):
         
         riskAware3.A = 20
         
-        straightMU1 = straightMU(margDistPricePrediction = randomMargDist, 
-                                                       m = riskAware1.m, 
-                                                       l = riskAware1.l, 
-                                                       v = riskAware1.v)
+        straightMU1 = straightMU8(margDistPricePrediction = randomMargDist, 
+                                                        m = riskAware1.m, 
+                                                        l = riskAware1.l, 
+                                                        v = riskAware1.v)
         
-        targetPriceDist1 = targetPriceDist(margDistPricePrediction = randomMargDist,
+        targetPriceDist1 = targetPrice8(margDistPricePrediction = randomMargDist,
                                                                  m = riskAware1.m,
                                                                  l = riskAware1.l,
                                                                  v = riskAware1.v)
@@ -60,7 +60,7 @@ class testAuctions(unittest.TestCase):
         
         [agent.printSummary() for agent in agentList]
         
-        auction = simultaneousAuction(agentList)
+        auction = simultaneousAuction(agentList = agentList)
         
         print auction.agentList
         

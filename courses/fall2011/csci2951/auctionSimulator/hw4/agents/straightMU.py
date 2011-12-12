@@ -113,7 +113,7 @@ class straightMU64(margDistPredictionAgent):
             tkwargs['method']   = 'iTsample'
             tkwargs['nSamples'] = 64
             
-        super(straightMU8,self).printSummary(**tkwargs)
+        super(straightMU64,self).printSummary(**tkwargs)
         
 class straightMU256(margDistPredictionAgent):
     """
@@ -149,4 +149,4 @@ class straightMU256(margDistPredictionAgent):
             tkwargs['method']   = 'iTsample'
             tkwargs['nSamples'] = 256
             
-        super(straightMU8,self).printSummary(**tkwargs)
+        super(straightMU256,self).printSummary(**tkwargs)

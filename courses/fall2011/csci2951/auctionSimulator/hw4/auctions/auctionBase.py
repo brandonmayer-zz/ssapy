@@ -7,8 +7,8 @@ Date:      11/23/2011
 
 class auctionBase(object):
     nextId = 0
-    def __init__(self, name = 'auctionBases'):
-        self.name = name
+    def __init__(self, **kwargs):
+        self.name = kwargs.get('name', 'Anonymous')
         self.id = auctionBase.nextId
         auctionBase.nextId +=1
         

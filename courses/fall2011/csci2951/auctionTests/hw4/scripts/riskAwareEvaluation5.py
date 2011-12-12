@@ -1,13 +1,8 @@
 from auctionSimulator.hw4.auctions.simultaneousAuction import *
 from auctionSimulator.hw4.agents.riskAware import *
-from auctionSimulator.hw4.agents.riskAwareTP8      import *
-from auctionSimulator.hw4.agents.riskAwareExpTP8   import *
-from auctionSimulator.hw4.agents.riskAwareTMVS8    import *
-from auctionSimulator.hw4.agents.riskAwareExpTMVS8 import *
-from auctionSimulator.hw4.agents.straightMU8 import *
-from auctionSimulator.hw4.agents.targetMU8 import *
-from auctionSimulator.hw4.agents.targetMUS8 import *
+from auctionSimulator.hw4.agents.straightMU import *
 from auctionSimulator.hw4.agents.targetPriceDist import *
+from auctionSimulator.hw4.agents.targetMUS import *
 
 import numpy
 from mpl_toolkits.mplot3d import Axes3D
@@ -34,7 +29,7 @@ class parallelWorker(object):
         
         
         
-        agentList.append(riskAwareTMVS8(margDistPricePrediction = self.margDistPrediction,
+        agentList.append(riskAwareTMUS8(margDistPricePrediction = self.margDistPrediction,
                                         A                       = self.A,
                                         name                    = 'riskAware_A={0}'.format(self.A)))
 
@@ -81,7 +76,7 @@ class parallelWorker(object):
                 agent.v = v
                 agent.l = l
                 
-            auction = simultaneousAuction(agentList)
+            auction = simultaneousAuction(agentList = agentList)
             
             auction.runAuction()
             
@@ -132,7 +127,13 @@ def main():
     ax = fig.add_subplot(111, projection='3d')
     alpha = 0.8
     
-    for A in xrange(0,100,10):
+    def drange(start, stop, step):
+        r = start
+        while r < stop:
+            yield r
+            r += step
+    
+    for A in drange(0,5,.2):
         
         pw = parallelWorker(margDistPrediction = margDistPrediction, 
                             nGames             = nGames,

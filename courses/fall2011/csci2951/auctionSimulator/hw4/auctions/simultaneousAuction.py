@@ -16,16 +16,21 @@ class simultaneousAuction(auctionBase):
     """
     A class for simulating simultaneous one shot auctions.
     """
-    def __init__(self, agentList = [], m = 5, nPrice = 2, name='simultaneousAuction', reserve = 0):
-        
+    def __init__(self,**kwargs):
+        agentList = kwargs.get('agentList', [])
         
         self.setAgentList(agentList=agentList)
         
-        super(simultaneousAuction,self).__init__(name)
+        self.m       = kwargs.get('m', 5)
+        self.nPrice  = int(kwargs.get('nPrice', 2))
+        self.reserve = kwargs.get('reserve',0)
         
-        self.m          = int(m)
-        self.nPrice     = int(nPrice)
-        self.reserve    = reserve
+        #indicate the auction has not yet run
+        self.finalPrices = None
+        self.winners     = None
+        self.winningBids = None
+        
+        super(simultaneousAuction,self).__init__(**kwargs)
         
     @staticmethod
     def type():
@@ -69,22 +74,14 @@ class simultaneousAuction(auctionBase):
         if targetAgent:
             self.agentList.remove(targetAgent[0])
             
-    def runAuction(self,args={}):
+    def runAuction(self,**kwargs):
         
-        nPrice = None
-        if 'nPrice' in args:
-            nPrice = args['nPrice']
-        else:
-            nPrice = self.nPrice
-            
-        reserve = None
-        if 'reserve' in args:
-            reserve = args['reserve']
-        else:
-            reserve = self.reserve
+        nPrice  = kwargs.get('nPrice', self.nPrice)
+        
+        reserve = kwargs.get('reserve', self.reserve)
             
         #collect the bids from the agents
-        bids = numpy.atleast_2d([agent.bid(args) for agent in self.agentList])
+        bids = numpy.atleast_2d([agent.bid(**kwargs) for agent in self.agentList])
         
         # the highest bids
         winningBids = numpy.max(bids,0)
@@ -120,12 +117,22 @@ class simultaneousAuction(auctionBase):
         
         return winners, finalPrices, winningBids      
     
-    def notifyAgents(self,args={}):
+    def notifyAgents(self,**kwargs):
         """
         Will modify all agent's agent.bundleWon and agent.finalPrices member variables
         so agents individual know which bundles they have obtained and
         at what price
         """
+        
+        numpy.testing.assert_(self.finalPrices != None,
+            msg="self.finalPrices are not yet valid.")
+        
+        numpy.testing.assert_(self.winners != None,
+            msg="self.winners is not yet valid.")
+        
+        numpy.testing.assert_(self.winningBids != None,
+            msg="self.winningBids is not yet valid.")
+        
         #iterate through agents
         for agentIdx in xrange(len(self.agentList)):
             
@@ -139,5 +146,5 @@ class simultaneousAuction(auctionBase):
             #let agent know of all final prices
             self.agentList[agentIdx].finalPrices = self.finalPrices
                  
-    def agentSurplus(self,args={}):
+    def agentSurplus(self,**kwargs):
         return numpy.atleast_1d([agent.finalSurplus() for agent in self.agentList])

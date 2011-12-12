@@ -108,6 +108,25 @@ class testDistAgents(unittest.TestCase):
         print''
         
         myStraightMU8.printSummary()
+    
+    def test_straightMU64(self):
+        randomMargDist = margDistSCPP(self.randomPriceDist)
+        
+        myStraightMU64 = straightMU64(margDistPricePrediction = randomMargDist,name="myStraightMU64")
+        
+        print''
+        
+        myStraightMU64.printSummary()
+        
+    def test_straightMU256(self):
+        randomMargDist = margDistSCPP(self.randomPriceDist)
+        
+        myStraightMU256 = straightMU256(margDistPricePrediction = randomMargDist,name="myStraightMU256")
+        
+        print''
+        
+        myStraightMU256.printSummary()
+    
         
     def test_targetMU(self):
         randomMargDist = margDistSCPP(self.randomPriceDist)
@@ -197,21 +216,38 @@ class testDistAgents(unittest.TestCase):
         print myRiskAwareTP8.bid()
         print ''
         
-#    def test_riskAwareTMVS8(self):
-#        randomMargDist = margDistSCPP(self.randomPriceDist)
-#        
-#        print ''
-#        myRiskAwareTMVS8 = riskAwareTMVS8(m                       = self.m,
-#                                          margDistPricePrediction = margDistSCPP(self.randomPriceDist),
-#                                          A                       = numpy.random.random_integers(1,10,1)[0],
-#                                          name                    = "riskAwareTMVS8") 
-#        
-#        print ''
-#        myRiskAwareTMVS8.printSummary()
-#        print ''
-#        print 'Bid function test, myRiskAwareTMVS8.bid()'
-#        print myRiskAwareTMVS8.bid()
-#        print ''
+    def test_riskAwareTP64(self):
+        randomMargDist = margDistSCPP(self.randomPriceDist)
+        
+        myRiskAwareTP64 = riskAwareTP64(m                       = self.m,
+                                        margDistPricePrediction = margDistSCPP(self.randomPriceDist),
+                                        A                       = numpy.random.random_integers(1,10,1)[0],
+                                        name                    = "riskAwareTP64")
+        
+        print ''
+        myRiskAwareTP64.printSummary()
+        
+        print ''
+        print 'Bid test, myRiskAwareTP8.bid()'
+        print myRiskAwareTP64.bid()
+        print ''
+        
+    def test_riskAwareTP256(self):
+        randomMargDist = margDistSCPP(self.randomPriceDist)
+        
+        myRiskAwareTP256 = riskAwareTP256(m                       = self.m,
+                                          margDistPricePrediction = margDistSCPP(self.randomPriceDist),
+                                          A                       = numpy.random.random_integers(1,10,1)[0],
+                                          name                    = "riskAwareTP256")
+        
+        print ''
+        myRiskAwareTP256.printSummary()
+        
+        print ''
+        print 'Bid test, myRiskAwareTP8.bid()'
+        print myRiskAwareTP256.bid()
+        print ''
+        
         
     def test_riskAwareTMUS8(self):
         randomMargDist = margDistSCPP(self.randomPriceDist)
@@ -228,10 +264,39 @@ class testDistAgents(unittest.TestCase):
         print 'Bid function test, myRiskAwareTMVS8.bid()'
         print myRiskAwareTMUS8.bid()
         print ''
-    
         
+    def test_riskAwareTMUS64(self):
+        randomMargDist = margDistSCPP(self.randomPriceDist)
+        
+        print ''
+        myRiskAwareTMUS64 = riskAwareTMUS64(m                       = self.m,
+                                            margDistPricePrediction = margDistSCPP(self.randomPriceDist),
+                                            A                       = numpy.random.random_integers(1,10,1)[0],
+                                            name                    = "riskAwareTMUS8") 
+        
+        print ''
+        myRiskAwareTMUS64.printSummary()
+        print ''
+        print 'Bid function test, myRiskAwareTMVS8.bid()'
+        print myRiskAwareTMUS64.bid()
+        print ''
+        
+        
+    def test_riskAwareTMUS256(self):
+        randomMargDist = margDistSCPP(self.randomPriceDist)
+        
+        print ''
+        myRiskAwareTMUS256 = riskAwareTMUS256(m                       = self.m,
+                                              margDistPricePrediction = margDistSCPP(self.randomPriceDist),
+                                              A                       = numpy.random.random_integers(1,10,1)[0],
+                                              name                    = "riskAwareTMUS8") 
+        
+        print ''
+        myRiskAwareTMUS256.printSummary()
+        print ''
+        print 'Bid function test, myRiskAwareTMVS8.bid()'
+        print myRiskAwareTMUS256.bid()
+        print ''
         
 if __name__ == "__main__":
     unittest.main()
-    
-    
