@@ -339,7 +339,7 @@ class simYW(agentBase):
         
         return self.surplus(self.bundleWon, 
                             self.valuation(self.bundleWon, self.v, self.l),
-                            self.finalPrices)
+                            self.finalPrices)[0]
     
     @staticmethod
     def idx2bundle(index=None, nGoods = 5):
