@@ -15,7 +15,7 @@ def drange(start,stop,step):
 
 def main():
     aStart = 0
-    aStop = 8
+    aStop = 10
     aStep = 1
     
     nGamesPerCore = 1000
@@ -78,7 +78,7 @@ def main():
         results.append(result)
 
     outFileZ = outDir + "results_A_{0}_{1}_{2}_nGames_{3}".format(aStart,aStop,aStep,nGamesTot)
-    numpy.savez(outFileZ,results = numpy.dstack(results), A = keys, nGames = nGamesTot)    
+    numpy.savez(outFileZ,results = numpy.dstack(results), A = keys, nGames = nGamesTot, agentTypeList = agentTypeList)    
     
     print 'Finished.'
 
