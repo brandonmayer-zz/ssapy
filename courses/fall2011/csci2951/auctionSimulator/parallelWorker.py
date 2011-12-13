@@ -4,6 +4,7 @@ from auctionSimulator.hw4.agents.averageMU import *
 from auctionSimulator.hw4.agents.targetMU import *
 from auctionSimulator.hw4.agents.targetMUS import *
 from auctionSimulator.hw4.agents.baselineBidder import *
+from auctionSimulator.hw4.agents.bidEvaluator import *
 
 from auctionSimulator.hw4.auctions.simultaneousAuction import *
 
@@ -45,40 +46,103 @@ class parallelSimAuctionSymmetricVL(parallelWorkerBase):
         
         self.margDistPrediction = kwargs['margDistPrediction']
         
-        self.A = kwargs.get('A',0)
+        self.A = kwargs.get('A')
     
         self.vmin = kwargs.get('vmin',0)
         
         self.vmax = kwargs.get('vmax',50)
+        
+    def agentsFromType(self,**kwargs):
+        try:
+            agentTypeList = kwargs['agentTypeList']
+        except:
+            raise KeyError('Must specify agentTypeList')
+        
+        #will be set to none if not specified
+        margDistPrediction = kwargs.get('margDistPrediction',self.margDistPrediction)
+        m = kwargs.get('m',self.m)
+        
+        agentList = []
+        for i, agentType in enumerate(agentTypeList):
+            if agentTypeList[i] == 'riskAwareTP8':
                 
+                A = kwargs.get('A',self.A)
+                if A == None:
+                    raise KeyError('Must Specify A valu of A if a riskAware Agent is specified.')
+                    
+                agentList.append(riskAwareTP8( m                       = m,
+                                               margDistPricePrediction = margDistPrediction,
+                                               A                       = A) )
+            elif agentTypeList[i] == 'riskAwareTMUS8':
+                
+                A = kwargs.get('A',self.A)
+                if A == None:
+                    raise KeyError('Must Specify A valu of A if a riskAware Agent is specified.')
+                
+                agentList.append(riskAwareTMUS8( m                       = m,
+                                                 margDistPricePrediction = margDistPrediction,
+                                                 A                       = A))
+            elif agentTypeList[i] == 'targetMUS8':
+                agentList.append(targetMUS8(m                       = m,
+                                                 margDistPricePrediction = margDistPrediction))
+            elif agentTypeList[i] == 'targetMU8':
+                agentList.append(targetMU8(m                       = m,
+                                                 margDistPricePrediction = margDistPrediction))
+            elif agentTypeList[i] == 'straightMU8':
+                agentList.append(straightMU8(m                       = m,
+                                                 margDistPricePrediction = margDistPrediction))
+            elif agentTypeList[i] == 'averageMU':
+                agentList.append(averageMU(m                       = m,
+                                           margDistPricePrediction = margDistPrediction))
+            elif agentTypeList[i] == 'bidEvaluatorSMU8':
+                agentList.append(bidEvaluatorSMU8(m                       = m,
+                                                  margDistPricePrediction = margDistPrediction))
+            elif agentTypeList[i] == 'bidEvaluatorTMUS8':
+                agentList.append(bidEvaluatorTMUS8(m                       = m,
+                                                   margDistPricePrediction = margDistPrediction))
+            else:
+                raise ValueError('Unknown Agent Type {0}'.format(agentTypeList[i]))
+            
+        return agentList
+        
+            
         
     def __call__(self,*args):
         
-        agentList = []
-        for i in xrange(len(self.agentTypeList)):
-            
-            if self.agentTypeList[i] == 'riskAwareTP8':
-                agentList.append(riskAwareTP8( m                       = self.m,
-                                               margDistPricePrediction = self.margDistPrediction,
-                                               A                       = self.A))
-            elif self.agentTypeList[i] == 'riskAwareTMUS8':
-                agentList.append(riskAwareTMUS8(m                       = self.m, 
-                                                margDistPricePrediction = self.margDistPrediction,
-                                                A                       = self.A))
-            elif self.agentTypeList[i] == 'targetMUS8':
-                agentList.append(targetMUS8(m                       = self.m, 
-                                            margDistPricePrediction = self.margDistPrediction))
-            elif self.agentTypeList[i] == 'targetMU8':
-                agentList.append(targetMU8(m                       = self.m, 
-                                           margDistPricePrediction = self.margDistPrediction))
-            elif self.agentTypeList[i] == 'straightMU8':
-                agentList.append(straightMU8(m                       = self.m,
-                                             margDistPricePrediction = self.margDistPrediction))
-            elif self.agentTypeList[i] == 'averageMU':
-                agentList.append(averageMU(m                       = self.m,
-                                           margDistPricePrediction = self.margDistPrediction))
-            else:
-                raise ValueError('Unknown Agent Type {0}'.format(self.agentTypeList[i]))
+        agentList = self.agentsFromType(agentTypeList      = self.agentTypeList,
+                                        A                  = self.A,
+                                        m                  = self.m,
+                                        margDistPrediction = self.margDistPrediction)
+#        for i in xrange(len(self.agentTypeList)):
+#            
+#            if self.agentTypeList[i] == 'riskAwareTP8':
+#                agentList.append(riskAwareTP8( m                       = self.m,
+#                                               margDistPricePrediction = self.margDistPrediction,
+#                                               A                       = self.A))
+#            elif self.agentTypeList[i] == 'riskAwareTMUS8':
+#                agentList.append(riskAwareTMUS8(m                       = self.m, 
+#                                                margDistPricePrediction = self.margDistPrediction,
+#                                                A                       = self.A))
+#            elif self.agentTypeList[i] == 'targetMUS8':
+#                agentList.append(targetMUS8(m                       = self.m, 
+#                                            margDistPricePrediction = self.margDistPrediction))
+#            elif self.agentTypeList[i] == 'targetMU8':
+#                agentList.append(targetMU8(m                       = self.m, 
+#                                           margDistPricePrediction = self.margDistPrediction))
+#            elif self.agentTypeList[i] == 'straightMU8':
+#                agentList.append(straightMU8(m                       = self.m,
+#                                             margDistPricePrediction = self.margDistPrediction))
+#            elif self.agentTypeList[i] == 'averageMU':
+#                agentList.append(averageMU(m                       = self.m,
+#                                           margDistPricePrediction = self.margDistPrediction))
+#            elif self.agentTypeList[i] == 'bidEvaluatorSMU8':
+#                agentList.append(bidEvaluatorSMU8(m                       = self.m,
+#                                                  margDistPricePrediction = self.margDistPrediction))
+#            elif self.agentTypeList[i] == 'bidEvaluatorTMUS8':
+#                agentList.append(bidEvaluatorTMUS8(m                       = self.m,
+#                                                   margDistPricePrediction = self.margDistPrediction))
+#            else:
+#                raise ValueError('Unknown Agent Type {0}'.format(self.agentTypeList[i]))
         
         agentSurplus = []
         
@@ -118,4 +182,5 @@ def runParallelJob(**kwargs):
     result = numpy.atleast_2d(pool.map(pw, xrange(0,NUM_PROC))).astype(kwargs.get('resultType',numpy.float))
     
     return numpy.reshape( result,(result.shape[0]*result.shape[1],result.shape[2]) )    
+            
             

@@ -76,7 +76,7 @@ class riskAware(margDistPredictionAgent):
         
         bundles         = kwargs['bundles']
         expectedSurplus = kwargs['expectedSurplus']
-        upperPartialStd = kwargs['upperPartialVar']
+        upperPartialVar = kwargs['upperPartialVar']
         A               = kwargs['A']
         
         #check for valid inputs

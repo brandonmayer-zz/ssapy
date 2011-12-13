@@ -32,51 +32,47 @@ class margDistPredictionAgent(pricePredictionAgent):
       """
       Standard SS checks for the margDistPrediciton agent.
       """  
-      assert 'margDistPrediction' in kwargs,\
-            "Must specify margDistPrediction in kwargs parameter."
-            
-      assert isinstance(kwargs['margDistPrediction'],margDistSCPP) or\
-                isinstance(kwargs['margDistPrediction'],tuple),\
-            "kwargs['margDistPrediction'] must be an instance of type margDistSCPP or a python tuple."
-            
-      pricePrediction = None
-      if isinstance(kwargs['margDistPrediction'], margDistSCPP):
-                        
+      try:
           pricePrediction = kwargs['margDistPrediction']
+      except KeyError:
+          raise KeyError('Must specify margDistPrediction')
+      
+    
+      numpy.testing.assert_(isinstance(kwargs['margDistPrediction'],margDistSCPP) or\
+                                isinstance(kwargs['margDistPrediction'],tuple), 
+                msg="kwargs['margDistPrediction'] must be an instance of type margDistSCPP or a python tuple.")
             
+      
+      if isinstance(pricePrediction, margDistSCPP):
+          
+          return pricePrediction
+                          
       elif isinstance(kwargs['margDistPrediction'], tuple):
             
-          pricePrediction = margDistSCPP(kwargs['margDistPrediction'])
+          return margDistSCPP(pricePrediction)
             
       else:
-          # this should never happen
-          raise AssertionError
-      
-      return pricePrediction
-      
+          raise AssertionError('This should never happen...')
+            
     def bid(self, **kwargs):
         """
         Interface to bid.
         Accepts an argument of margDistPrediction which
         will take precidence over any stored prediction
         """
-        bundles = self.allBundles(self.m)
-        if 'margDistPrediction' in kwargs:
-                            
-                return self.SS(margDistPrediction = kwargs['margDistPrediction'],
-                               bundles            = bundles,
-                               l                  = self.l,
-                               valuation          = simYW.valuation(bundles, self.v, self.l))
-                
-                           
-        else:
-            assert isinstance(self.pricePrediction, margDistSCPP),\
-                "Must specify a price prediction to bid."
-                
-            return self.SS(margDistPrediction = self.pricePrediction,
-                           bundles            = bundles,
-                           l                  = self.l,
-                           valuation          = simYW.valuation(bundles,self.v,self.l))
+        m                  = kwargs.get('m', self.m)
+        v                  = kwargs.get('v', self.v)
+        l                  = kwargs.get('l', self.l)
+        margDistPrediction = kwargs.get('margDistPrediciton', self.pricePrediction)
+        bundles            = kwargs.get('bundles', self.allBundles(m))
+        
+        numpy.testing.assert_(isinstance(margDistPrediction,margDistSCPP),
+            msg="margDistPrediction must be a valid instance of margDistSCPP.")
+        
+        return self.SS( margDistPrediction = margDistPrediction,
+                        bundles            = bundles,
+                        l                  = l,
+                        valuation          = simYW.valuation(bundles,self.v,self.l) )
     
     def printSummary(self,**kwargs):
         """
