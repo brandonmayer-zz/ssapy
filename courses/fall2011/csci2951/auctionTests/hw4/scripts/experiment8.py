@@ -1,12 +1,13 @@
 from auctionSimulator.hw4.auctions.simultaneousAuction import *
 from auctionSimulator.parallelWorker import *
+from auctionSimulator.config import *
 
 import numpy
 import time
 import itertools
 import multiprocessing
 import os
-import config
+
 
 def drange(start,stop,step):
     r = start
@@ -23,13 +24,16 @@ def main():
     NUM_PROC = multiprocessing.cpu_count() - 1
     nGamesTot = nGamesPerCore*NUM_PROC
                   
-    margDistPkl = config.margDistPklFiles[distPricePrediction_straightMU8_10000_2011_12_8_1323383753.pkl]
+    margDistPkl = config.margDistPklFiles['distPricePrediction_straightMU8_10000_2011_12_8_1323383753.pkl']
                   
-    margDistPrediction = margDistSCPP()
+#    margDistPrediction = margDistSCPP()
+    margDistPrediction = margDistSCPP(margDistPkl)
+
+#    margDistPrediction.loadPickle(margDistPkl)
     
-    margDistPrediction.loadPickle(margDistPkl)
+    margDistPrediction.graphPdf()
                   
-    outDir = "F:\\courses\\fall2011\\csci2951\\hw4\\exp8\\"
+    outDir = os.path.join(config.expDir, "exp8")
     if not os.path.isdir(outDir):
         os.makedirs(outDir)
     

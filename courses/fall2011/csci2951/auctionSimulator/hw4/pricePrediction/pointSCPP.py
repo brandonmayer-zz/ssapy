@@ -6,31 +6,41 @@ class pointSCPP(object):
     Class wrapper for point self confirming price predictions
     """
 #    def __init__(self, pointPricePrediction = None):
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
+        
         pointPricePrediction = kwargs.get('pointPricePrediction')
         
-        if isinstance(pointPricePrediction,numpy.ndarray):
-            if numpy.atleast_2d(pointPricePrediction).shape[0] == 1:
-                self.data = pointPricePrediction
-                self.m = numpy.atleast_2d(self.data).shape[1]
+        if pointPricePrediction:
+            if isinstance(pointPricePrediction,numpy.ndarray):
+                if numpy.atleast_2d(pointPricePrediction).shape[0] == 1:
+                    self.data = pointPricePrediction
+                    self.m = numpy.atleast_2d(self.data).shape[1]
+                else:
+                    print "----Warning----"
+                    print "pointSCPP.__init__"
+                    print "pointPricePrediction must be a 1d array"
+                    print "self.data = None"
+                    self.data = None
+                    self.m = None
+            elif pointPricePrediction == None:
+                self.data = None
+                self.m = None
             else:
                 print "----Warning----"
                 print "pointSCPP.__init__"
-                print "pointPricePrediction must be a 1d array"
+                print "pointPricePrediction must be a numpy.ndarray"
                 print "self.data = None"
+                print "self.m = None"
                 self.data = None
                 self.m = None
-        elif pointPricePrediction == None:
-            self.data = None
-            self.m = None
-        else:
-            print "----Warning----"
-            print "pointSCPP.__init__"
-            print "pointPricePrediction must be a numpy.ndarray"
-            print "self.data = None"
-            print "self.m = None"
-            self.data = None
-            self.m = None
+        elif args:
+            if isinstance(args[0], basestring):
+                filename, fileExt = os.path.splitext(args[0])
+                if fileExt == '.pkl':
+                    self.loadPickle(args[0])
+                else:
+                    raise ValueError('Unknown file type: {0}'.format(fileExt))
+                            
                     
     
     

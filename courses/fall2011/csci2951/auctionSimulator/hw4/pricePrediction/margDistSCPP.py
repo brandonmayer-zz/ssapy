@@ -2,6 +2,8 @@ from pointSCPP import *
 from types import * #for type checking
 import matplotlib.pyplot as plt
 import itertools
+import os
+import copy
 
 class margDistSCPP(pointSCPP):
     """
@@ -18,24 +20,54 @@ class margDistSCPP(pointSCPP):
     savePickle and loadPickle are inherited from the pointSCPP class
     """
 #    def __init__(self, margDistData = None):
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         """
         marginalDistributionPrediction should be a list of size m of tuples
         each tuple specifies a normalized histogram count and bin edges
         """          
         # initialize as empty
-        margDistData = kwargs['margDistData']
-        if margDistData == None:
-            self.data = None
-            self.m = None
-        else:
-            if self.validateData(margDistData=margDistData):
-                self.data = margDistData
-                if isinstance(margDistData,list):
-                    self.m = len(margDistData)
+        margDist = kwargs.get('margDist')
+        
+        if margDist:
+            if isinstance(margDist,numpy.ndarray):
+                if self.validateData(margDistData=margDistData):
+                    self.data = margDistData
+                    if isinstance(margDistData,list):
+                        self.m = len(margDistData)
+                    else:
+                        self.m = 1
+            elif isinstance(margDist, basestring):
+                filename, fileExt = os.path.splitext(margDist)
+                if fileExt == '.pkl':
+                    self.loadPickle(margDist)
                 else:
-                    self.m = 1
-    
+                    raise ValueError('Unknown file type: {0}'.format(fileExt))
+            elif isinstance(margDist, margDistSCPP):
+                #will default to a deepcopy copy constructor...
+                self.data = copy.deepcopy(margDist.data)
+                self.m    = copy.deepcopy(margDist.m)
+            else:
+                raise ValueError('Uknown parameter type.')
+        elif args:
+            if isinstance(args[0],basestring):
+                filename, fileExt = os.path.splitext(args[0])
+                if fileExt == '.pkl':
+                    self.loadPickle(args[0])
+                else:
+                    raise ValueError('Unknown file type: {0}'.format(fileExt))
+            elif isinstance(args[0],margDist):
+                self.data = copy.deepcopy(args[0].data)
+                self.m    = copy.deepcopy(args[0].m)
+            elif isinstance(args[0],numpy.ndarray) or isinstance(args[0],list):
+                self.data = numpy.array(args[0])
+                self.m    = self.data.shape[0]
+            else:
+                raise ValueError('Unknown Value Type.')
+        else:
+            self.data = None
+            self.m    = None
+                
+                
     @staticmethod
     def type():
         return "marginalDistributionSCPP"

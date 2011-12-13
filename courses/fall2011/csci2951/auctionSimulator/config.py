@@ -1,11 +1,11 @@
 import os
 import glob
-
+import auctionSimulator
+import auctionTests
 class conf(object):
     def __init__(self,**kwargs):
-        self.cwd = os.getcwd()
-        self.auctionSimulatorDir = os.path.join(self.cwd,'auctionSimulator')
-        self.auctionTestsDir = os.path.join(self.cwd,'auctionTests')
+        self.auctionSimulatorDir = os.path.dirname(auctionSimulator.__file__)
+        self.auctionTestsDir = os.path.dirname(auctionTests.__file__)
         
         self.pricePredictionDir = os.path.join(self.auctionSimulatorDir,'hw4','pricePrediction')
         self.margDistPredictionDir = os.path.join(self.pricePredictionDir,'margDistPredictions')
@@ -27,10 +27,10 @@ class conf(object):
         #set up output experiment directory given the computer i'm using
         self.usr = kwargs.get('usr', 'desktop')
         if self.usr == 'desktop':
-            self.expDir = "F:\\courses\\fall2011\\csci2951\\hw4"
+            self.expDir = 'F:\\courses\\fall2011\\csci2951\\hw4'
+#            
         elif self.usr == 'laptop':
-            self.expDir = "C:\\coursesFall2011\\csci2951\\exp"
-        
+            self.expDir = 'C:\\coursesFall2011\\csci2951\\exp'        
 
 config = conf()
 pass
