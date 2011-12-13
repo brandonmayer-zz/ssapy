@@ -13,46 +13,15 @@ import multiprocessing
 
 class parallelWorkerBase(object):
     def __init__(self, **kwargs):
-        pass
+        raise AssertionError('Cannot instantiate a parallelWorkerBase')
     
-    def __call__(self,*args):
-        pass
-
-class parallelSimAuctionSymmetricVL(parallelWorkerBase):
-    """
-    NOTE:
-        THIS WORKER ASSUMES THAT ALL AGENTS HAVE THE SAME
-        VALUATION AND TARGET NUMBER OF GOODS!!!!
-    """
-    def __init__(self, **kwargs):
-        
-        numpy.testing.assert_('margDistPrediction' in kwargs,
-                              msg="Must specify a margianl price prediction distribution.")
-        
-        numpy.testing.assert_(isinstance(kwargs['margDistPrediction'],margDistSCPP),
-                              msg="margDistPrediction must be an instance of margDistSCPP")
-        
-        numpy.testing.assert_('agentList' in kwargs,
-                              msg="Must specify a list of agents.")
-        
-        if isinstance(kwargs['agentList'],list):
-            [numpy.testing.assert_(isinstance(agent,basestring)) for agent in kwargs['agentList']]
-        
-        self.agentTypeList = kwargs['agentList']
-        
-        self.nGames = kwargs.get('nGames',100)
-        
-        self.m      = kwargs.get('m',5)
-        
-        self.margDistPrediction = kwargs['margDistPrediction']
-        
-        self.A = kwargs.get('A')
+    def __call__(self,*args, **kwargs):
+        raise AssertionError('Cannot Call a parallelWorkerBase')
     
-        self.vmin = kwargs.get('vmin',0)
-        
-        self.vmax = kwargs.get('vmax',50)
-        
     def agentsFromType(self,**kwargs):
+        """
+        Construct agents from a list of strings. E.g. and agent factory.
+        """
         try:
             agentTypeList = kwargs['agentTypeList']
         except:
@@ -104,46 +73,48 @@ class parallelSimAuctionSymmetricVL(parallelWorkerBase):
                 raise ValueError('Unknown Agent Type {0}'.format(agentTypeList[i]))
             
         return agentList
+
+class parallelSimAuctionSymmetricVL(parallelWorkerBase):
+    """
+    NOTE:
+        THIS WORKER ASSUMES THAT ALL AGENTS HAVE THE SAME
+        VALUATION AND TARGET NUMBER OF GOODS!!!!
+    """
+    def __init__(self, **kwargs):
         
-            
+        numpy.testing.assert_('margDistPrediction' in kwargs,
+                              msg="Must specify a margianl price prediction distribution.")
         
-    def __call__(self,*args):
+        numpy.testing.assert_(isinstance(kwargs['margDistPrediction'],margDistSCPP),
+                              msg="margDistPrediction must be an instance of margDistSCPP")
+        
+        numpy.testing.assert_('agentList' in kwargs,
+                              msg="Must specify a list of agents.")
+        
+        if isinstance(kwargs['agentList'],list):
+            [numpy.testing.assert_(isinstance(agent,basestring)) for agent in kwargs['agentList']]
+        
+        self.agentTypeList = kwargs['agentList']
+        
+        self.nGames = kwargs.get('nGames',100)
+        
+        self.m      = kwargs.get('m',5)
+        
+        self.margDistPrediction = kwargs['margDistPrediction']
+        
+        self.A = kwargs.get('A')
+    
+        self.vmin = kwargs.get('vmin',0)
+        
+        self.vmax = kwargs.get('vmax',50)
+        
+    def __call__(self, *args , **kwargs):
         
         agentList = self.agentsFromType(agentTypeList      = self.agentTypeList,
                                         A                  = self.A,
                                         m                  = self.m,
                                         margDistPrediction = self.margDistPrediction)
-#        for i in xrange(len(self.agentTypeList)):
-#            
-#            if self.agentTypeList[i] == 'riskAwareTP8':
-#                agentList.append(riskAwareTP8( m                       = self.m,
-#                                               margDistPricePrediction = self.margDistPrediction,
-#                                               A                       = self.A))
-#            elif self.agentTypeList[i] == 'riskAwareTMUS8':
-#                agentList.append(riskAwareTMUS8(m                       = self.m, 
-#                                                margDistPricePrediction = self.margDistPrediction,
-#                                                A                       = self.A))
-#            elif self.agentTypeList[i] == 'targetMUS8':
-#                agentList.append(targetMUS8(m                       = self.m, 
-#                                            margDistPricePrediction = self.margDistPrediction))
-#            elif self.agentTypeList[i] == 'targetMU8':
-#                agentList.append(targetMU8(m                       = self.m, 
-#                                           margDistPricePrediction = self.margDistPrediction))
-#            elif self.agentTypeList[i] == 'straightMU8':
-#                agentList.append(straightMU8(m                       = self.m,
-#                                             margDistPricePrediction = self.margDistPrediction))
-#            elif self.agentTypeList[i] == 'averageMU':
-#                agentList.append(averageMU(m                       = self.m,
-#                                           margDistPricePrediction = self.margDistPrediction))
-#            elif self.agentTypeList[i] == 'bidEvaluatorSMU8':
-#                agentList.append(bidEvaluatorSMU8(m                       = self.m,
-#                                                  margDistPricePrediction = self.margDistPrediction))
-#            elif self.agentTypeList[i] == 'bidEvaluatorTMUS8':
-#                agentList.append(bidEvaluatorTMUS8(m                       = self.m,
-#                                                   margDistPricePrediction = self.margDistPrediction))
-#            else:
-#                raise ValueError('Unknown Agent Type {0}'.format(self.agentTypeList[i]))
-        
+               
         agentSurplus = []
         
         for g in xrange(0,self.nGames):
@@ -160,6 +131,39 @@ class parallelSimAuctionSymmetricVL(parallelWorkerBase):
                 agent.v = v
                 agent.l = l
             
+            auction = simultaneousAuction(agentList = agentList)
+            
+            auction.runAuction()
+            
+            auction.notifyAgents()
+            
+            agentSurplus.append( auction.agentSurplus() )
+            
+        return numpy.atleast_2d(agentSurplus).astype(numpy.float)
+    
+    
+def parallelSimAuctionSymmetric(parallelSimAuctionSymmetricVL):
+    """
+    In every game, every agent draws a valuation function from
+    the same underlying distribution (symmetric game).
+    """
+    def __call__(self, *args, **kwargs):
+        
+        agentList = self.agentsFromType(agentTypeList      = self.agentTypeList,
+                                        A                  = self.A,
+                                        m                  = self.m,
+                                        margDistPrediction = self.margDistPrediction)
+        
+        agentSurplus = []
+        
+        for g in xrange(self.nGames):
+            
+            # all agents draw new valuation function
+            for agent in agentList:
+                agent.randomValuation(vmin = self.vmin,
+                                      vmax = self.vmax,
+                                      m     = self.m)
+                
             auction = simultaneousAuction(agentList = agentList)
             
             auction.runAuction()

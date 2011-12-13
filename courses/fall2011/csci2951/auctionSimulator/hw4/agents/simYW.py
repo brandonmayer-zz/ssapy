@@ -78,20 +78,19 @@ class simYW(agentBase):
         """    
         self.m = kwargs.get('m',5)
         
-        self.l = kwargs.get('l',numpy.random.random_integers(low = 1, high = self.m))        
+        self.l = kwargs.get('l',numpy.random.random_integers(low = 1, high = self.m))     
         
-                
+        self.vmin = kwargs.get('vmin',0)
+            
+        self.vmax = kwargs.get('vmax',50)   
+        
         if 'v' in kwargs:    
             self.v = numpy.atleast_1d(kwargs['v'])
             numpy.testing.assert_equal(self.v.shape[0], self.m,
                                        err_msg="self.v.shape[0] = {0} != self.m = {1}".format(self.v.shape[0],self.m))
         else:
-            vmin = kwargs.get('vmin',0)
-            
-            vmax = kwargs.get('vmax',50)
-                
-            self.v = self.randomValueVector(vmin = vmin, 
-                                            vmax = vmax, 
+            self.v = self.randomValueVector(vmin = self.vmin, 
+                                            vmax = self.vmax, 
                                             m    = self.m)
             
         # a bit vector indicating which items where won
@@ -110,6 +109,21 @@ class simYW(agentBase):
         v = v[::-1]
         
         return v
+    
+    def randomValuation(self, *args, **args):
+        """
+        Draw a new valuation function given the agent's parameters.
+        """
+        vmin = kwargs.get('vmin',self.vmin)
+        vmax = kwargs.get('vmax',self.vmax)
+        m    = kwargs.get('m',self.m)
+        
+        v = numpy.random.random_integers(low = vmin, high = vmax, size = m)
+        v.sort()
+        v = v[::-1]
+        
+        self.v = v  
+        self.l = kwargs.get('l',numpy.random.random_integers(low = 1, m))  
     
     def acq(self, **kwargs):
         """
