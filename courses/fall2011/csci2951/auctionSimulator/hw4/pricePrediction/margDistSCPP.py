@@ -17,12 +17,14 @@ class margDistSCPP(pointSCPP):
     
     savePickle and loadPickle are inherited from the pointSCPP class
     """
-    def __init__(self, margDistData = None):
+#    def __init__(self, margDistData = None):
+    def __init__(self, **kwargs):
         """
         marginalDistributionPrediction should be a list of size m of tuples
         each tuple specifies a normalized histogram count and bin edges
         """          
         # initialize as empty
+        margDistData = kwargs['margDistData']
         if margDistData == None:
             self.data = None
             self.m = None

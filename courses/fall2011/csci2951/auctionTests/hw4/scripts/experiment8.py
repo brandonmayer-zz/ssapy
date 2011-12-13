@@ -6,6 +6,7 @@ import time
 import itertools
 import multiprocessing
 import os
+import config
 
 def drange(start,stop,step):
     r = start
@@ -21,10 +22,8 @@ def main():
     nGamesPerCore = 1000
     NUM_PROC = multiprocessing.cpu_count() - 1
     nGamesTot = nGamesPerCore*NUM_PROC
-    
-    margDistPkl = "C:\\bmProjects\\courses\\fall2011\\csci2951\\" +\
-                  "auctionSimulator\\hw4\\pricePrediction\\margDistPredictions\\" +\
-                  "distPricePrediction_straightMU8_10000_2011_12_8_1323383753.pkl"
+                  
+    margDistPkl = config.margDistPklFiles[distPricePrediction_straightMU8_10000_2011_12_8_1323383753.pkl]
                   
     margDistPrediction = margDistSCPP()
     

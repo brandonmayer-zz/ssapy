@@ -5,7 +5,9 @@ class pointSCPP(object):
     """
     Class wrapper for point self confirming price predictions
     """
-    def __init__(self, pointPricePrediction = None):
+#    def __init__(self, pointPricePrediction = None):
+    def __init__(self, **kwargs):
+        pointPricePrediction = kwargs.get('pointPricePrediction')
         
         if isinstance(pointPricePrediction,numpy.ndarray):
             if numpy.atleast_2d(pointPricePrediction).shape[0] == 1:
@@ -26,6 +28,7 @@ class pointSCPP(object):
             print "pointSCPP.__init__"
             print "pointPricePrediction must be a numpy.ndarray"
             print "self.data = None"
+            print "self.m = None"
             self.data = None
             self.m = None
                     

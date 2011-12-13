@@ -22,6 +22,15 @@ class conf(object):
         self.pointPklFiles = dict()
         for file in glob.glob(os.path.join(self.pointPricePredictionDir,'*.pkl')):
             self.pointPklFiles[os.path.basename(file)] = file
+            
+            
+        #set up output experiment directory given the computer i'm using
+        self.usr = kwargs.get('usr', 'desktop')
+        if self.usr == 'desktop':
+            self.expDir = "F:\\courses\\fall2011\\csci2951\\hw4"
+        elif self.usr == 'laptop':
+            self.expDir = "C:\\coursesFall2011\\csci2951\\exp"
+        
 
 config = conf()
 pass
