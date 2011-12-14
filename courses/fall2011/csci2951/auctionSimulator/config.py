@@ -33,4 +33,3 @@ class conf(object):
             self.expDir = 'C:\\coursesFall2011\\csci2951\\exp'        
 
 config = conf()
-pass

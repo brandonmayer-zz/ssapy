@@ -110,7 +110,7 @@ class simYW(agentBase):
         
         return v
     
-    def randomValuation(self, *args, **args):
+    def randomValuation(self, *args, **kwargs):
         """
         Draw a new valuation function given the agent's parameters.
         """
@@ -123,7 +123,7 @@ class simYW(agentBase):
         v = v[::-1]
         
         self.v = v  
-        self.l = kwargs.get('l',numpy.random.random_integers(low = 1, m))  
+        self.l = kwargs.get('l',numpy.random.random_integers(low = 1, high = m))  
     
     def acq(self, **kwargs):
         """

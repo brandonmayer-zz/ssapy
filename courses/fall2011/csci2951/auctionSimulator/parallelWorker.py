@@ -42,6 +42,7 @@ class parallelWorkerBase(object):
                 agentList.append(riskAwareTP8( m                       = m,
                                                margDistPricePrediction = margDistPrediction,
                                                A                       = A) )
+                
             elif agentTypeList[i] == 'riskAwareTMUS8':
                 
                 A = kwargs.get('A',self.A)
@@ -51,6 +52,15 @@ class parallelWorkerBase(object):
                 agentList.append(riskAwareTMUS8( m                       = m,
                                                  margDistPricePrediction = margDistPrediction,
                                                  A                       = A))
+            elif agentTypeList[i] == 'riskAwareTMUS64':
+                
+                A = kwargs.get('A',self.A)
+                if A == None:
+                    raise KeyError('Must Specify A valu of A if a riskAware Agent is specified.')
+                    
+                agentList.append(riskAwareTMUS64( m                       = m,
+                                                  margDistPricePrediction = margDistPrediction,
+                                                  A                       = A) )
             elif agentTypeList[i] == 'targetMUS8':
                 agentList.append(targetMUS8(m                       = m,
                                                  margDistPricePrediction = margDistPrediction))
@@ -65,6 +75,9 @@ class parallelWorkerBase(object):
                                            margDistPricePrediction = margDistPrediction))
             elif agentTypeList[i] == 'bidEvaluatorSMU8':
                 agentList.append(bidEvaluatorSMU8(m                       = m,
+                                                  margDistPricePrediction = margDistPrediction))
+            elif agentTypeList[i] == 'bidEvaluatorSMU64':
+                agentList.append(bidEvaluatorSMU64(m                       = m,
                                                   margDistPricePrediction = margDistPrediction))
             elif agentTypeList[i] == 'bidEvaluatorTMUS8':
                 agentList.append(bidEvaluatorTMUS8(m                       = m,
@@ -142,7 +155,7 @@ class parallelSimAuctionSymmetricVL(parallelWorkerBase):
         return numpy.atleast_2d(agentSurplus).astype(numpy.float)
     
     
-def parallelSimAuctionSymmetric(parallelSimAuctionSymmetricVL):
+class parallelSimAuctionSymmetric(parallelSimAuctionSymmetricVL):
     """
     In every game, every agent draws a valuation function from
     the same underlying distribution (symmetric game).
@@ -172,8 +185,7 @@ def parallelSimAuctionSymmetric(parallelSimAuctionSymmetricVL):
             
             agentSurplus.append( auction.agentSurplus() )
             
-        return numpy.atleast_2d(agentSurplus).astype(numpy.float)
-    
+        return numpy.atleast_2d(agentSurplus).astype(numpy.float)  
     
 def runParallelJob(**kwargs):
     
