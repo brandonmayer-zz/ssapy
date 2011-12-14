@@ -187,6 +187,44 @@ class parallelSimAuctionSymmetric(parallelSimAuctionSymmetricVL):
             
         return numpy.atleast_2d(agentSurplus).astype(numpy.float)  
     
+class parallelSimAuctionSymmetric2(parallelSimAuctionSymmetricVL):
+    """
+    Same as parallelSimAuctionSymmetric but takes to each call
+    a single argument that indicates how many iterations to run 
+    per loop
+    """
+    def __call__(self, *args, **kwargs):
+        
+        nGames = self.nGames
+        if args:
+            nGames = args[0]
+            
+        agentList = self.agentsFromType(agentTypeList      = self.agentTypeList,
+                                        A                  = self.A,
+                                        m                  = self.m,
+                                        margDistPrediction = self.margDistPrediction)
+                                        
+        agentSurplus = []
+        
+        for g in xrange(nGames):
+            
+            # all agents draw new valuation function
+            for agent in agentList:
+                agent.randomValuation(vmin = self.vmin,
+                                      vmax = self.vmax,
+                                      m     = self.m)
+                auction = simultaneousAuction(agentList = agentList)
+            
+            auction.runAuction()
+            
+            auction.notifyAgents()
+            
+            agentSurplus.append( auction.agentSurplus() )
+            
+        return numpy.atleast_2d(agentSurplus).astype(numpy.float) 
+        
+        
+    
 def runParallelJob(**kwargs):
     
     pw = kwargs['parallelWorker']
