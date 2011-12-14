@@ -82,6 +82,10 @@ class parallelWorkerBase(object):
             elif agentTypeList[i] == 'bidEvaluatorTMUS8':
                 agentList.append(bidEvaluatorTMUS8(m                       = m,
                                                    margDistPricePrediction = margDistPrediction))
+            elif agentTypeList[i] == 'bidEvaluatorRaTMUS8':
+                agentList.append(bidEvaluatorRaTMUS8(m                       = m,
+                                                     margDistPricePrediction = margDistPrediction,
+                                                     A                       = A))
             else:
                 raise ValueError('Unknown Agent Type {0}'.format(agentTypeList[i]))
             
