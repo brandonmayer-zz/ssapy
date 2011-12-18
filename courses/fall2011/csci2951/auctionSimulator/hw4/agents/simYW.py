@@ -255,11 +255,12 @@ class simYW(agentBase):
         """
         Calculate the valuation of a given list of bundles
         """
-        assert isinstance(bundles,numpy.ndarray),\
-            "simYW::valuation bundles must be a numpy.ndarray"
-            
-        assert isinstance(v, numpy.ndarray),\
-            "v must be a numpy.ndarray"
+        numpy.testing.assert_(isinstance(bundles,numpy.ndarray) or\
+                              isinstance(bundles,list), 
+                              msg="bundles must be a list or numpy.ndarray")
+        
+        numpy.testing.assert_(isinstance(v,numpy.ndarray),
+                              msg="v must be a numpy.ndarray")
         
         assert isinstance(l,int) and l >= 0 and l <= v.shape[0],\
             "simYW::valuation l = {0} must be a positive integer "+\

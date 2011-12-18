@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import itertools
 import os
 import copy
+from scipy.interpolate import interp1d
 
 class margDistSCPP(pointSCPP):
     """
@@ -49,18 +50,30 @@ class margDistSCPP(pointSCPP):
             else:
                 raise ValueError('Uknown parameter type.')
         elif args:
+            
             if isinstance(args[0],basestring):
                 filename, fileExt = os.path.splitext(args[0])
                 if fileExt == '.pkl':
                     self.loadPickle(args[0])
                 else:
                     raise ValueError('Unknown file type: {0}'.format(fileExt))
-            elif isinstance(args[0],margDist):
+                
+            elif isinstance(args[0],margDistSCPP):
                 self.data = copy.deepcopy(args[0].data)
                 self.m    = copy.deepcopy(args[0].m)
-            elif isinstance(args[0],numpy.ndarray) or isinstance(args[0],list):
-                self.data = numpy.array(args[0])
-                self.m    = self.data.shape[0]
+                
+            elif isinstance(args[0],list):
+                self.validateData(args[0])
+                self.data = args[0]
+                self.m = len(args[0])
+                
+            elif isinstance(args[0],tuple):
+                self.validateData(args[0])
+                self.data = args[0]
+                self.m = 1
+#            elif isinstance(args[0],numpy.ndarray) or isinstance(args[0],list):
+#                self.data = numpy.array(args[0])
+#                self.m    = self.data.shape[0]
             else:
                 raise ValueError('Unknown Value Type.')
         else:
@@ -216,6 +229,108 @@ class margDistSCPP(pointSCPP):
             
         return numpy.array(upv)
     
+    def bidPdf(self, *args, **kwargs):
+        """
+        Return the probability of winning each good given a bid vector
+        
+        Parameters
+        ----------
+        bids: numpy.ndarray
+            The array of bids on each good
+            
+        interp: string [optional]
+            A string indicating what type of interpolation to use.
+        <interp> ::= 'linear' | 'nearest' | 'zero' | 'slinear' | 'quadratic' | 'cubic'
+            
+        Returns
+        -------
+        probBid: numpy.ndarray
+            An array in which each element contains the probability that
+            the bid is equal to the closing price Pr[closing price = bid]
+            
+        Note, the bid vector must be the same length as the number of
+        marginal distributions (bids.shape[0] = self.m)
+        """
+        bids = None
+        kind = kwargs.get('kind','cubic')
+        
+        if not args:
+            bids = kwargs.get(bids)
+            if not bids:
+                raise AssertionError('Must specify bid vector.')
+        else:
+            bids = args[0]
+            
+        numpy.testing.assert_(isinstance(bids,numpy.ndarray) or
+                              isinstance(bids,list),
+                              msg="bids must be a list or numpy.ndarray")
+        if isinstance(bids,numpy.ndarray):
+            numpy.testing.assert_equal(bids.shape[0],self.m)
+        else:
+            numpy.testing.assert_equal(len(bids),self.m)
+        
+        probBid = numpy.zeros(self.m)
+        for i, margData in enumerate(self.data):
+            hist, binEdges = margData 
+            #take off the last bin edge so hist and binEdges
+            #are the same size
+            interpObj = interp1d(binEdges[:-1], hist, kind)
+            probBid[i] = interpObj(bids[i])
+            
+        return probBid
+    
+    def bidCdf(self, *args, **kwargs):
+        """
+        Return the marginal cdf values for each given bid. that is
+        Pr[closing price[i] <= bid[i]]
+        
+        Parameters
+        ----------
+        bids: numpy.ndarray
+            The array of bids on each good
+            
+        interp: string [optional]
+            A string indicating what type of interpolation to use.
+        <interp> ::= 'linear' | 'nearest' | 'zero' | 'slinear' | 'quadratic' | 'cubic'
+            
+        Returns
+        -------
+        cdfBid: numpy.ndarray
+            An array in which each element contains the probability that
+            the bid is equal to the closing price Pr[closing price = bid]
+            
+        Note, the bid vector must be the same length as the number of
+        marginal distributions (bids.shape[0] = self.m)
+        """
+        bids = None
+        kind = kwargs.get('kind','cubic')
+    
+        if not args:
+            bids = kwargs.get(bids)
+            if not bids:
+                raise AssertionError('Must specify bid vector.')
+        else:
+            bids = args[0]
+            
+        numpy.testing.assert_(isinstance(bids,numpy.ndarray) or
+                              isinstance(bids,list),
+                              msg="bids must be a list or numpy.ndarray")
+        if isinstance(bids,numpy.ndarray):
+            numpy.testing.assert_equal(bids.shape[0],self.m)
+        else:
+            numpy.testing.assert_equal(len(bids),self.m)
+        
+        cdfBid = numpy.zeros(self.m)
+        for i, margData in enumerate(self.data):
+            hist, binEdges = margData
+            cdf = numpy.cumsum( hist*numpy.diff(binEdges),
+                                dtype=numpy.float )
+            
+            f = interp1d(binEdges[:-1], cdf, kind)
+            cdfBid[i] = f(bids[i])
+            
+        return cdfBid
+            
     def iTsample(self, **kwargs):
         """
         Function to sample independently from marginal distributions

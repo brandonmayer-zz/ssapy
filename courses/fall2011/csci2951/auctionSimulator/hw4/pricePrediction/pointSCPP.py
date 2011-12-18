@@ -41,9 +41,6 @@ class pointSCPP(object):
                 else:
                     raise ValueError('Unknown file type: {0}'.format(fileExt))
                             
-                    
-    
-    
     def savePickle(self,f):
         """
         Function to serialize class to binary file

@@ -8,6 +8,7 @@ Just some sanity checks.
 """
 
 from auctionSimulator.hw4.pricePrediction.margDistSCPP import *
+from auctionSimulator.config import *
 
 import numpy
 import unittest
@@ -91,6 +92,20 @@ class testMargDistSCPP(unittest.TestCase):
                                            
         #doing ok if we reach here w/o an exception
         return True
+    
+    def test_memberFncs(self):
+        margDist = margDistSCPP(config.margDistPklFiles['distPricePrediction_straightMU8_10000_2011_12_8_1323383753.pkl'])
         
+#        margDist.graphPdf()
+#        
+#        margDist.graphCdf()
+        bids = [13,2.4,6,5.6,2]
+        probBid = margDist.bidPdf(bids)
+        cdfBid = margDist.bidCdf(bids)
+        
+        print ''
+        print probBid
+        print ''
+        print cdfBid
 if __name__ == "__main__":
     unittest.main()

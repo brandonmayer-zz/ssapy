@@ -628,4 +628,9 @@ class riskAwareTMUS256(riskAware):
                                                               nSamples = 256))
                                                                         
         super(riskAwareTMUS256,self).printSummary(**tkwargs)  
+        
+#class riskAware2(riskAware):
+    
+    
+    
     
