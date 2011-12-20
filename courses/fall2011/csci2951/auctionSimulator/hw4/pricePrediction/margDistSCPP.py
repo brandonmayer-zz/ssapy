@@ -194,7 +194,8 @@ class margDistSCPP(pointSCPP):
         """
         Will be in units of prices
         """
-        expectedPrices = kwargs['expectedPrices']
+        expectedPrices = kwargs.get('expectedPrices',self.expectedPrices())
+        
         return numpy.sqrt(self.margUpv(expectedPrices = expectedPrices))
     
     def margUpv(self,**kwargs):
@@ -205,7 +206,7 @@ class margDistSCPP(pointSCPP):
         
         will be in units of price**2
         """
-        expectedPrices = kwargs['expectedPrices']
+        expectedPrices = kwargs.get('expectedPrices',self.expectedPrices())
         
         numpy.testing.assert_(expectedPrices.shape[0] == len(self.data), 
                               msg = "expectedPrice.shape[0] = {0} != len(self.data) = {1}".\
@@ -240,7 +241,7 @@ class margDistSCPP(pointSCPP):
             
         interp: string [optional]
             A string indicating what type of interpolation to use.
-        <interp> ::= 'linear' | 'nearest' | 'zero' | 'slinear' | 'quadratic' | 'cubic'
+        <kind> ::= 'linear' | 'nearest' | 'zero' | 'slinear' | 'quadratic' | 'cubic'
             
         Returns
         -------
@@ -252,11 +253,11 @@ class margDistSCPP(pointSCPP):
         marginal distributions (bids.shape[0] = self.m)
         """
         bids = None
-        kind = kwargs.get('kind','cubic')
+        kind = kwargs.get('kind','linear')
         
         if not args:
-            bids = kwargs.get(bids)
-            if not bids:
+            bids = numpy.atleast_1d(kwargs.get('bids'))
+            if bids.shape[0] == 0:
                 raise AssertionError('Must specify bid vector.')
         else:
             bids = args[0]
@@ -264,6 +265,7 @@ class margDistSCPP(pointSCPP):
         numpy.testing.assert_(isinstance(bids,numpy.ndarray) or
                               isinstance(bids,list),
                               msg="bids must be a list or numpy.ndarray")
+        
         if isinstance(bids,numpy.ndarray):
             numpy.testing.assert_equal(bids.shape[0],self.m)
         else:
@@ -272,10 +274,20 @@ class margDistSCPP(pointSCPP):
         probBid = numpy.zeros(self.m)
         for i, margData in enumerate(self.data):
             hist, binEdges = margData 
-            #take off the last bin edge so hist and binEdges
-            #are the same size
-            interpObj = interp1d(binEdges[:-1], hist, kind)
-            probBid[i] = interpObj(bids[i])
+            # assume that the histogram probabilities represent the center of the bins
+            # and interpolate between them
+            binCenters = .5*(binEdges[:-1]+binEdges[1:])
+            interpObj = interp1d(binCenters, hist, kind)
+            try:
+                probBid[i] = interpObj(bids[i])
+            #extend the bounds of the histogram
+            except ValueError:
+                if bids[i] > binCenters[-2]:
+                    probBid[i]= hist[-1]
+                elif bids[i] < binCenters[0]:
+                    probBid[i] = hist[0]
+                else:
+                    raise ValueError('Unknown Boundary Condition Reached.')
             
         return probBid
     
@@ -291,6 +303,9 @@ class margDistSCPP(pointSCPP):
             
         interp: string [optional]
             A string indicating what type of interpolation to use.
+            Default = 'linear'
+            cubic may yeild negative values (bad for probabilities)
+            lienar is the safest
         <interp> ::= 'linear' | 'nearest' | 'zero' | 'slinear' | 'quadratic' | 'cubic'
             
         Returns
@@ -303,7 +318,7 @@ class margDistSCPP(pointSCPP):
         marginal distributions (bids.shape[0] = self.m)
         """
         bids = None
-        kind = kwargs.get('kind','cubic')
+        kind = kwargs.get('kind','linear')
     
         if not args:
             bids = kwargs.get(bids)
@@ -349,7 +364,7 @@ class margDistSCPP(pointSCPP):
         
         for m in xrange(len(self.data)):
             #calculate the cdf
-            hist,binEdges = self.data[m]
+            hist, binEdges = self.data[m]
             cdf = numpy.cumsum(hist)
             
             #get some random numbers (0.0,1.0]
@@ -439,15 +454,4 @@ class margDistSCPP(pointSCPP):
         plt.legend()
         
         plt.show()
-            
-            
-            
-        
-        
-        
-                
-    
-        
-    
-                
-                
+                 

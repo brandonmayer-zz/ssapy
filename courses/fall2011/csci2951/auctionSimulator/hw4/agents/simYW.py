@@ -324,7 +324,7 @@ class simYW(agentBase):
 
         
     @staticmethod
-    def surplus(bundles=None, valuation = None, priceVector = None,):
+    def surplus(bundles=None, valuation = None, priceVector = None):
         """
         Calculate the surplus for a given array of bundles, prices and a valuation vector.
         Surplus equals valuation less cost.

@@ -1,5 +1,7 @@
 from auctionSimulator.hw4.auctions.simultaneousAuction import *
 from auctionSimulator.parallelWorker import *
+from auctionSimulator.hw4.agents.riskAware import *
+
 
 import numpy
 import time

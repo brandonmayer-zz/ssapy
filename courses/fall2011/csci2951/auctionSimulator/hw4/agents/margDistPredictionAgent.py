@@ -16,6 +16,10 @@ class margDistPredictionAgent(pricePredictionAgent):
     def __init__(self,**kwargs):
         if 'margDistPricePrediction' in  kwargs:
             kwargs['pricePrediction'] = kwargs['margDistPricePrediction']
+        elif 'margDistPrediction' in kwargs:
+            kwargs['pricePrediction'] = kwargs['margDistPrediction']
+        elif 'margDist' in kwargs:
+            kwargs['pricePrediction'] = kwargs['margDist']
             
         super(margDistPredictionAgent,self).__init__(**kwargs)
             

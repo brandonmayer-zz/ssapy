@@ -83,9 +83,35 @@ class parallelWorkerBase(object):
                 agentList.append(bidEvaluatorTMUS8(m                       = m,
                                                    margDistPricePrediction = margDistPrediction))
             elif agentTypeList[i] == 'bidEvaluatorRaTMUS8':
+                A = kwargs.get('A',self.A)
+                if A == None:
+                    raise KeyError('Must Specify A valu of A if a riskAware Agent is specified.')
                 agentList.append(bidEvaluatorRaTMUS8(m                       = m,
                                                      margDistPricePrediction = margDistPrediction,
                                                      A                       = A))
+            elif agentTypeList[i] == 'riskEvaluator8':
+                A = kwargs.get('A',self.A)
+                if A == None:
+                    raise KeyError('Must Specify A valu of A if a riskAware Agent is specified.')
+                agentList.append(riskEvaluator8(m                       = m,
+                                                margDistPricePrediction = margDistPrediction,
+                                                A                       = A))
+                
+            elif agentTypeList[i] == 'riskEvaluator64':
+                A = kwargs.get('A',self.A)
+                if A == None:
+                    raise KeyError('Must Specify A valu of A if a riskAware Agent is specified.')
+                agentList.append(riskEvaluator64(m                       = m,
+                                                 margDistPricePrediction = margDistPrediction,
+                                                 A                       = A))
+                
+            elif agentTypeList[i] == 'riskEvaluator256':
+                A = kwargs.get('A',self.A)
+                if A == None:
+                    raise KeyError('Must Specify A valu of A if a riskAware Agent is specified.')
+                agentList.append(riskEvaluator256(m                       = m,
+                                                  margDistPricePrediction = margDistPrediction,
+                                                  A                       = A))
             else:
                 raise ValueError('Unknown Agent Type {0}'.format(agentTypeList[i]))
             
@@ -233,10 +259,12 @@ def runParallelJob(**kwargs):
     
     pw = kwargs['parallelWorker']
     
+    NUM_PROC = kwargs.get('NUM_PROC', multiprocessing.cpu_count() - 1)
+    
     numpy.testing.assert_(isinstance(pw,parallelWorkerBase))
     
-    pool = multiprocessing.Pool(processes = kwargs.get('NUMP_PROC', multiprocessing.cpu_count() - 1))
-    
+    pool = multiprocessing.Pool(processes = NUM_PROC)
+
     result = numpy.atleast_2d(pool.map(pw, xrange(0,NUM_PROC))).astype(kwargs.get('resultType',numpy.float))
     
     return numpy.reshape( result,(result.shape[0]*result.shape[1],result.shape[2]) )    

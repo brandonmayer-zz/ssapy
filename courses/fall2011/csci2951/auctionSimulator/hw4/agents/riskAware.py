@@ -157,7 +157,6 @@ class riskAware(margDistPredictionAgent):
         util = []
         for bundleIdx in xrange(bundles.shape[0]):
             nGoods = numpy.sum(bundles[bundleIdx],dtype=numpy.float)
-    
             if nGoods:
                 util.append( expectedSurplus[bundleIdx] - A*(1/nGoods)*numpy.dot(upperPartialStd,bundles[bundleIdx]) )
             else:
@@ -629,8 +628,372 @@ class riskAwareTMUS256(riskAware):
                                                                         
         super(riskAwareTMUS256,self).printSummary(**tkwargs)  
         
-#class riskAware2(riskAware):
+class riskAware2(riskAware):
+    @staticmethod
+    def type():
+        return 'riskAware2'
     
+    @staticmethod
+    def _bidCost(**kwargs):
+        """
+        Return the expected cost of bundle.
+        
+        Parameters
+        ----------
+        bids: numpy.ndarray
+            The array of bids on each good
+            
+        bidProb: numpy.ndarray
+            The probability that each bid in the bids array
+            is the closing price
+            
+        Returns
+        -------
+        expectedCost: scalar
+            numpy.dot(bids,bidProb)
+        """
+        try:
+            bidProb = numpy.atleast_1d(kwargs['bidProb'])
+        except:
+            raise KeyError('Must specify bidProb')
+        
+        try:
+            bids = numpy.atleast_1d(kwargs['bids'])
+        except:
+            raise KeyError('Must specify the bids')
+        
+        return numpy.dot(bidProb,bids)
     
+    def bidCost(self,**kwargs):
+        """
+        Calculate the expected cost given a vector of bids
+        
+        Parameters
+        ----------
+        bids: numpy.ndarray
+            The array of bids for each good
+        """
+        bids = numpy.atleast1d( kwargs.get('bids') )
+        
+        if not bids:
+            raise AssertionError('Must specify bids.')
+        
+        numpy.testing.assert_equal(bids.shape[0], self.m, 
+            err_msg='Must specify a bid for each good.')
+        
+        bidProb = self.pricePrediction.bidPdf(bids)
+        
+        return self._bidCost(bids = bids, bidProb = bidProb)
     
+    @staticmethod
+    def _bidBundle(**kwargs):
+        """
+        Calcualte the probability that a given bundle will be
+        the bundle that is won given a probability of winning the goods
+        given our bids
+        
+        We are assuming that the goods contained in a bundle are independent
+        thus the probability of winning a bundle is the product of the 
+        probability of winning the goods in the bundle times the probability
+        of losing the goods that are not in the bundle.
+        
+        Parameters
+        ----------
+        bidProb: numpy.ndarray dtype = float
+            An array in which each element contains the probability that
+            a bid will be the closing price of the auction Pr[closing price = bid]
+            
+        bundle: numpy.ndarray dtype = bool
+            A target bundle. A bit vector representing the goods won at 
+            auction
+            
+        Return
+        ------
+        finalBundleProb: scalar
+            Pr[bundle = FinalBundle]
+        """
+        try:
+            bidProb = numpy.atleast_1d(kwargs['bidProb'])
+        except:
+            raise KeyError('Must specify bidProb.')
+        try:
+            bundle = numpy.atleast_1d(kwargs['bundle'])
+        except:
+            raise KeyError('Must specify target Bundle.')
+        
+        numpy.testing.assert_equal(bidProb.shape, bundle.shape, 
+            err_msg="bidProb and bundle must have the same shape.")
+        
+        #use nat. log to protect against underflow
+        #note le pun
+        winSum  = 0.0
+        loseSum = 0.0
+        for i, good in enumerate(bundle):
+            if good:
+                if bidProb[i] < numpy.finfo(float).eps:
+                    winSum += numpy.log(numpy.finfo(float).eps)
+                else:
+                    winSum += numpy.log(bidProb[i])
+            else:
+                if bidProb[i] < numpy.finfo(float).eps:
+                    loseSum += numpy.log(numpy.finfo(float).eps)
+                else:
+                    loseSum += numpy.log(bidProb[i])
+                
+                
+            
+        return numpy.exp(winSum+loseSum)
+                
+    @staticmethod
+    def _bidValuation(**kwargs):
+        """
+        Calculate the expected valuation given a bid.
+        
+        We don't need to consider the bid explicitly in this function
+        only the probability of winning each good given a bid vector
+        therefore the parameter of interest is bidProb which is the marginal
+        probability of winning each good given whatever the bid was.
+        
+        Parameters
+        ----------
+        bidProb: numpy.ndarray dtype = float
+            An array (or list) in which each element contains the probability that
+            a bid will be the closing price of the auction, Pr[closing price = bid]
+            
+        bundles: numpy.ndarray dtype = float (2 dimensional)
+            A numpy.ndarray or 2d list which enumerate the valid bundles
+            
+        valuation: numpy.ndarray (1 dimensional)
+            A numpy.ndarray or list which enumerates the valuations 
+            for a given bundle.
+            
+        Return
+        ------
+        expectedValuation: scalar
+            sum for all bundles valuation*Pr(X_i = X_final)
+            
+        """
+        try:
+            valuation = numpy.atleast_1d(kwargs['valuation'])
+        except:
+            raise KeyError('Must provide a vector of valuations over bundles.')
+        
+        try:
+            bundles = numpy.atleast_2d(kwargs['bundles'])
+        except:
+            raise KeyError('Must provide a single or list of bundles.')
+        
+        try:
+            bidProb = numpy.atleast_1d(kwargs['bidProb'])
+        except:
+            raise KeyError('Must specify bidProb.')
+        
+        numpy.testing.assert_equal(bundles.shape[0], valuation.shape[0], 
+            err_msg = "Must provide a single valuation for each bundle.")
+        
+        numpy.testing.assert_equal(bundles.shape[1], bidProb.shape[0],
+            err_msg = "Must have a probability for winning each possible good in a bundle.")
+        
+        expectedValuation = 0.0
+        for i, bundle in enumerate(bundles):
+            probFinalBundle = riskAware2._bidBundle(bundle  = bundle,
+                                                    bidProb = bidProb)
+            expectedValuation += valuation[i]*probFinalBundle
+        
+        return expectedValuation
     
+    def bidValuation(self,**kwargs):
+        bundles   = kwargs.get('bundles',self.allBundles(self.m))
+        
+        v = kwargs.get('v', self.v)
+        
+        l = kwargs.get('l', self.l)
+        
+        valuation = kwargs.get('valuation', self.valuation(bundles,v,l))
+        
+        bidProb = numpy.atleast_1d(kwargs.get('bidProb'))
+        
+        if bidProb.shape == 0:
+            try:
+                bids = kwargs['bids']
+            except:
+                raise AssertionError('Must specify bidProb or bids.')
+            
+            margDist = kwargs.get('margDistPrediction', self.pricePrediction)
+            
+            bidProb = margDist.bidPdf(bids = bids, kind = 'cubic')
+            
+        
+        return self._bidValuation(bundles = bundles,
+                                  bidProb = bidProb,
+                                  valuation = valuation)
+        
+    def bidSurplus(self,**kwargs):
+        try:
+            bids = numpy.atleast_1d(kwargs['bids'])
+        except:
+            raise KeyError('Must specify bid to calculate resulting expected surplus')
+            
+        bundles    = kwargs.get('bundles',self.allBundles(self.m))
+        v          = kwargs.get('v', self.v)
+        l          = kwargs.get('l', self.l)
+        valuation  = kwargs.get('valuation',self.valuation(bundles, v, l))    
+        
+        bidProb = numpy.atleast_1d(kwargs.get('bidProb'))
+        
+        if bidProb == None:
+            
+            
+            margDist   = kwargs.get('margDistPrediction', self.pricePrediction)
+            interpKind = kwargs.get('interpKind', 'linear')
+            bidProb = margDist.bidPdf(bids = bids,
+                                      kind = interpKind)
+            
+        bidVal = self.bidValuation(bundles = bundles,
+                                   valuation = valuation,
+                                   bidProb = bidProb)
+        
+        bCost = self._bidCost(bidProb = bidProb,
+                              bids = bids)
+        
+        return bidVal - bCost
+        
+    def bidRisk(self, **kwargs):
+        """
+        Calculate the risk incurred given either a bid or the probability of
+        winning marginal goods given the bid.
+        
+        Parameters
+        ----------
+        One of the two must be specified, bidProb or bids
+        bidProb: numpy.ndarray (1 dimensional)
+            The elements of bidProb are the marginal probabilities of 
+            winning the i'th good given a particular bid.
+            
+        bids: numpy.ndarray (1 dimensional)
+            The 
+        """
+        
+        A        = kwargs.get('A', self.A)        
+        bidProb  = kwargs.get('bidProb')
+        margDist = kwargs.get('margDistPrediction', self.pricePrediction)
+        
+        if bidProb.shape[0] == 0:
+            try:
+                bids = kwargs['bids']
+            except:
+                raise AssertionError('Must specify bids for goods.')
+            
+            
+        
+            interpKind = kwargs.get('interpKind', 'linear')
+        
+            bidProb  = margDist.bidPdf(bids = bids,
+                                       kind = interpKind)
+        
+        ups = kwargs.get('ups',margDist.margUps())
+        
+        return A*numpy.dot(ups,bidProb)
+               
+    def bidUtility(self, **kwargs):
+        try:
+            bids = numpy.atleast_2d(kwargs['bids'])
+        except:
+            raise KeyError('Must specify potential bid to calculate utility.')
+        
+        bundles   = numpy.atleast_2d(kwargs.get('bundles', self.allBundles(self.m)))
+        v         = kwargs.get('v', self.v)
+        l         = kwargs.get('l', self.l)
+        valuation = numpy.atleast_1d(kwargs.get('valuation',self.valuation(bundles,v,l)))
+        margDist  = kwargs.get('margDistPrediction', self.pricePrediction)
+        A         = kwargs.get('A', self.A)
+        
+        numpy.testing.assert_equal(bundles.shape[0], valuation.shape[0],
+            err_msg="Must specify one valuation for each bundle.")
+                
+        # precompute the bid prob so its not done again and again
+        # in the helper functions
+        utility = numpy.zeros(bids.shape[0])
+        for i in xrange(bids.shape[0]):
+            bidProb = margDist.bidPdf(bids=bids[i])
+                    
+            bSurplus = self.bidSurplus(bids               = bids[i],
+                                       bidProb            = bidProb,
+                                       bundles            = bundles,
+                                       valuation          = valuation)
+                                       
+            
+            bRisk = self.bidRisk(bidProb = bidProb,
+                                 A    = A)
+            
+            utility[i] = bSurplus - bRisk
+            
+        return utility
+    
+class riskEvaluator8(riskAware2):
+    @staticmethod
+    def type():
+        return "riskEvaluator8"
+    
+    def bid(self,**kwargs):
+        margDist = kwargs.get('margDistPrediction', self.pricePrediction)
+        
+        samples = kwargs.get('samples', margDist.iTsample(nSamples = 8))
+        
+        utility = self.bidUtility(bids=samples)
+        
+        maxIdx = numpy.nonzero(utility==numpy.max(utility))[0]
+        
+        if maxIdx.shape[0] > 1:
+            #randomly pick
+            maxIdx = numpy.random.shuffle(maxIdx)
+            
+        return samples[maxIdx[0]]
+    
+class riskEvaluator64(riskAware2):
+    @staticmethod
+    def type():
+        return "riskEvaluator64"
+    
+    def bid(self,**kwargs):
+        
+        margDist = kwargs.get('margDistPrediction', self.pricePrediction)
+        
+        samples = kwargs.get('samples', margDist.iTsample(nSamples = 64))
+        
+        utility = self.bidUtility(bids=samples)
+        
+        maxIdx = numpy.nonzero(utility==numpy.max(utility))[0]
+        
+        if maxIdx.shape[0] > 1:
+            #randomly pick
+            maxIdx = numpy.random.shuffle(maxIdx)
+            
+        return samples[maxIdx[0]]
+    
+class riskEvaluator256(riskAware2):
+    @staticmethod
+    def type():
+        return "riskEvaluator256"
+    
+    def bid(self,**kwargs):
+        margDist = kwargs.get('margDistPrediction', self.pricePrediction)
+        
+        samples = kwargs.get('samples', margDist.iTsample(nSamples = 256))
+        
+        utility = self.bidUtility(bids=samples)
+        
+        maxIdx = numpy.nonzero(utility == numpy.max(utility))[0]
+        
+        if maxIdx.shape[0] > 1:
+            #randomly pick
+            maxIdx = numpy.random.shuffle(maxIdx)
+            
+        return samples[maxIdx[0]]
+    
+        
+        
+        
+        
+        
+        

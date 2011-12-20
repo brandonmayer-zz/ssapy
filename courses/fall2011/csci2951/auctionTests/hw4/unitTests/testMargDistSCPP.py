@@ -107,5 +107,6 @@ class testMargDistSCPP(unittest.TestCase):
         print probBid
         print ''
         print cdfBid
+        
 if __name__ == "__main__":
     unittest.main()
