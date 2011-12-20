@@ -893,7 +893,7 @@ class riskAware2(riskAware):
         
         ups = kwargs.get('ups',margDist.margUps())
         
-        return A*numpy.dot(ups,bidProb)
+        return (1/(numpy.sum(bidProb)+numpy.finfo(float).eps))*A*numpy.dot(ups,bidProb)
                
     def bidUtility(self, **kwargs):
         try:
@@ -990,6 +990,20 @@ class riskEvaluator256(riskAware2):
             maxIdx = numpy.random.shuffle(maxIdx)
             
         return samples[maxIdx[0]]
+    
+class riskAwareLM(riskAware2):
+    @staticmethod
+    def type():
+        return "riskAwareLM"
+    
+    def bid(self,**kwargs):
+        
+        #wrapper for bidUtility to pass to optimization
+        #routine
+        def f(x,*args):
+            bundles = self.allBundles(self.m)
+            return self.bidUtility(bids = x)
+    
     
         
         

@@ -1,10 +1,3 @@
-__all__ = ["bidEvaluator", 
-           "riskAware", 
-           "straightMU", 
-           "straightMV", 
-           "targetMU", 
-           "targetMV", 
-           "targetMUS", 
-           "targetMVS", 
-           "targetPrice", 
-           "targetPriceDist"]
+__all__ = ["agentBase", "straightMV", "targetMV", "targetMVS", "targetPrice",
+           "averageMU", "straightMU", "targetMU", "targetMUS", "targetPriceDist", 
+           "baselineBidder", "bidEvaluator", "riskAware"]
