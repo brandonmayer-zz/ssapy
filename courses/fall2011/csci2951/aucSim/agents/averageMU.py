@@ -7,8 +7,7 @@ Date:   11/21/2011
 Specialized agent class to replicate averageMU from Yoon and Wellman 2011.
 """
 
-from margDistPredictionAgent import margDistPredictionAgent
-#from aucSim.pricePrediction import *
+from margDistPredictionAgent import *
 
 class averageMU(margDistPredictionAgent):
     @staticmethod       
@@ -24,7 +23,7 @@ class averageMU(margDistPredictionAgent):
                 
         priceSamples = pricePrediction.iTsample(nSamples = nSamples)
 
-        bundles = kwargs.get('bundles', simYW.allBundles(pricePrediction.m))
+        bundles = kwargs.get('bundles', averageMU.allBundles(pricePrediction.m))
         
         #for each price vector, we calculate the marginal
         #value of the ith good
@@ -38,15 +37,15 @@ class averageMU(margDistPredictionAgent):
                 tempPriceZero = numpy.array(s)
                 tempPriceZero[idx] = 0
                 
-                [optBundleInf, predictedSurplusInf]    = simYW.acqYW(bundles     = bundles,
-                                                                     valuation   = kwargs['valuation'],
-                                                                     l           = kwargs['l'],
-                                                                     priceVector = tempPriceInf)
+                [optBundleInf, predictedSurplusInf]    = averageMU.acqYW(bundles     = bundles,
+                                                                         valuation   = kwargs['valuation'],
+                                                                         l           = kwargs['l'],
+                                                                         priceVector = tempPriceInf)
                 
-                [optBundleZero, predictedSurplusZero] = simYW.acqYW(bundles     = bundles,
-                                                                    valuation   = kwargs['valuation'],
-                                                                    l           = kwargs['l'],
-                                                                    priceVector = tempPriceZero )
+                [optBundleZero, predictedSurplusZero] = averageMU.acqYW(bundles     = bundles,
+                                                                        valuation   = kwargs['valuation'],
+                                                                        l           = kwargs['l'],
+                                                                        priceVector = tempPriceZero )
                 
                 if predictedSurplusZero - predictedSurplusInf < 0:
                     print''

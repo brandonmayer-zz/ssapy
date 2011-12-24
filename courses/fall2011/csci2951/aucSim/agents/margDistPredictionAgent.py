@@ -6,11 +6,12 @@ Date:          11/27/2011
 
 A base class for agents who utilize a distribution price prediction.
 """
-from pricePredictionAgent import pricePredictionAgent
-from aucSim.pricePrediction.margDistSCPP import margDistSCPP
+from pricePredictionAgent import *
+from aucSim.pricePrediction.margDistSCPP import *
 from aucSim.padnums import pprint_table as ppt
 
 import sys
+import numpy
 
 class margDistPredictionAgent(pricePredictionAgent):
     def __init__(self,**kwargs):

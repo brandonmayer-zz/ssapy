@@ -1,9 +1,10 @@
-from auctionSimulator.hw4.agents.straightMU        import *
-from auctionSimulator.hw4.agents.targetPriceDist   import *
-from auctionSimulator.hw4.agents.targetMU          import *
-from auctionSimulator.hw4.agents.targetMUS         import *
-from auctionSimulator.hw4.agents.averageMU         import *
-from auctionSimulator.hw4.agents.riskAware         import *
+from aucSim.agents.straightMU        import *
+from aucSim.agents.targetPriceDist   import *
+from aucSim.agents.targetMU          import *
+from aucSim.agents.targetMUS         import *
+from aucSim.agents.averageMU         import *
+from aucSim.agents.riskAware         import *
+from aucSim.pricePrediction.margDistSCPP import margDistSCPP
 
 
 import unittest
