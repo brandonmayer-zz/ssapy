@@ -9,7 +9,7 @@ given a distirubtion price prediction, not a point price prediciton.
 """
 
 from margDistPredictionAgent import *
-from auctionSimulator.hw4.agents.targetPrice import *
+from targetPrice import *
 
 class targetPriceDist(margDistPredictionAgent):
     

@@ -10,9 +10,7 @@ Yoon & Wellman 2011 and use price prediction strategies.
 import sys
 
 from simYW import *
-
-from auctionSimulator.hw4.pricePrediction.pointSCPP import *
-from auctionSimulator.hw4.pricePrediction.margDistSCPP import *
+from aucSim.pricePrediction import *
 
 class pricePredictionAgent(simYW):
     """

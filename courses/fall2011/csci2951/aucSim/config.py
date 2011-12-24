@@ -1,11 +1,11 @@
 import os
 import glob
-import auctionSimulator
-import auctionTests
+import aucSim
+
 class conf(object):
     def __init__(self,**kwargs):
-        self.auctionSimulatorDir = os.path.dirname(auctionSimulator.__file__)
-        self.auctionTestsDir = os.path.dirname(auctionTests.__file__)
+        self.auctionSimulatorDir = os.path.dirname(aucSim.__file__)
+#        self.auctionTestsDir = os.path.dirname(auctionTests.__file__)
         
         self.pricePredictionDir = os.path.join(self.auctionSimulatorDir,'hw4','pricePrediction')
         self.margDistPredictionDir = os.path.join(self.pricePredictionDir,'margDistPredictions')

@@ -11,6 +11,7 @@ and calculates the mean(s) for price prediction
 from margDistPredictionAgent import *
 from targetMV import *
 
+
 class targetMU(margDistPredictionAgent):
 
     @staticmethod       

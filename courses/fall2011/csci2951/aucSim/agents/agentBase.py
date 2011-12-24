@@ -1,5 +1,5 @@
 '''
-This is /auctionSimulator/hw4/agents.py
+This is /aucSim/agents/agentBase.py
 
 Author: Brandon A. Mayer
 Date: 11/13/2011

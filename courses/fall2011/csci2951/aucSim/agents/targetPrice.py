@@ -8,7 +8,7 @@ Specialized agent class to replicate targetPrice from
 Yoon and Wellman (2011)
 """
 
-from auctionSimulator.hw4.agents.pointPredictionAgent import *
+from pointPredictionAgent import *
 
 class targetPrice(pointPredictionAgent):
         

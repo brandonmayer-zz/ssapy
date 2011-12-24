@@ -7,8 +7,8 @@ Date:   11/21/2011
 Specialized agent class to replicate averageMU from Yoon and Wellman 2011.
 """
 
-# take targetMU as base so we don't have to rewrite bid function
-from auctionSimulator.hw4.agents.margDistPredictionAgent import *
+from margDistPredictionAgent import margDistPredictionAgent
+#from aucSim.pricePrediction import *
 
 class averageMU(margDistPredictionAgent):
     @staticmethod       

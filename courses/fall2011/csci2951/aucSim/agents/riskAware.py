@@ -5,10 +5,12 @@ Author:    Brandon A. Mayer
 Date:      11/23/2011
 """
 
+
+
 from margDistPredictionAgent import *
-from auctionSimulator.hw4.agents.targetPrice import *
-from auctionSimulator.hw4.agents.targetMVS import *
-from auctionSimulator.hw4.agents.targetMV import *
+from targetPrice import *
+from targetMVS import *
+from targetMV  import *
 import copy
 
 class riskAware(margDistPredictionAgent):

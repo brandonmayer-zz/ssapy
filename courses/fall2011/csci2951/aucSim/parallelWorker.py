@@ -1,12 +1,13 @@
-from auctionSimulator.hw4.agents.riskAware import *
-from auctionSimulator.hw4.agents.straightMU import *
-from auctionSimulator.hw4.agents.averageMU import *
-from auctionSimulator.hw4.agents.targetMU import *
-from auctionSimulator.hw4.agents.targetMUS import *
-from auctionSimulator.hw4.agents.baselineBidder import *
-from auctionSimulator.hw4.agents.bidEvaluator import *
+#from auctionSimulator.hw4.agents.riskAware import *
+#from auctionSimulator.hw4.agents.straightMU import *
+#from auctionSimulator.hw4.agents.averageMU import *
+#from auctionSimulator.hw4.agents.targetMU import *
+#from auctionSimulator.hw4.agents.targetMUS import *
+#from auctionSimulator.hw4.agents.baselineBidder import *
+#from auctionSimulator.hw4.agents.bidEvaluator import *
+from aucSim.agents import *
 
-from auctionSimulator.hw4.auctions.simultaneousAuction import *
+from aucSim.simultaneousAuction import *
 
 import numpy
 import multiprocessing

@@ -8,8 +8,8 @@ A base class for agents who utilize a point price prediction.
 """
 
 from pricePredictionAgent import *
-from auctionSimulator.hw4.pricePrediction.pointSCPP import *
-from auctionSimulator.hw4.padnums import pprint_table as ppt
+from aucSim.pricePrediction import *
+from aucSim.padnums import pprint_table as ppt
 
 import sys
 

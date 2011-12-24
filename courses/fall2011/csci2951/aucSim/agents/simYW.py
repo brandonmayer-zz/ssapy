@@ -7,9 +7,7 @@ Date:      11/26/2011
 A base class for agents who participate in simultaneous auctions of the type
 described by Yoon & Wellman 2011
 """
-
-from auctionSimulator.hw4.agents.agentBase import *
-
+from agentBase import *
 import itertools
 import numpy
 import operator

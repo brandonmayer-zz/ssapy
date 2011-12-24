@@ -6,9 +6,9 @@ Date:          11/27/2011
 
 A base class for agents who utilize a distribution price prediction.
 """
-from pricePredictionAgent import *
-from auctionSimulator.hw4.pricePrediction.margDistSCPP import *
-from auctionSimulator.hw4.padnums import pprint_table as ppt
+from pricePredictionAgent import pricePredictionAgent
+from aucSim.pricePrediction.margDistSCPP import margDistSCPP
+from aucSim.padnums import pprint_table as ppt
 
 import sys
 

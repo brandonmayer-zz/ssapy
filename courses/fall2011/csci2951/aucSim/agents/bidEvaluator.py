@@ -26,9 +26,9 @@ Implementation of bidEvaluator as described in Yoon & Wellman 2011:
 
 
 """
-from auctionSimulator.hw4.agents.straightMU import *
-from auctionSimulator.hw4.agents.targetMUS import *
-from auctionSimulator.hw4.agents.riskAware import *
+from straightMU import *
+from targetMUS import *
+from riskAware import *
 
 class bidEvaluatorBase(margDistPredictionAgent):
     @staticmethod

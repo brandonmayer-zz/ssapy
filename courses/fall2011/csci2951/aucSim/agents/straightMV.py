@@ -7,7 +7,8 @@ Date: 11/17/2011
 Specialized agent class to replicate straightMV from
 Yoon and Wellman (2011)
 """
-from auctionSimulator.hw4.agents.pointPredictionAgent import *
+#from auctionSimulator.hw4.agents.pointPredictionAgent import *
+from pointPredictionAgent import *
 
 class straightMV(pointPredictionAgent):
     """
