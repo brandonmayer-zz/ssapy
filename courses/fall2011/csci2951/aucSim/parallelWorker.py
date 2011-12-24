@@ -14,7 +14,32 @@ import multiprocessing
 
 class parallelWorkerBase(object):
     def __init__(self, **kwargs):
-        raise AssertionError('Cannot instantiate a parallelWorkerBase')
+        
+        numpy.testing.assert_('margDistPrediction' in kwargs,
+                              msg="Must specify a margianl price prediction distribution.")
+        
+        numpy.testing.assert_(isinstance(kwargs['margDistPrediction'],margDistSCPP),
+                              msg="margDistPrediction must be an instance of margDistSCPP")
+        
+        numpy.testing.assert_('agentList' in kwargs,
+                              msg="Must specify a list of agents.")
+        
+        if isinstance(kwargs['agentList'],list):
+            [numpy.testing.assert_(isinstance(agent,basestring)) for agent in kwargs['agentList']]
+        
+        self.agentTypeList = kwargs['agentList']
+        
+        self.nGames = kwargs.get('nGames',100)
+        
+        self.m      = kwargs.get('m',5)
+        
+        self.margDistPrediction = kwargs['margDistPrediction']
+        
+        self.A = kwargs.get('A')
+    
+        self.vmin = kwargs.get('vmin',0)
+        
+        self.vmax = kwargs.get('vmax',50)
     
     def __call__(self,*args, **kwargs):
         raise AssertionError('Cannot Call a parallelWorkerBase')
@@ -118,40 +143,12 @@ class parallelWorkerBase(object):
             
         return agentList
 
-class parallelSimAuctionSymmetricVL(parallelWorkerBase):
+class pwEqVl(parallelWorkerBase):
     """
     NOTE:
         THIS WORKER ASSUMES THAT ALL AGENTS HAVE THE SAME
         VALUATION AND TARGET NUMBER OF GOODS!!!!
-    """
-    def __init__(self, **kwargs):
-        
-        numpy.testing.assert_('margDistPrediction' in kwargs,
-                              msg="Must specify a margianl price prediction distribution.")
-        
-        numpy.testing.assert_(isinstance(kwargs['margDistPrediction'],margDistSCPP),
-                              msg="margDistPrediction must be an instance of margDistSCPP")
-        
-        numpy.testing.assert_('agentList' in kwargs,
-                              msg="Must specify a list of agents.")
-        
-        if isinstance(kwargs['agentList'],list):
-            [numpy.testing.assert_(isinstance(agent,basestring)) for agent in kwargs['agentList']]
-        
-        self.agentTypeList = kwargs['agentList']
-        
-        self.nGames = kwargs.get('nGames',100)
-        
-        self.m      = kwargs.get('m',5)
-        
-        self.margDistPrediction = kwargs['margDistPrediction']
-        
-        self.A = kwargs.get('A')
-    
-        self.vmin = kwargs.get('vmin',0)
-        
-        self.vmax = kwargs.get('vmax',50)
-        
+    """    
     def __call__(self, *args , **kwargs):
         
         agentList = self.agentsFromType(agentTypeList      = self.agentTypeList,
@@ -186,7 +183,7 @@ class parallelSimAuctionSymmetricVL(parallelWorkerBase):
         return numpy.atleast_2d(agentSurplus).astype(numpy.float)
     
     
-class parallelSimAuctionSymmetric(parallelSimAuctionSymmetricVL):
+class pwEqNgames(parallelWorkerBase):
     """
     In every game, every agent draws a valuation function from
     the same underlying distribution (symmetric game).
@@ -218,7 +215,7 @@ class parallelSimAuctionSymmetric(parallelSimAuctionSymmetricVL):
             
         return numpy.atleast_2d(agentSurplus).astype(numpy.float)  
     
-class parallelSimAuctionSymmetric2(parallelSimAuctionSymmetricVL):
+class pwVarNgames(parallelWorkerBase):
     """
     Same as parallelSimAuctionSymmetric but takes to each call
     a single argument that indicates how many iterations to run 
@@ -257,8 +254,10 @@ class parallelSimAuctionSymmetric2(parallelSimAuctionSymmetricVL):
         
     
 def runParallelJob(**kwargs):
-    
-    pw = kwargs['parallelWorker']
+    try:
+        pw = kwargs['parallelWorker']
+    except KeyError:
+        raise KeyError('Must specify a parallel worker functor.')
     
     NUM_PROC = kwargs.get('NUM_PROC', multiprocessing.cpu_count() - 1)
     
@@ -266,8 +265,17 @@ def runParallelJob(**kwargs):
     
     pool = multiprocessing.Pool(processes = NUM_PROC)
 
-    result = numpy.atleast_2d(pool.map(pw, xrange(0,NUM_PROC))).astype(kwargs.get('resultType',numpy.float))
-    
+    if isinstance(pw,pwEqVl) or isinstance(pw,pwEqNgames):
+        result = numpy.atleast_2d(pool.map(pw, xrange(0,NUM_PROC))).astype(kwargs.get('resultType',numpy.float))
+    if isinstance(pw,pwVarNgames):
+        # a list of number of games
+        try:
+            nGameList = kwargs['nGameList']
+        except KeyError:
+            raise KeyError('Must specify the number of games each auction will run with nGameList parameter')
+        
+        result = numpy.atleast_2d(pool.map(pw, nGameList)).astype(kwargs.get('resultType',numpy.float)) 
+        
     return numpy.reshape( result,(result.shape[0]*result.shape[1],result.shape[2]) )    
             
             
