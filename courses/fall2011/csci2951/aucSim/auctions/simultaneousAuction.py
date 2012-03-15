@@ -5,7 +5,7 @@ Date:      12/2/2011
 
 A class implementing a simultaneous auction.
 """
-from auctionSimulator.hw4.agents.agentBase import *
+from aucSim.agents.agentBase import *
 from auctionBase import *
 
 

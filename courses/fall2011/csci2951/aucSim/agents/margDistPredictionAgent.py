@@ -68,7 +68,7 @@ class margDistPredictionAgent(pricePredictionAgent):
         m                  = kwargs.get('m', self.m)
         v                  = kwargs.get('v', self.v)
         l                  = kwargs.get('l', self.l)
-        margDistPrediction = kwargs.get('margDistPrediciton', self.pricePrediction)
+        margDistPrediction = kwargs.get('margDistPrediction', self.pricePrediction)
         bundles            = kwargs.get('bundles', self.allBundles(m))
         
         numpy.testing.assert_(isinstance(margDistPrediction,margDistSCPP),

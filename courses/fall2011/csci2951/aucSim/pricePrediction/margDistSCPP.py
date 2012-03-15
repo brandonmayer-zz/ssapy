@@ -28,6 +28,7 @@ class margDistSCPP(pointSCPP):
         """          
         # initialize as empty
         margDist = kwargs.get('margDist')
+        m = kwargs.get('m')
         
         if margDist:
             if isinstance(margDist,numpy.ndarray):
@@ -49,6 +50,7 @@ class margDistSCPP(pointSCPP):
                 self.m    = copy.deepcopy(margDist.m)
             else:
                 raise ValueError('Uknown parameter type.')
+
         elif args:
             
             if isinstance(args[0],basestring):

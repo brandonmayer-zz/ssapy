@@ -13,9 +13,9 @@ Very similar in form and function to symmetricPointPricePrediciton.py script in 
 directory
 """
 
-from auctionSimulator.hw4.agents.straightMU import *
-from auctionSimulator.hw4.agents.targetPriceDist import *
-from auctionSimulator.hw4.agents.riskAware import *
+from aucSim.agents.straightMU import *
+from aucSim.agents.targetPriceDist import *
+from aucSim.agents.riskAware import *
 
 import argparse
 from datetime import date
@@ -62,7 +62,7 @@ class symmetricDPPworker(object):
             for i in xrange(self.args['nAgents']):
                 agentList.append(straightMU(m=self.args['m']))
             
-            bids = numpy.atleast_2d([agent.bid({'margDistPrediction': margDistPrediciton}) for agent in agentList])
+            bids = numpy.atleast_2d([agent.bid(margDistPrediction = margDistPrediciton) for agent in agentList])
             
             #the winning bids at auction
             return numpy.max(bids,0)

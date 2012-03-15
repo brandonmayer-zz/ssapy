@@ -1,1 +1,1 @@
-__all__ = ["pointSCPP", "margDistSCPP", "bayesSCPP"]
+__all__ = ["pointSCPP", "margDistSCPP", "hist"]

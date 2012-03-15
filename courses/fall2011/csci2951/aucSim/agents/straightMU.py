@@ -13,7 +13,13 @@ from straightMV import *
 import copy
 
 class straightMU(margDistPredictionAgent):
-       
+    def __init__(self,**kwargs):
+        super(straightMU,self).__init__(**kwargs)
+        
+#        self._bundles = kwargs.get('bundles',self.allBundles(self.m))
+#        self._valuation= kwargs.get('valuation',self.valuation(self._bundles, self.v, self.l))
+        
+               
     @staticmethod
     def type():
         return "straightMU"
@@ -42,7 +48,7 @@ class straightMU(margDistPredictionAgent):
                              bundles              = kwargs['bundles'],
                              l                    = kwargs['l'],
                              valuation            = kwargs['valuation'])
-        
+               
 class straightMU8(margDistPredictionAgent):
     """
     A concrete class for straightMU8
@@ -105,6 +111,7 @@ class straightMU64(margDistPredictionAgent):
                               bundles        = bundles,
                               valuation      = kwargs['valuation'],
                               l              = kwargs['l'])
+                
         
     def printSummary(self,**kwargs):
         tkwargs = copy.deepcopy(kwargs)
