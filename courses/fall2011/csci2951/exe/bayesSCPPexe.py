@@ -6,6 +6,7 @@ import numpy
 import time
 import os
 import copy
+import glob
     
 def klDiv(margDist1, margDist2):
     assert isinstance(margDist1, margDistSCPP) and\
@@ -41,10 +42,10 @@ def main():
     maxPrice = 50
     delta = 1
     maxSim = 1000
-    nGames = 1000
+    nGames = 100
     parallel = False
     outDir = 'E:/research/auction/bayesSCPP/exp1/'
-    tol = .1
+    tol = .001
     
     currHist = hist()
     
@@ -53,6 +54,13 @@ def main():
     
     
     sim = 0
+    cs = ['y--p', 'm-*', 'r-o','y-^','y-*']
+    outfile = outDir+'bayesSCPP_itr_{0}.png'.format(sim)
+    title='Bayes SCPP, straightMU8, klD = {0} Number of Samples = {1}'.format(0,sim*nGames)
+    currHist.bayesMargDistSCPP().graphPdfToFile(fname=outfile,
+                                                    colorStyles=cs,
+                                                    title=title)
+    
     done = False
     while sim < maxSim and not done:
         sim+=1
@@ -75,6 +83,13 @@ def main():
                 
         #calculate the KL divergence between the old and new distributions
         kl = klDiv(currHist.bayesMargDistSCPP(),oldHist.bayesMargDistSCPP())
+        
+        outfile = outDir+'bayesSCPP_itr_{0}.png'.format(sim)
+        title='Bayes SCPP, straightMU8, klD = {0:.6} Number of Samples = {1}'.format(kl,sim*nGames)
+        currHist.bayesMargDistSCPP().graphPdfToFile(fname=outfile,
+                                                    colorStyles=cs,
+                                                    title=title)
+        print 'saving plot to: {0}'.format(outfile)
         print'\tkl = {0}'.format(kl)
         print ''
         if kl < tol:
@@ -82,7 +97,7 @@ def main():
             print 'number of iterations = {0}'.format(sim)
             done = True
             
-    currHist.bayesMargDistSCPP().graphPdf()
+#    currHist.bayesMargDistSCPP().graphPdf()
                 
 
         
