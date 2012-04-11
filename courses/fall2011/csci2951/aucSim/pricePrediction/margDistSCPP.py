@@ -416,8 +416,10 @@ class margDistSCPP(pointSCPP):
             plt.title('Price Distribution')
             
         plt.legend()
-        
-        plt.show()
+        if 'filename' in kwargs:
+            plt.savefig(kwargs['filename'])
+        else:
+            plt.show()
         
     def graphCdf(self,**kwargs):
         if 'colorStyles' in kwargs:
@@ -447,12 +449,7 @@ class margDistSCPP(pointSCPP):
             plt.ylabel(kwargs['ylabel'])
         else:
             plt.ylabel('Probability')
-        
-        if 'title' in kwargs:
-            plt.title(kwargs['title'])
-        else:
-            plt.title('Price Distribution')
-            
+                   
         plt.legend()
         
         plt.show()

@@ -14,6 +14,8 @@ directory
 """
 
 from aucSim.agents.straightMU import *
+from aucSim.agents.targetMU import *
+from aucSim.agents.targetMUS import *
 from aucSim.agents.targetPriceDist import *
 from aucSim.agents.riskAware import *
 
@@ -234,7 +236,7 @@ def main():
     parser.add_argument('--nproc',         action='store', dest='NUM_PROC', type=int,    default=multiprocessing.cpu_count()-1 )
     parser.add_argument('--m',             action='store', dest='m',        type=int,    default=5)
     parser.add_argument('--L',             action='store', dest='L',        type=int,    default=100)
-    parser.add_argument('--d',             action='store', dest='d',        type=float,  default=0.05)
+    parser.add_argument('--d',             action='store', dest='d',        type=float,  default=0.01)
     parser.add_argument('--g',             action='store', dest='g',        type=int,    default=1000000)
     parser.add_argument('--pInitFile',     action='store', dest='pInitFile',type=int)
     parser.add_argument('--minPrice',      action='store', dest='minPrice', type=int,    default=0)
@@ -397,23 +399,17 @@ def main():
             
         
         if ksStat[t] <= delta:
-            pricePredictionPklFilename = os.path.join(args['outDir'], 
-                                                      'distPricePrediction_{0}_{1}_{2}_{3}_{4}_{5}.pkl'.format(args['agentType'],
-                                                                                                               args['g'],
-                                                                                                               date.today().year,
-                                                                                                               date.today().month,
-                                                                                                               date.today().day,
-                                                                                                               int(time.time())))
+            postfix = '{0}_{1}_{2}_{3}_{4}_{5}'.format(args['agentType'], args['g'], args['m'], args['d'],args['minPrice'],args['maxPrice'])
+            pklName = 'distPricePrediction_' + postfix + '.pkl'
+            txtName = 'distPricePrediction_' + postfix + '.txt'
+            
+            pricePredictionPklFilename = os.path.join(args['outDir'], pklName) 
+                                                      
             updatedDist.savePickle(pricePredictionPklFilename)
             
             if args['writeTxt']:
-                pricePredictionTxtFilename = os.path.join(args['outDir'],
-                                                          'distPricePrediction_{0}_{1}_{2}_{3}_{4}_{5}.txt'.format(args['agentType'],
-                                                                                                                   args['g'],
-                                                                                                                   date.today().year,
-                                                                                                                   date.today().month,
-                                                                                                                   date.today().day,
-                                                                                                                   int(time.time())))
+                pricePredictionTxtFilename = os.path.join(args['outDir'], txtName)
+                                                          
                 #this section could be improved....
                 testdata = []
                 for m in xrange(updatedDist.m):
@@ -430,7 +426,8 @@ def main():
             
             if args['plot']:
                 title = '{0} Self Confirming Price Distribution'.format(args['agentType'])
-                updatedDist.graphPdf(title=title)
+                pltName = os.path.join(args['outDir'],'distPricePrediction_' + postfix + '.png')
+                updatedDist.graphPdfToFile(fname = pltName, title = title)
                 
             sys.exit()
             
