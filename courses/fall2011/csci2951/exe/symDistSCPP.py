@@ -67,6 +67,15 @@ class symmetricDPPworker(object):
             #the winning bids at auction
             return numpy.max(bids,0)
         
+        elif self.args['agentType'] == 'straightMU8':
+            agentList = [straightMU8(m=self.args['m']) for i in xrange(self.args['nAgents'])]
+            
+            bids = numpy.atleast_2d([agent.bid(margDistPrediction = margDistPrediciton) for agent in agentList])
+            
+            #the winning bids at auction
+            return numpy.max(bids,0)
+            
+        
         elif self.args['agentType'] == 'targetPriceDist':
             
             agentList = []
@@ -91,6 +100,20 @@ class symmetricDPPworker(object):
 #            print [agent.l for agent in agentList]
             
 #            [agent.printSummary({'margDistPrediction': margDistPrediciton}) for agent in agentList]
+            
+            return numpy.max(bids,0)
+        
+        elif self.args['agentType'] == 'targetMUS8':
+            agentList = [targetMUS8(m=self.args['m']) for i in xrange(self.args['nAgents'])]
+            
+            bids = numpy.atleast_2d([agent.bid(margDistPrediction = margDistPrediciton) for agent in agentList])
+            
+            return numpy.max(bids,0)
+        
+        elif self.args['agentType'] == 'targetMU8':
+            agentList = [targetMU8(m=self.args['m']) for i in xrange(self.args['nAgents'])]
+            
+            bids = numpy.atleast_2d([agent.bid(margDistPrediction = margDistPrediciton) for agent in agentList])
             
             return numpy.max(bids,0)
             
@@ -204,11 +227,11 @@ def main():
     desc = 'Parallel Implementation of Self Confirming Distribution Price Prediction (Yoon & Wellman 2011)'
     
     parser = argparse.ArgumentParser(description=desc)
-    parser.add_argument('--agentType',     action='store', dest='agentType',              default='straightMU')
+    parser.add_argument('--agentType',     action='store', dest='agentType',              default='straightMU8')
     
     parser.add_argument('--outDir',        action='store', dest='outDir',   required=True)
     
-    parser.add_argument('--nproc',         action='store', dest='NUM_PROC', type=int,    default=multiprocessing.cpu_count() )
+    parser.add_argument('--nproc',         action='store', dest='NUM_PROC', type=int,    default=multiprocessing.cpu_count()-1 )
     parser.add_argument('--m',             action='store', dest='m',        type=int,    default=5)
     parser.add_argument('--L',             action='store', dest='L',        type=int,    default=100)
     parser.add_argument('--d',             action='store', dest='d',        type=float,  default=0.05)
@@ -234,7 +257,10 @@ def main():
     
     #add more agents as they are implemented
     assert args['agentType'] == 'straightMU' or\
+           args['agentType'] == 'straightMU8' or\
            args['agentType'] == 'targetPriceDist' or\
+           args['agentType'] == 'targetMUS8' or\
+           args['agentType'] == 'targetMU8' or\
            args['agentType'] == 'riskAware',\
         "Unknown Agent Type {0}".format(args['agentType'])
         
@@ -404,7 +430,7 @@ def main():
             
             if args['plot']:
                 title = '{0} Self Confirming Price Distribution'.format(args['agentType'])
-                updatedDist.graphPdf({'title':title})
+                updatedDist.graphPdf(title=title)
                 
             sys.exit()
             
