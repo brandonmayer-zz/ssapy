@@ -1,3 +1,11 @@
+from aucSim.agents.straightMU import *
+from aucSim.agents.targetMU import *
+from aucSim.agents.targetMUS import *
+from aucSim.agents.targetPriceDist import *
+from aucSim.agents.riskAware import *
+
+from aucSim.pricePrediction.hist import *
+from aucSim.pricePrediction.util import *
 
 import numpy
 import subprocess
@@ -36,7 +44,22 @@ def main():
     ywExe    = os.path.realpath('./symDistSCPP')
     
     table = []
-    table.append([])
+    table.append(['aType',      '{0}'.format(args['aType'])])
+    table.append(['oDir',       '{0}'.format(args['oDir'])])
+    table.append(['sccpType',   '{0}'.format(args['scppType'])])
+    table.append(['tmin',       '{0}'.format(args['tmin'])])
+    table.append(['tmax',       '{0}'.format(args['tmax'])])
+    table.append(['m',          '{0}'.format(args['m'])])
+    table.append(['pmin',       '{0}'.format(args['pmin'])])
+    table.append(['pmax',       '{0}'.format(args['pmax'])])
+    table.append(['plot',       '{0}'.format(args['plot'])])
+    table.append(['verbose',    '{0}'.format(args['verbose'])])
+    table.append(['writeTxt',   '{0}'.format(args['writeTxt'])])
+    
+    if args['verbose']:
+        ppt(sys.stdout, table)
+    
+    
     
     pass
 
