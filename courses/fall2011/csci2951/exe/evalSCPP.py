@@ -58,7 +58,7 @@ def main():
     parser.add_argument( '--oDir',   action = 'store', dest = 'oDir', required = True )
     parser.add_argument( '--aType',  action = 'store', dest = 'aType', required = True )
     
-    parser.add_argument( '--nGames',  action = 'store', dest = 'nGames',  default = 1000000 )
+    parser.add_argument( '--nGames',  action = 'store', dest = 'nGames',  default = 1000000 , type = int)
     parser.add_argument( '--nAgents', action = 'store', dest = 'nAgents', default = 8 )
     parser.add_argument( '--nProc',   action = 'store', dest = 'nProc',   default = multiprocessing.cpu_count() - 1)
     parser.add_argument( '--verbose', action = 'store', dest = 'verbose', default = True, type = bool )
@@ -66,23 +66,24 @@ def main():
     parser.add_argument( '--plot',    action = 'store', dest = 'plot',    default = True, type = bool)
     
     args = parser.parse_args().__dict__
+    table = []
+    table.append(['iPkl', '{0}'.format(args['iPkl'])])
+    table.append(['oDir', '{0}'.format(args['oDir'])])
+    table.append(['aType', '{0}'.format(args['aType'])])
+    table.append(['nGames', '{0}'.format(args['nGames'])])
+    table.append(['nAgents', '{0}'.format(args['nAgents'])])
+    table.append(['nProc', '{0}'.format(args['nProc'])])
     
-    if args['verbose']:
-        table = []
-        table.append(['iPkl', '{0}'.format(args['iPkl'])])
-        table.append(['oDir', '{0}'.format(args['oDir'])])
-        table.append(['aType', '{0}'.format(args['aType'])])
-        table.append(['nGames', '{0}'.format(args['nGames'])])
-        table.append(['nAgents', '{0}'.format(args['nAgents'])])
-        table.append(['nProc', '{0}'.format(args['nProc'])])
-        
+    if args['verbose']: 
         ppt(sys.stdout,table)
-        del table
+    
     
     #load the distribution
     margDist = margDistSCPP(args['iPkl'])
     m = margDist.m
     
+    
+    start = time.clock()    
     result = []
     if args['serial']:
         pass
@@ -98,9 +99,12 @@ def main():
         result = numpy.atleast_2d(pool.map(w, itertools.repeat(margDist,args['nGames']))).astype(numpy.float)
         pool.close()
         pool.join()
+    
+    finish = time.clock()
         
     if args['verbose']:
-        print 'Simulation Finished'
+        print 'Simulation Finished {0} games in {1} seconds.'.format(args['nGames'],finish-start)
+        
         print 'Histograming results.'
         
     histData  = []
@@ -119,21 +123,24 @@ def main():
     if args['verbose']:
         print 'KL Divergence = {0}'.format(kl)
         
-    oFile = os.path.realpath(os.path.join(oDir,'klDiv.txt'))
+    oname = 'klDiv_{0}_{1}_{2}.txt'.format(args['aType'], args['nAgents'], args['nGames'])
+    oFile = os.path.realpath(os.path.join(args['oDir'],oname))
     
     if args['verbose']:
         print 'Saving kl to {0}'.format(oFile)
         
-    with open(ofile,'w') as f:
-        f.write('{0}\n'.format(kl))
+    with open(oFile,'w') as f:
+        table.append(['KL Divergence', '{0}'.format(kl)])
+        ppt(f,table)
         
     if args['plot']:
-        pFile = os.path.realpath(os.path.join(oDir,'evalDist.png'))
+        pFile = os.path.realpath(os.path.join(args['oDir'],'evalDist.png'))
         
         if args['verbose']:
             print 'Plotting Eval Dist to {0}'.format(pFile)
-        
-        newDist.graphPdfToFile(pFile)
+        cs = ['y--p', 'm-*', 'r-o','y-^','y-*']
+        newDist.graphPdfToFile(fname = pFile,
+                               colorStyles = cs)
 
 if __name__ == '__main__':
     main()
