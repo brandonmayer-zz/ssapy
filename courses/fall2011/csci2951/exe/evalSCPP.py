@@ -55,15 +55,15 @@ def main():
     parser = argparse.ArgumentParser(description=desc)
     
     parser.add_argument( '--iPkl',   action = 'store', dest = 'iPkl',  required = True )
-    parser.add_argument( '--oDir',   action = 'store', dest = 'oDir', required = True )
+    parser.add_argument( '--oDir',   action = 'store', dest = 'oDir',  required = True )
     parser.add_argument( '--aType',  action = 'store', dest = 'aType', required = True )
     
-    parser.add_argument( '--nGames',  action = 'store', dest = 'nGames',  default = 1000000 , type = int)
-    parser.add_argument( '--nAgents', action = 'store', dest = 'nAgents', default = 8 )
-    parser.add_argument( '--nProc',   action = 'store', dest = 'nProc',   default = multiprocessing.cpu_count() - 1)
-    parser.add_argument( '--verbose', action = 'store', dest = 'verbose', default = True, type = bool )
-    parser.add_argument( '--serial',  action = 'store', dest = 'serial',  default = False, type = bool )
-    parser.add_argument( '--plot',    action = 'store', dest = 'plot',    default = True, type = bool)
+    parser.add_argument( '--nGames',  action = 'store', dest = 'nGames',  default = 1000000 ,                        type = int )
+    parser.add_argument( '--nAgents', action = 'store', dest = 'nAgents', default = 8,                               type = int )
+    parser.add_argument( '--nProc',   action = 'store', dest = 'nProc',   default = multiprocessing.cpu_count() - 1, type = int )
+    parser.add_argument( '--verbose', action = 'store', dest = 'verbose', default = True,                            type = bool )
+    parser.add_argument( '--serial',  action = 'store', dest = 'serial',  default = False,                           type = bool )
+    parser.add_argument( '--plot',    action = 'store', dest = 'plot',    default = True,                            type = bool)
     
     args = parser.parse_args().__dict__
     table = []

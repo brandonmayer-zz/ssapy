@@ -49,7 +49,7 @@ class evalTask(object):
         self.oDir     = kwargs.get('oDir')
         
         self.nEval    = kwargs.get('nEval', 100000)
-        self.nAgents  = kwargs.get('nAgnets', 8)
+        self.nAgents  = kwargs.get('nAgents', 8)
         self.pmin     = kwargs.get('pmin', 0)
         self.pmax     = kwargs.get('pmax', 50)
         
@@ -72,8 +72,8 @@ class evalTask(object):
                 k = subprocess.Popen([sys.executable, self.bSCPPpy, '--aType', '{0}'.format(self.aType),
                                       '--oDir', '{0}'.format(self.oDir), '--tol', '{0}'.format(self.tol),
                                       '--maxSim', '{0}'.format(self.maxSim), '--minPrice', '{0}'.format(self.pmin),
-                                      '--maxPrice', '{0}'.format(self.pmax), '--convStep', '{0}'.format(self.convStep)],
-                                      '--nAgents', '{0}'.formaT(self.nAgents))
+                                      '--maxPrice', '{0}'.format(self.pmax), '--convStep', '{0}'.format(self.convStep),
+                                      '--nAgents', '{0}'.format(self.nAgents)])
                 
                 print 'Waiting'
                 
@@ -92,9 +92,18 @@ class evalTask(object):
                     lines = f.readlines()
                     kl = lines[-1].split()[-1]
                     
-                pkl = glob.glob(os.path.join(self.oDir, '/*.pkl'))
+                pkl = os.path.join(self.oDir,'bayesSCPP.pkl')
 
-                return (self.convStep, self.tol, kl, pkl, self.aTyp, self.nAgents, self.pmin, self.pmax)
+                d = {'convStep': self.convStep, 
+                     'oDir':     self.oDir,
+                     'tol':      self.tol, 
+                     'kl':       kl, 
+                     'pkl':      pkl,
+                     'aType':    self.aType,
+                     'nAgents':  self.nAgents,
+                     'pmin':     self.pmin,
+                     'pmax':     self.pmax}
+                return d
             else:
                 raise valueError
                 
@@ -146,7 +155,9 @@ def main():
     args = parser.parse_args().__dict__
     
     bayesExe = os.path.realpath('./bSCPP.py')
-    ywExe    = os.path.realpath('./symDistSCPP')
+    ywExe    = os.path.realpath('./symDistSCPP.py')
+    evalExe  = os.path.realpath('./evalSCPP.py')
+    
     tlist = numpy.linspace(args['tmin'], args['tmax'], args['tnum'])
     
     cslist = None
@@ -236,37 +247,70 @@ def main():
                 print 'TASKS DONE!!'
                 print
             
-            r = []
-            d = {}
-            while not results.empty():
-                r = (results.get())
-                if r[0] not in d:
-                    d[r[0]] = numpy.atleast_1d((r[1],r[2]))
-                else:
-                    d[r[0]] = numpy.vstack( (d[r[0]],numpy.atleast_1d( (r[1],r[2]) )) )
-                
-                
-#            r = sorted(r,key=lambda r:r[0])
-#            r = numpy.atleast_2d(r)
-                
-            fig = plt.figure()
-            ax = fig.add_subplot(111)
-            colors = numpy.linspace(0,1,len(cslist))
-            cm = plt.get_cmap('jet')
-            pcount = 0
-            for key,value in d.iteritems():
-                value = numpy.atleast_2d(sorted(value,key=lambda v:v[0]))
-                ax.plot(value[:,0],value[:,1],linestyle='dashed', marker='o', color=cm(colors[pcount]),label="convStep = {0}".format(key))
-                pcount+=1
-                
-            ax.set_xlabel('Tolerance')
-            ax.set_ylabel('KL Divergence')
-            pout = os.path.realpath(os.path.join(args['oDir'],'fig.png'))
-            plt.savefig(pout)
-#            plt.show()
+            
             
         else:
             print 'scppType: {0} Not Yet Implemented'.format(args['scppType'])
+            raise
+        
+        
+        d = {}
+        while not results.empty():
+            r = results.get()
+            
+            print '-----------------' 
+            print 'RUNNIN EVAL'
+            print 'Agent Type: {0}'.format(r.get('aType'))
+            print 'nGames: {0}'.format(args['nEval'])
+            print 'iPkl:   {0}'.format(r.get('pkl'))
+            
+            k = subprocess.Popen([sys.executable,
+                                  evalExe,
+                                  '--iPkl',    '{0}'.format(r.get('pkl')),
+                                  '--oDir',    '{0}'.format(r.get('oDir')),
+                                  '--aType',   '{0}'.format(r.get('aType')),
+                                  '--nAgents', '{0}'.format(r.get('nAgents')),
+                                  '--nGames',  '{0}'.format(args['nEval'])
+                                 ])
+            
+            print 'Eval Waiting.'
+            k.wait()
+            print 'Eval Done Waiting.'
+            
+            klFile = os.path.join(r['oDir'], 'klDiv.txt')
+            with open(klFile,'r') as f:
+                lines = f.readlines()
+                kl = lines[-1].split()[-1]
+            del f
+                
+            
+            if r['convStep'] not in d:
+                d[r['convStep']] = numpy.atleast_1d( (r['tol'],kl) )
+            else:
+                d[r['convStep']] = numpy.vstack( ( d[r['convStep']],
+                                                   numpy.atleast_1d( (r['tol'],kl) ) ) )
+            
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        colors = numpy.linspace(0,1,len(cslist))
+        cm = plt.get_cmap('jet')
+        pcount = 0
+        
+        for key, value in d.iteritems():
+            value = numpy.atleast_2d(sorted(value,key=lambda v:v[0]))
+            ax.plot(value[:,0],value[:,1],linestyle='dashed', marker='o', color=cm(colors[pcount]), label="convStep = {0}".format(key))
+            pcount+=1
+            
+        
+        ax.set_xlabel('Tolerance')
+        ax.set_ylabel('KL Divergence')
+        ax.legend()
+        pout = os.path.realpath(os.path.join(args['oDir'], 'tolGraph.png'))
+        plt.savefig(pout)
+        plt.show()
+        
+        print 'BATCH DONE'
+                    
             
     except:
         print 'UNKNOWN ERROR'
