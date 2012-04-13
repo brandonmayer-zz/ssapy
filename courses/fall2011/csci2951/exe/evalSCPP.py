@@ -123,7 +123,7 @@ def main():
     if args['verbose']:
         print 'KL Divergence = {0}'.format(kl)
         
-    oname = 'klDiv_{0}_{1}_{2}.txt'.format(args['aType'], args['nAgents'], args['nGames'])
+    oname = 'klDiv.txt'
     oFile = os.path.realpath(os.path.join(args['oDir'],oname))
     
     if args['verbose']:
