@@ -3,7 +3,7 @@ import numbers
 import numpy
 import copy
 
-from aucSim.pricePrediction.margDistSCPP import *
+from ssapy.margDistSCPP import margDistSCPP 
 
 class hist(object):
     """
