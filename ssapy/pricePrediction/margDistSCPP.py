@@ -1,5 +1,5 @@
 from pointSCPP import *
-from types import * #for type checking
+#from types import * #for type checking
 import matplotlib.pyplot as plt
 import itertools
 import os

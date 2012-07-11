@@ -1,13 +1,7 @@
-#from auctionSimulator.hw4.agents.riskAware import *
-#from auctionSimulator.hw4.agents.straightMU import *
-#from auctionSimulator.hw4.agents.averageMU import *
-#from auctionSimulator.hw4.agents.targetMU import *
-#from auctionSimulator.hw4.agents.targetMUS import *
-#from auctionSimulator.hw4.agents.baselineBidder import *
-#from auctionSimulator.hw4.agents.bidEvaluator import *
 from aucSim.agents import *
 
-from aucSim.simultaneousAuction import *
+#from aucSim.simultaneousAuction import *
+from ssapy.auctions.simultaneousAuction import simultaneousAuction 
 
 import numpy
 import multiprocessing
@@ -46,15 +40,14 @@ class parallelWorkerBase(object):
     
     def agentsFromType(self,**kwargs):
         """
-        Construct agents from a list of strings. E.g. and agent factory.
+        Construct agents from a list of strings. An agent factory.
         """
-        try:
-            agentTypeList = kwargs['agentTypeList']
-        except:
-            raise KeyError('Must specify agentTypeList')
         
+        agentTypeList = kwargs.get('agentTypeList')
+            
         #will be set to none if not specified
         margDistPrediction = kwargs.get('margDistPrediction',self.margDistPrediction)
+        
         m = kwargs.get('m',self.m)
         
         agentList = []

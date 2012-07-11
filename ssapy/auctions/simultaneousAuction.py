@@ -5,8 +5,8 @@ Date:      12/2/2011
 
 A class implementing a simultaneous auction.
 """
-from aucSim.agents.agentBase import *
-from auctionBase import *
+from ssapy.agents import agentBase
+from ssapy.auctionBase import *
 
 
 import numpy
