@@ -144,7 +144,7 @@ def ywSCPP(**kwargs):
         if pltItr:
             cs = cs = ['y--p', 'm-*', 'r-o','y-^','y-*']
             graphname = os.path.join(oDir,'ywSCPP_itr_{0}.png'.format(L))
-            updatedDist.graphPdfToFile(graphname)
+            updatedDist.graphPdfToFile(fname = graphname)
         
         if verbose:
             print 'Previous Expected Prices = {0}'.format(currentDist.expectedPrices())
