@@ -8,8 +8,8 @@ A base class for agents who utilize a point price prediction.
 """
 
 from pricePredictionAgent import *
-from aucSim.pricePrediction.pointSCPP import *
-from aucSim.padnums import pprint_table as ppt
+from ssapy.pricePrediction.pointSCPP import *
+from ssapy.padnums import pprint_table as ppt
 
 import sys
 

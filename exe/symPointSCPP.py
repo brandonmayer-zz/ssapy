@@ -143,6 +143,7 @@ def main():
     g = args['g']    
     delta = args['d']
     
+    args['outDir'] = os.path.realpath(args['outDir'])
     if not os.path.isdir(args['outDir']):
         os.makedirs(args['outDir'])
         

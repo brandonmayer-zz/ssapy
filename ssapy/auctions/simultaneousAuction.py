@@ -6,7 +6,7 @@ Date:      12/2/2011
 A class implementing a simultaneous auction.
 """
 from ssapy.agents import agentBase
-from ssapy.auctionBase import *
+from ssapy.auctions.auctionBase import *
 
 
 import numpy

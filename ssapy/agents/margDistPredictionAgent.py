@@ -7,8 +7,8 @@ Date:          11/27/2011
 A base class for agents who utilize a distribution price prediction.
 """
 from pricePredictionAgent import *
-from aucSim.pricePrediction.margDistSCPP import *
-from aucSim.padnums import pprint_table as ppt
+from ssapy.pricePrediction.margDistSCPP import *
+from ssapy.padnums import pprint_table as ppt
 
 import sys
 import numpy
@@ -63,7 +63,7 @@ class margDistPredictionAgent(pricePredictionAgent):
         """
         Interface to bid.
         Accepts an argument of margDistPrediction which
-        will take precidence over any stored prediction
+        will take precedence over any stored prediction
         """
         m                  = kwargs.get('m', self.m)
         v                  = kwargs.get('v', self.v)

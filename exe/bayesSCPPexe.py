@@ -1,12 +1,15 @@
-from aucSim.agents.straightMU import *
-from aucSim.pricePrediction.hist import *
-from aucSim.auctions.simultaneousAuction import *
+from ssapy.agents.straightMU import *
+from ssapy.pricePrediction.hist import *
+from ssapy.auctions.simultaneousAuction import *
+from ssapy.pricePrediction.util import ksStatistic
 
 import numpy
+import matplotlib.pyplot as plt
 import time
 import os
 import copy
 import glob
+import json
     
 def klDiv(margDist1, margDist2):
     assert isinstance(margDist1, margDistSCPP) and\
@@ -44,8 +47,11 @@ def main():
     maxSim = 1000
     nGames = 100
     parallel = False
-    outDir = 'E:/research/auction/bayesSCPP/exp1/'
     tol = .001
+    outDir = os.path.realpath('C:/auctionResearch/experiments/bayesSCPP_straightMU8_{0}_{1}_{2}'.format(nAgents,m,tol))
+    if not os.path.exists(outDir):
+        os.makedirs(outDir)
+    
     
     currHist = hist()
     
@@ -55,12 +61,14 @@ def main():
     
     sim = 0
     cs = ['y--p', 'm-*', 'r-o','y-^','y-*']
-    outfile = outDir+'bayesSCPP_itr_{0}.png'.format(sim)
+    outfile = os.path.join(outDir,'bayesSCPP_itr_{0}.png'.format(sim))
     title='Bayes SCPP, straightMU8, klD = {0} Number of Samples = {1}'.format(0,sim*nGames)
     currHist.bayesMargDistSCPP().graphPdfToFile(fname=outfile,
                                                     colorStyles=cs,
                                                     title=title)
     
+    klList = []
+    ksList = []
     done = False
     while sim < maxSim and not done:
         sim+=1
@@ -83,9 +91,12 @@ def main():
                 
         #calculate the KL divergence between the old and new distributions
         kl = klDiv(currHist.bayesMargDistSCPP(),oldHist.bayesMargDistSCPP())
+        klList.append(kl)
+        ks = ksStatistic(currHist.bayesMargDistSCPP(), oldHist.bayesMargDistSCPP())
+        ksList.append(ks)
         
-        outfile = outDir+'bayesSCPP_itr_{0}.png'.format(sim)
-        title='Bayes SCPP, straightMU8, klD = {0:.6} Number of Samples = {1}'.format(kl,sim*nGames)
+        outfile = os.path.join(outDir,'bayesSCPP_itr_{0}.png'.format(sim))
+        title='BayesSCPP straightMU8, klD = {0:.6}, ks = {1:.6} itr = {2}'.format(kl,ks,sim*nGames)
         currHist.bayesMargDistSCPP().graphPdfToFile(fname=outfile,
                                                     colorStyles=cs,
                                                     title=title)
@@ -97,6 +108,26 @@ def main():
             print 'number of iterations = {0}'.format(sim)
             done = True
             
+    plt.subplot(211)
+    plt.plot(range(0,len(klList)*100,100),klList,'r-')
+    plt.title('KL Divergence')
+    
+    plt.subplot(212)
+    plt.plot(range(0,len(klList)*100,100),ksList,'b-')
+    plt.title('KS Statistic')
+    
+    fname = os.path.join(outDir,'error.png')
+    plt.savefig(fname)
+    
+    ksListName = os.path.join(outDir,'ksList.json')
+    with open(ksListName,'w') as f:
+        json.dump(ksList,f)
+        
+    klListName = os.path.join(outDir,'klList.json')
+    with open(klListName,'w') as f:
+        json.dump(klList,f)
+        
+#        plt.show()
 #    currHist.bayesMargDistSCPP().graphPdf()
                 
 

@@ -42,12 +42,26 @@ class straightMU(margDistPredictionAgent):
             pricePrediction = margDistPredictionAgent.SS(**kwargs)
             
             #AGENT SPECIFIC LOGIC
-            expectedPrices = kwargs.get('expectedPrices',pricePrediction.expectedPrices())
+            expectedPrices = kwargs.get('expectedPrices',pricePrediction.expectedPrices())            
 
         return straightMV.SS(pointPricePrediction = expectedPrices,
                              bundles              = kwargs['bundles'],
                              l                    = kwargs['l'],
                              valuation            = kwargs['valuation'])
+        
+    def bid2(self,**kwargs):
+        
+        expectedPrices = numpy.asarray(kwargs.get('expectedPrices'))
+        m              = kwargs.get('m',self.m)
+        bundles        = kwargs.get('bundles',self.allBundles(m))
+        l              = kwargs.get('l',self.l)
+        v              = kwargs.get('v',self.v)
+        valuation      = kwargs.get('valuation',self.valuation(bundles, v, l))
+        
+        return straightMV.SS( pointPricePrediction = expectedPrices,
+                              bundles              = bundles,
+                              l                    = l,
+                              valuation            = valuation)
                
 class straightMU8(margDistPredictionAgent):
     """
@@ -66,8 +80,9 @@ class straightMU8(margDistPredictionAgent):
         
         pricePrediction = margDistPredictionAgent.SS(**kwargs)
         
-        expectedPrices = pricePrediction.expectedPrices( method   = 'iTsample',
-                                                         nSamples = 8)
+        if 'expectedPrices' not in kwargs:
+            expectedPrices = pricePrediction.expectedPrices( method   = 'iTsample',
+                                                             nSamples = 8)
         
         bundles = kwargs.get('bundles', simYW.allBundles(pricePrediction.m))
         

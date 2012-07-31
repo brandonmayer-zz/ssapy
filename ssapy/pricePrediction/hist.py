@@ -2,8 +2,8 @@ import json
 import numbers
 import numpy
 import copy
-
-from ssapy.margDistSCPP import margDistSCPP 
+ 
+from ssapy.pricePrediction.margDistSCPP import margDistSCPP
 
 class hist(object):
     """

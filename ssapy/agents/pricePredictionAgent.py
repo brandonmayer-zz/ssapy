@@ -10,8 +10,8 @@ Yoon & Wellman 2011 and use price prediction strategies.
 import sys
 
 from simYW import *
-from aucSim.pricePrediction.pointSCPP import *
-from aucSim.pricePrediction.margDistSCPP import *
+from ssapy.pricePrediction.pointSCPP import *
+from ssapy.pricePrediction.margDistSCPP import *
 
 class pricePredictionAgent(simYW):
     """

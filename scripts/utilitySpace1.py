@@ -65,10 +65,5 @@ def main():
     upv = margDist2.margUpv(expectedPrices = expectedPrices)
     
     
-    
-    
-    
-    
-
 if __name__ == "__main__":
     main()

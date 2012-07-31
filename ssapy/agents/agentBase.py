@@ -15,17 +15,15 @@ class agentBase(object):
     """
     nextId = 0
     def __init__(self, **kwargs):
-        if 'name' in kwargs:
-            self.name = kwargs['name']
-        else:
-            self.name = 'Anonymous'
+        
+        self.name = kwargs.get('Name','Anonymous')
         
         if 'id' in kwargs:
             self.id = kwargs['id']
         else:
             self.id           = agentBase.nextId
             agentBase.nextId += 1
-
+            
     def id(self):
         return self.id
     

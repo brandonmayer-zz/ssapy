@@ -1,5 +1,9 @@
-from aucSim.agents import *
-
+#from aucSim.agents import *
+from ssapy.agents.riskAware import riskAwareTMUS64, riskEvaluator8, riskEvaluator64, riskAwareTMUS256
+from ssapy.agents.targetMU import targetMUS8, targetMU8
+from ssapy.agents.averageMU import averageMU
+from ssapy.agents.bidEvaluator import bidEvaluatorSMU8, bidEvaluatorSMU64, bidEvaluatorTMUS8, bidEvaluatorRaTMUS8
+ 
 #from aucSim.simultaneousAuction import *
 from ssapy.auctions.simultaneousAuction import simultaneousAuction 
 
@@ -9,31 +13,22 @@ import multiprocessing
 class parallelWorkerBase(object):
     def __init__(self, **kwargs):
         
+        self.agentTypeList      = kwargs.get('agentList')
+        self.nGames             = kwargs.get('nGames',100)
+        self.m                  = kwargs.get('m',5)
+        self.margDistPrediction = kwargs.get('margDistPrediction')        
+        self.A                  = kwargs.get('A')    
+        self.vmin               = kwargs.get('vmin',0)
+        self.vmax               = kwargs.get('vmax',50)
+        
         numpy.testing.assert_('margDistPrediction' in kwargs,
                               msg="Must specify a margianl price prediction distribution.")
         
         numpy.testing.assert_(isinstance(kwargs['margDistPrediction'],margDistSCPP),
                               msg="margDistPrediction must be an instance of margDistSCPP")
         
-        numpy.testing.assert_('agentList' in kwargs,
-                              msg="Must specify a list of agents.")
-        
-        if isinstance(kwargs['agentList'],list):
+        if isinstance(self.agentTypeList,list):
             [numpy.testing.assert_(isinstance(agent,basestring)) for agent in kwargs['agentList']]
-        
-        self.agentTypeList = kwargs['agentList']
-        
-        self.nGames = kwargs.get('nGames',100)
-        
-        self.m      = kwargs.get('m',5)
-        
-        self.margDistPrediction = kwargs['margDistPrediction']
-        
-        self.A = kwargs.get('A')
-    
-        self.vmin = kwargs.get('vmin',0)
-        
-        self.vmax = kwargs.get('vmax',50)
     
     def __call__(self,*args, **kwargs):
         raise AssertionError('Cannot Call a parallelWorkerBase')
@@ -42,13 +37,12 @@ class parallelWorkerBase(object):
         """
         Construct agents from a list of strings. An agent factory.
         """
-        
-        agentTypeList = kwargs.get('agentTypeList')
+        agentTypeList = kwargs.get('agentTypeList',self.agentTypeList)
             
         #will be set to none if not specified
         margDistPrediction = kwargs.get('margDistPrediction',self.margDistPrediction)
         
-        m = kwargs.get('m',self.m)
+        m = kwargs.get('m',margDistPrediction.m)
         
         agentList = []
         for i, agentType in enumerate(agentTypeList):
@@ -82,13 +76,13 @@ class parallelWorkerBase(object):
                                                   A                       = A) )
             elif agentTypeList[i] == 'targetMUS8':
                 agentList.append(targetMUS8(m                       = m,
-                                                 margDistPricePrediction = margDistPrediction))
+                                            margDistPricePrediction = margDistPrediction))
             elif agentTypeList[i] == 'targetMU8':
                 agentList.append(targetMU8(m                       = m,
-                                                 margDistPricePrediction = margDistPrediction))
+                                           margDistPricePrediction = margDistPrediction))
             elif agentTypeList[i] == 'straightMU8':
                 agentList.append(straightMU8(m                       = m,
-                                                 margDistPricePrediction = margDistPrediction))
+                                             margDistPricePrediction = margDistPrediction))
             elif agentTypeList[i] == 'averageMU':
                 agentList.append(averageMU(m                       = m,
                                            margDistPricePrediction = margDistPrediction))

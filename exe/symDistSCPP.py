@@ -13,11 +13,11 @@ Very similar in form and function to symmetricPointPricePrediciton.py script in 
 directory
 """
 
-from aucSim.agents.straightMU import *
-from aucSim.agents.targetMU import *
-from aucSim.agents.targetMUS import *
-from aucSim.agents.targetPriceDist import *
-from aucSim.agents.riskAware import *
+from ssapy.agents.straightMU import *
+from ssapy.agents.targetMU import *
+from ssapy.agents.targetMUS import *
+from ssapy.agents.targetPriceDist import *
+from ssapy.agents.riskAware import *
 
 import argparse
 from datetime import date
@@ -254,6 +254,7 @@ def main():
     
     args = parser.parse_args().__dict__
     
+    args['outDir'] = os.path.realpath(args['outDir'])
     if not os.path.isdir(args['outDir']):
         os.makedirs(args['outDir'])
     
