@@ -138,7 +138,7 @@ def ywSCPP(**kwargs):
             print 'Updated distribution in {0} seconds.'.format(updateFinish-updateStart)
             
             
-        ksList.append(ksStatistic(margDist1 = currentDist, margDist2 = updatedDist))
+        ksList.append(ksStat(margDist1 = currentDist, margDist2 = updatedDist))
         klList.append(klDiv(currentDist, updatedDist))
         
         if pltItr:
