@@ -390,9 +390,11 @@ class margDistSCPP(pointSCPP):
             colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
             lineStyles = ['-', '--', '-.', ':']
             markerStyles = ['o', 'v', '^', '<', '>', 's', 'p', '*', 'h', 'H', 'x', '+', 'D']
+            
             colorStyles = [j[0] + j[1] for j in itertools.product(markerStyles,[i[0] + i[1] for i in itertools.product(colors,lineStyles)])]
             numpy.random.shuffle(colorStyles)
             colorStyles = colorStyles[:len(self.data)]
+            
         
         fig = plt.figure()
         ax = fig.add_subplot(111)

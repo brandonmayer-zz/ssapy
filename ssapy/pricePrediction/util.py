@@ -1,5 +1,9 @@
 import numpy
-#from aucSim.pricePrediction.margDistSCPP import * 
+from ssapy.agents.straightMU import *
+from ssapy.agents.targetMU import *
+from ssapy.agents.targetMUS import *
+from ssapy.agents.targetPriceDist import *
+from ssapy.agents.riskAware import *
 from ssapy.pricePrediction.margDistSCPP import margDistSCPP
 
 def ksStat(margDist1 = None, margDist2 = None):
@@ -75,3 +79,155 @@ def klDiv(margDist1, margDist2):
 
         
     return kldSum
+
+def updateDist(currDist = None, newDist = None, kappa = None, verbose = True, zeroEps = 0.00001):
+    
+    assert isinstance(currDist, margDistSCPP),\
+        "margDist1 must be an instance of margDistSCPP"
+        
+    assert isinstance(newDist, margDistSCPP),\
+        "margDist2 must be an instance of margDistSCPP"
+        
+    assert isinstance(kappa,float) or isinstance(kappa,int),\
+        "kappa must be a floating point number or integer"        
+    
+    #test there exists a marginal distribution for each good
+    numpy.testing.assert_equal(currDist.m, newDist.m)
+    
+    updatedDist = []
+    for idx in xrange(currDist.m):
+        
+        # test that the distributions are over the same bin indices
+        # if they are not this calculation is meaninless
+        numpy.testing.assert_equal(currDist.data[idx][1],newDist.data[idx][1])
+        
+        #the update equation
+        histTemp = currDist.data[idx][0] + kappa*(newDist.data[idx][0] - currDist.data[idx][0])
+        
+        #set all negative values to a value close to zero 
+        #we don't want to set the price probability completely to zero
+        #that way there is still some (small) chance of realizing that price
+        histTemp[numpy.nonzero(histTemp < 0)] = zeroEps
+        
+        # re-normalize
+        histTemp = histTemp.astype(numpy.float)/ \
+                numpy.sum(histTemp*numpy.diff(currDist.data[idx][1]), dtype=numpy.float)
+        
+        # a bit pedantic but better safe than sorry...
+        numpy.testing.assert_almost_equal(numpy.sum(histTemp*numpy.diff(currDist.data[idx][1]), dtype=numpy.float),
+                                          numpy.float(1.0),
+                                          err_msg = "Renomalization failed.")
+        
+        # make histogram, edge tuple
+        updatedDist.append((histTemp, currDist.data[idx][1]))
+    
+    #insert into a marg dist wrapper and return
+    return margDistSCPP(updatedDist)
+
+class symmetricDPPworker(object):
+    """
+    Functor to facilitate concurrency in symmetric self confirming price prediction (Yoon & Wellman 2011)
+    
+    Due to the homogeneity of the "games" defined in the self confirming price prediction,
+    We can specify an agent type and the number of goods that will participate in all acutions.
+    
+    Therefore create an instance of this class with the correct parameters then we can use
+    multiprocessing.Pool.map to pass a single argument to the callable class.
+    
+    When this class is called, it instantiates a new agent (so that each concurrent process
+    is run with a completely different agent) and returns a unique bid instance.
+    """
+    def __init__(self, args={}):
+        # store values for specific initialization
+        
+        numpy.testing.assert_('m' in args, 
+                              msg="Must Specify m in args.")
+        numpy.testing.assert_('agentType' in args, 
+                              msg="Must specify the type of participating agents.")
+        numpy.testing.assert_('nAgents' in args,
+                              msg="Must specify the number of participating agents.")
+        self.args = args
+    def __call__(self, margDistPrediciton = None):
+        """
+        Make the class callable with a single argument for multiprocessing.Pool.map()
+        """
+        agent = None
+        assert margDistPrediciton != None,\
+            "Must provide a marginal distribution price prediciton"
+        
+        if self.args['agentType'] == 'straightMU':
+            
+            agentList = []
+            for i in xrange(self.args['nAgents']):
+                agentList.append(straightMU(m=self.args['m']))
+            
+            bids = numpy.atleast_2d([agent.bid(margDistPrediction = margDistPrediciton) for agent in agentList])
+            
+            #the winning bids at auction
+            return numpy.max(bids,0)
+        
+        elif self.args['agentType'] == 'straightMU8':
+            agentList = [straightMU8(m=self.args['m']) for i in xrange(self.args['nAgents'])]
+            
+            bids = numpy.atleast_2d([agent.bid(margDistPrediction = margDistPrediciton) for agent in agentList])
+            
+            #the winning bids at auction
+            return numpy.max(bids,0)
+            
+        
+        elif self.args['agentType'] == 'targetPriceDist':
+            
+            agentList = []
+            for i in xrange(self.args['nAgents']):
+                agentList.append(targetPriceDist(m=self.args['m']))
+            
+            
+            bids = []
+            if 'method' in self.args:
+                if self.args['method'] == 'iTsample':
+                    numpy.testing.assert_('nSamples' in self.args, msg = "Must provide nSamples parameter")
+                    
+                    bids = [agent.SS({'margDistPrediction': margDistPrediciton,
+                                     'bundles'           : agent.allBundles(agent.m),
+                                     'l'                 : agent.l,
+                                     'valuation'         : agent.valuation(agent.allBundles(agent.m), agent.v, agent.l),
+                                     'method'            : self.args['method'],
+                                     'nSamples'          : self.args['nSamples']}) for agent in agentList]
+                else:
+                    bids =[numpy.array(agent.bid({'margDistPrediction': margDistPrediciton})).astype('float') for agent in agentList]
+            
+#            print [agent.l for agent in agentList]
+            
+#            [agent.printSummary({'margDistPrediction': margDistPrediciton}) for agent in agentList]
+            
+            return numpy.max(bids,0)
+        
+        elif self.args['agentType'] == 'targetMUS8':
+            agentList = [targetMUS8(m=self.args['m']) for i in xrange(self.args['nAgents'])]
+            
+            bids = numpy.atleast_2d([agent.bid(margDistPrediction = margDistPrediciton) for agent in agentList])
+            
+            return numpy.max(bids,0)
+        
+        elif self.args['agentType'] == 'targetMU8':
+            agentList = [targetMU8(m=self.args['m']) for i in xrange(self.args['nAgents'])]
+            
+            bids = numpy.atleast_2d([agent.bid(margDistPrediction = margDistPrediciton) for agent in agentList])
+            
+            return numpy.max(bids,0)
+            
+        elif self.args['agentType'] == 'riskAware':
+            
+#            agent = riskAware(m = self.args['m'])
+            agentList = []
+            for i in xrange(args['nAgents']):
+                agentList.append(riskAware(m=self.args['m']))
+            
+            bids=[numpy.array(agent.bid({'margDistPrediction': margDistPrediciton})).astype('float') for agent in agentList]
+            
+            return numpy.max(bids,0)
+            
+        else:
+            print 'symmetricDPPworker.__call(self.margDistPrediction)'
+            print 'Unknown Agent Type: {0}'.format(agentType)
+            raise AssertionError

@@ -1,158 +1,189 @@
-from ssapy.multiprocessingAdaptor import Consumer
-from ssapy.parallelWorker import parallelWorkerBase
-from ssapy.auctions.simultaneousAuction import simultaneousAuction
-from ssapy.pricePrediction.util import klDiv
+from ssapy.agents.straightMU import *
+from ssapy.agents.targetMU import *
+from ssapy.agents.targetMUS import *
+from ssapy.agents.targetPriceDist import *
+from ssapy.agents.riskAware import *
 
-from sklearn import mixture
+from ssapy.pricePrediction.util import klDiv, ksStat, updateDist, symmetricDPPworker
+
+import matplotlib.pyplot as plot
 import numpy
-
 import multiprocessing
 import time
+import os
+import json
 
-class ywDPgmmTaskStraightMU8(parallelWorkerBase):
-    def __init__(self,**kwargs):
-        self.nAgents             = kwargs.get('nAgents',8)
-        self.nGames              = kwargs.get('nGames')
-        self.nSamples            = kwargs.get('nSamples',8)
-        self.model               = kwargs.get('model')
-
-    def __call__(self):
-        
-        if isinstance(self.model, mixture.GMM):
-            for agentIdx in xrange(self.nAgents):
-                samples = mixture.sample(8)
-                logProb = mixture.eval(samples)
-                prob    = numpy.exp(logProb)
-                expectedPrice = numpy.dot(prob,samples)
-                
-    #            expectedPrices = 
-        
-        agentSurplus = []
-        closingPrices = []
-        for g in self.nGames:
-            
-            #draw a new valuation
-            #maintain the same price prediction
-            for agent in agentList:
-                agent.randomValuation( vmin = self.pMin,
-                                       vmax = self.pMax,
-                                       m    = self.m)
-                
-                
-                
-            bids = [numpy.array(agent.bid()).astype('float') for agent in agentList]
-        
-            closingPrices.append(bids.max(0))
-            
-        return numpy.atleast_2d(closingPrices)
-        
-        
-
-
-def ywDPgmm(**kwargs):
-    #number of goods for auction
-    m             = kwargs.get('m', 5)
-    #list of participating agents
-    agentTypeList = kwargs.get('agentTypeList',['straightMU8']*8)
-    #number of inner loop games
-    nTotGames     = kwargs.get('nGames', 1000000)
-    #minimum price
-    pmin          = kwargs.get('vmin',0)
-    #maximum price
-    pmax          = kwargs.get('vmax',50)
-    #convergence histogram distance threshold
-    d             = kwargs.get('d',0.01)
-    #number of agents
-    nAgents       = kwargs.get('nAgents', 8)
-    #number of processors
-    nProc         = kwargs.get('nProc', multiprocessing.cpu_count() - 1)
+def ywSCPP(**kwargs):
+    oDir      = kwargs.get('oDir')
+    if oDir == None:
+        raise ValueError("Must provide oDir")
+    oDir = os.path.realpath(oDir)
     
-    #maximum number of iterations
-    L             = kwargs.get('L')
-    g             = kwargs.get('g')
-    A             = kwargs.get('A')
-    dampen        = kwargs.get('dampen',True)
-    verbose       = kwargs.get('verbose',True)
+    agentType = kwargs.get('agentType', 'straightMU8')
+    nAgents   = kwargs.get('nAgents',8)
+    m         = kwargs.get('m',5)
+    L         = kwargs.get('L',100)
+    d         = kwargs.get('d', 0.01)
+    g         = kwargs.get('g', 1000000)
+    minPrice  = kwargs.get('minPrice',0)
+    maxPrice  = kwargs.get('maxPrice',50)
+    nSamples  = kwargs.get('nSamples',8)
+    serial    = kwargs.get('serial', False)
+    dampen    = kwargs.get('dampen', True)
+    nProc     = kwargs.get('nProc', multiprocessing.cpu_count() - 1)
+    verbose   = kwargs.get('verbose',True)
+    pltItr    = kwargs.get('pltItr', True)
     
-    ksStat = numpy.zeros(L,dtype=numpy.float64)
     
     if verbose:
-        print 'Computing Marginal DPVGMM Self Confirming Price Prediction'
-        print 'agentTypeList = {0}'.format(agentTypeList)
-        print 'd             = {0}'.format(d)
-        print 'pMin          = {0}'.format(pMin)
-        print 'pMax          = {0}'.format(pMax)
-        print 'm             = {0}'.format(m)
-        print 'nAgents       = {0}'.format(len(agentTypeList))
-        print 'L             = {0}'.format(L)
-        print 'dampen        = {0}'.format(dampen)
-        print 'nProc         = {0}'.format(nProc)
-    
-    nGameList = []
-    if nTotGames % (nProc-1) > 0:
-        nGameList = [nTotGames/(nProc-1)]*(nProc-1)
-        nGameList.append(nTotGames%(nProc-1))
-    else:
-        nGameList = [nTotGames/(nProc)]*nProc
+        print'Computing Symmetric Self Confirming Point Price Prediction.'
         
-    #create the initial uniform distribution
+        print'Agent Type                   = {0}'.format(agentType)
+        
+        print 'Termination Threshold (d)    = {0}'.format(d)
+        
+        print'Number of Iterations        = {0}'.format(L)
+        
+        print'Number of Games             = {0}'.format(g)
+        
+        print'Number of Items per Auction = {0}'.format(m)
+        
+        print 'Using Dampining             = {0}'.format(dampen)
+        
+        if serial:
+            print 'Using serial implementation'
+        else:
+            print'Number of Parallel Cores    = {0}'.format(nProc)
+            
+        
+        print'Output Directory            = {0}'.format(oDir)
+    
+    sDPP = symmetricDPPworker({'agentType' : agentType,
+                               'm'         : m,
+                               'method'    : 'iTsample',
+                               'nSamples'  : nSamples,
+                               'nAgents'   : nAgents})
+    
+    #initial uniform distribution
     tempDist = []
-    p        = float(1)/round(pMax - pMin)
-    a        = [p]*(pMax-pMin)
-    binEdges = [bin for bin in xrange( int(args['maxPrice']-args['minPrice'])+1 ) ]
-    for i in xrange(args['m']):
+    p = float(1)/round(maxPrice - minPrice)
+    a = [p]*(maxPrice - minPrice)
+#    binEdges = [bin for bin in xrange( int(minPrice - maxPrice)+1 ) ]
+    binEdges = numpy.arange(minPrice,maxPrice+1,1)
+    for i in xrange(m):
         tempDist.append((numpy.atleast_1d(a),numpy.atleast_1d(binEdges)))
         
     currentDist = margDistSCPP(tempDist)
-        
+    
     #clean up
     # keep the binEdges for later histograms
     del p,a,tempDist
     
-    [consumers]
-    
+    ksList = []
+    klList = []
     kappa = 1
     for t in xrange(0,L):
-        
-        tasks = multiprocessing.JoinableQueue()
-        results = multiprocessing.Queue()
-        
-        consumers = [Consumer(tasks, results) for i in xrange(nProc)]
-        
-        [w.start() for w in consumers]
-        
         print ""
-        
+
         if verbose:
-            print "Iteration: {0}".format(t)
-            
+            print 'Iteration: {0}'.format(t)
+
+        # set up the dampining constant if so specified
         if dampen:
             kappa = float(L-t)/L
             
         if verbose:
             print 'kappa = {0}'.format(kappa)
-            gamesStart = time.time()
+            gamesStart = time.clock()
             
-        for ng in nGameList:
-            tasks.put(ywDPgmmTask(agentTypeList = agentTypeList,
-                                  A             = A,
-                                  nGames        = ng,
-                                  margDistPrediction = currentDist))
-          
+        result = []
         
-        for ng in nGameList:
-            tasks.put(None)
+        if serial:
+            # use serial 1 core implementation
+            result = numpy.atleast_2d([r for r in itertools.imap(sDPP, itertools.repeat(currentDist,times=g))]).astype(numpy.float)
+        else:
+            pool = multiprocessing.Pool(processes=nProc)
+            result = numpy.atleast_2d( pool.map(sDPP, itertools.repeat(currentDist,times=g)) ).astype(numpy.float)
+            pool.close()
+            pool.join()
+            
+        if verbose:
+            gamesFinish = time.clock()
+            print 'Finished {0} games in {1} seconds.'.format(g, gamesFinish-gamesStart)
+            
+        if verbose:
+            histStart=time.clock() 
+            
+        histData = [] 
+        histCount = []
+        for m in xrange(result.shape[1]):
+            histData.append(numpy.histogram(result[:,m],binEdges,density=True))
+            histCount.append(numpy.histogram(result[:,m],binEdges,density=False))
+            
+        if verbose:
+            histFinish = time.clock()
+            print 'Histogramed {0} marginal distributions of {1} games {2} seconds'.\
+                format(result.shape[1],g,histFinish-histStart)
+                
+        if verbose:
+            updateStart = time.clock()
+            
+        updatedDist = updateDist(currDist = currentDist, 
+                                 newDist = margDistSCPP(histData), 
+                                 kappa = kappa, 
+                                 verbose = verbose)
+        
+        if verbose:
+            updateFinish = time.clock()
+            print 'Updated distribution in {0} seconds.'.format(updateFinish-updateStart)
             
             
-        closingPrices = []
-        while not results.empty():
-            closingPrices.append(numpy.atleast_2d(results.get()))
-    
-        closingPrices = numpy.atleast_2d(closingPrices)
-    
-def main():
-    print 'hello yw'
-
+        ksList.append(ksStatistic(margDist1 = currentDist, margDist2 = updatedDist))
+        klList.append(klDiv(currentDist, updatedDist))
+        
+        if pltItr:
+            cs = cs = ['y--p', 'm-*', 'r-o','y-^','y-*']
+            graphname = os.path.join(oDir,'ywSCPP_itr_{0}.png'.format(L))
+            updatedDist.graphPdfToFile(graphname)
+        
+        if verbose:
+            print 'Previous Expected Prices = {0}'.format(currentDist.expectedPrices())
+            print 'New expected Prices      = {0}'.format(updatedDist.expectedPrices())
+            print 'KS Statistic between Successive Iterations = {0}'.format(ksStat[t])
+        
+        if ksStat[-1] <= d:
+            postfix = '{0}_{1}_{2}_{3}_{4}_{5}'.format(args['agentType'], args['g'], args['m'], args['d'],args['minPrice'],args['maxPrice'])
+            pklName = 'distPricePrediction_' + postfix + '.pkl'
+            txtName = 'distPricePrediction_' + postfix + '.txt'
+            
+            pricePredictionPklFilename = os.path.join(args['outDir'], pklName) 
+                                                      
+            updatedDist.savePickle(pricePredictionPklFilename)
+            
+            pricePredictionTxtFilename = os.path.join(args['outDir'], txtName)
+            
+            #this section could be improved....
+            testdata = []
+            for m in xrange(updatedDist.m):
+                if m == 0:
+                    textdata = numpy.vstack([updatedDist.data[m][0],updatedDist.data[m][1][:-1]])
+                else:
+                    textdata = numpy.vstack([textdata, numpy.vstack([updatedDist.data[m][0],updatedDist.data[m][1][:-1]])])
+                    
+            numpy.savetxt(pricePredictionTxtFilename,textdata)
+            
+            print ''
+            print'Terminated after {0} Iterations'.format(t)
+            print'Final Expected Price Vector = {0}'.format(updatedDist.expectedPrices())
+            
+            break
+        else:
+            currentDist = updatedDist
+            del updatedDist
+            
+            
 if __name__ == "__main__":
-    main()
-    
+    ywSCPP(oDir = "C:/research/auction/ywTest2",
+           g    = 1000)
+           
+        
