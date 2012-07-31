@@ -149,18 +149,18 @@ def ywSCPP(**kwargs):
         if verbose:
             print 'Previous Expected Prices = {0}'.format(currentDist.expectedPrices())
             print 'New expected Prices      = {0}'.format(updatedDist.expectedPrices())
-            print 'KS Statistic between Successive Iterations = {0}'.format(ksStat[t])
+            print 'KS Statistic between Successive Iterations = {0}'.format(ksList[-1])
         
-        if ksStat[-1] <= d:
-            postfix = '{0}_{1}_{2}_{3}_{4}_{5}'.format(args['agentType'], args['g'], args['m'], args['d'],args['minPrice'],args['maxPrice'])
+        if ksList[-1] <= d:
+            postfix = '{0}_{1}_{2}_{3}_{4}_{5}'.format(agentType, g, m, d,minPrice,maxPrice)
             pklName = 'distPricePrediction_' + postfix + '.pkl'
             txtName = 'distPricePrediction_' + postfix + '.txt'
             
-            pricePredictionPklFilename = os.path.join(args['outDir'], pklName) 
+            pricePredictionPklFilename = os.path.join(oDir, pklName) 
                                                       
             updatedDist.savePickle(pricePredictionPklFilename)
             
-            pricePredictionTxtFilename = os.path.join(args['outDir'], txtName)
+            pricePredictionTxtFilename = os.path.join(oDir, txtName)
             
             #this section could be improved....
             testdata = []
