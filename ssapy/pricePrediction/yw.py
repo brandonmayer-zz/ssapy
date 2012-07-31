@@ -176,10 +176,19 @@ def ywSCPP(**kwargs):
             print'Terminated after {0} Iterations'.format(t)
             print'Final Expected Price Vector = {0}'.format(updatedDist.expectedPrices())
             
+            ksListName = os.path.join(oDir,'ksList.json')
+            with open(ksListName,'w') as f:
+                json.dump(ksList,f)
+            klListName = os.path.join(oDir,'klList.json')
+            with open(klListName,'w') as f:
+                json.dump(klList,f)
+            
+            
             break
         else:
             currentDist = updatedDist
             del updatedDist
+            
             
             
 if __name__ == "__main__":
