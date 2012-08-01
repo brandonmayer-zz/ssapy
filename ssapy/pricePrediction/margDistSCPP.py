@@ -373,7 +373,10 @@ class margDistSCPP(pointSCPP):
             randNumbers = numpy.random.random_sample(nSamples)
             
             for idx in xrange(randNumbers.shape[0]):
-                binIdx = numpy.nonzero(cdf > randNumbers[idx])[0][0]
+                if randNumbers[idx] < cdf[0]:
+                    binIdx = 0
+                else:
+                    binIdx = numpy.nonzero(cdf <= randNumbers[idx])[0][-1]
                 samples[idx][m] = binEdges[binIdx]
                 
         return samples

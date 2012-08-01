@@ -143,8 +143,10 @@ def ywSCPP(**kwargs):
         
         if pltItr:
             cs = cs = ['y--p', 'm-*', 'r-o','y-^','y-*']
-            graphname = os.path.join(oDir,'ywSCPP_itr_{0}.png'.format(L))
-            updatedDist.graphPdfToFile(fname = graphname)
+            graphname = os.path.join(oDir,'ywSCPP_itr_{0}.png'.format(t))
+            updatedDist.graphPdfToFile(fname = graphname,
+                                       colorStyles = cs,
+                                       title = "ywSCPP, {0}, kld = {1}, ks = {2}".format(agentType,klList[-1],ksList[-1]))
         
         if verbose:
             print 'Previous Expected Prices = {0}'.format(currentDist.expectedPrices())
