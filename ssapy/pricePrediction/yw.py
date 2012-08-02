@@ -154,7 +154,7 @@ def ywSCPP(**kwargs):
             print 'New expected Prices      = {0}'.format(updatedDist.expectedPrices())
             print 'KS Statistic between Successive Iterations = {0}'.format(ksList[-1])
         
-        if ksList[-1] <= d:
+        if ksList[-1] <= d or t == (L-1):
             postfix = '{0}_{1}_{2}_{3}_{4}_{5}'.format(agentType, g, m, d,minPrice,maxPrice)
             pklName = 'distPricePrediction_' + postfix + '.pkl'
             txtName = 'distPricePrediction_' + postfix + '.txt'
