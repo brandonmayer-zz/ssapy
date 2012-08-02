@@ -128,6 +128,7 @@ def ywSCPP(**kwargs):
         if verbose:
             updateStart = time.clock()
             
+        
         updatedDist = updateDist(currDist = currentDist, 
                                  newDist = margDistSCPP(histData), 
                                  kappa = kappa, 
