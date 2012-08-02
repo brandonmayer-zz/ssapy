@@ -204,7 +204,7 @@ def yw2SCPP(**kwargs):
             
             pricePredictionPklFilename = os.path.join(oDir, pklName) 
                                                       
-            updatedDist.savePickle(pricePredictionPklFilename)
+            currentDist.savePickle(pricePredictionPklFilename)
             
             pricePredictionTxtFilename = os.path.join(oDir, txtName)
             
@@ -212,9 +212,9 @@ def yw2SCPP(**kwargs):
             testdata = []
             for m in xrange(updatedDist.m):
                 if m == 0:
-                    textdata = numpy.vstack([updatedDist.data[m][0],updatedDist.data[m][1][:-1]])
+                    textdata = numpy.vstack([updatedDist.data[m][0],currentDist.data[m][1][:-1]])
                 else:
-                    textdata = numpy.vstack([textdata, numpy.vstack([updatedDist.data[m][0],updatedDist.data[m][1][:-1]])])
+                    textdata = numpy.vstack([textdata, numpy.vstack([currentDist.data[m][0],currentDist.data[m][1][:-1]])])
                     
             numpy.savetxt(pricePredictionTxtFilename,textdata)
             
