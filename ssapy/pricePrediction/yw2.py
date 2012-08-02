@@ -82,6 +82,9 @@ def yw2SCPP(**kwargs):
             print'Number of Parallel Cores    = {0}'.format(nProc)
     
     
+    if not serial:
+        nGamesList = [g/nProc]*nProc
+        nGamesList[-1] += (g%nProc)
     
     #initial uniform distribution
     tempDist = []
@@ -106,9 +109,9 @@ def yw2SCPP(**kwargs):
             cs = cs = ['y--p', 'm-*', 'r-o','y-^','y-*']
             graphname = os.path.join(oDir,'ywSCPP_itr_{0}.png'.format(t))
             if not ksList:
-                title = "yw2SCPP, {0}, initial distribution".format(agentType)
+                title = "yw2SCPP, {0}, itr = {1}".format(agentType,t)
             else:
-                title = "ywSCPP, {0}, kld = {1}, ks = {2}".format(agentType,klList[-1],ksList[-1])
+                title = "ywSCPP, {0}, kld = {1}, ks = {2}, itr = {3}".format(agentType,klList[-1],ksList[-1],t)
             currentDist.graphPdfToFile(fname = graphname,
                                        colorStyles = cs,
                                        title = title)
@@ -122,8 +125,6 @@ def yw2SCPP(**kwargs):
         else:
             kappa = 1
             
-        
-        
         if serial:
             result = numpy.zeros(g,m)
             for i in xrange(g):
@@ -138,10 +139,7 @@ def yw2SCPP(**kwargs):
             
             #start the consumers
             [w.start() for w in consumers]
-            
-            nGamesList = [g/nProc]*nProc
-            nGamesList[-1] += (g%nProc)
-            
+                     
             [tasks.put( yw2Task(agentType = agentType, nAgents = nAgents, margDist = currentDist, nGames = nGames) ) for nGames in nGamesList]
             
             [tasks.put(None) for i in xrange(nProc)]
@@ -160,7 +158,10 @@ def yw2SCPP(**kwargs):
                 print ""
                 print "Collecting Results"
                 start = time.time()
-                
+             
+            
+            
+               
             rList = []
             while not results.empty():
                 rList.append(results.get())
@@ -170,6 +171,9 @@ def yw2SCPP(**kwargs):
             if verbose:
                 print ""
                 print "Done collecting results in {0} seconds".format(time.time() - start)
+                
+            [w.terminate() for w in consumers]
+            del results,tasks,consumers
         
             
         histData = [] 
@@ -217,20 +221,21 @@ def yw2SCPP(**kwargs):
             
             break
         else:
-            currentDist = updateDist(currentDist, newDist, kappa)
             
+            currentDist = updateDist(currentDist, newDist, kappa)
+            del result, newDist
             
         
         
 if __name__ == "__main__":
     oDir = "C:/auctionResearch/experiments/yw2/debug"
-    agentType = "straightMU8"
+    agentType = "targetMU8"
     minPrice  = 0
     maxPrice  = 50
     m         = 5
     L         = 100
     d         = 0.01
-    g         = 1000
+    g         = 20000
 #    tempDist = []
 #    p = float(1)/round(maxPrice - minPrice)
 #    a = [p]*(maxPrice - minPrice)
