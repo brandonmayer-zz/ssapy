@@ -210,9 +210,9 @@ def yw2SCPP(**kwargs):
             
             #this section could be improved....
             testdata = []
-            for m in xrange(updatedDist.m):
+            for m in xrange(currentDist.m):
                 if m == 0:
-                    textdata = numpy.vstack([updatedDist.data[m][0],currentDist.data[m][1][:-1]])
+                    textdata = numpy.vstack([currentDist.data[m][0],currentDist.data[m][1][:-1]])
                 else:
                     textdata = numpy.vstack([textdata, numpy.vstack([currentDist.data[m][0],currentDist.data[m][1][:-1]])])
                     
@@ -220,7 +220,7 @@ def yw2SCPP(**kwargs):
             
             print ''
             print'Terminated after {0} Iterations'.format(t)
-            print'Final Expected Price Vector = {0}'.format(updatedDist.expectedPrices())
+            print'Final Expected Price Vector = {0}'.format(currentDist.expectedPrices())
             
             ksListName = os.path.join(oDir,'ksList.json')
             with open(ksListName,'w') as f:
