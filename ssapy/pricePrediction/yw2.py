@@ -186,7 +186,7 @@ def yw2SCPP(**kwargs):
         ksList.append(ksStat(currentDist, newDist))
         klList.append(klDiv(currentDist, newDist))
         
-        if ksList[-1] < d:
+        if ksList[-1] < d or t == (L-1):
             
             postFix = '{0}_{1}_{2}_{3}_{4}_{5}'.format(agentType, g, m, d,minPrice,maxPrice)
             pklName = 'distPricePrediction_' + postfix + '.pkl'
