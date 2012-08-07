@@ -18,7 +18,7 @@ def simulateAuction( **kwargs ):
     nGames        = kwargs.get('nGames')
     m             = margDist.m
 
-    winningBids = winningBids = numpy.zeros((nGames,m))
+    winningBids = numpy.zeros((nGames,m))
     
     for g in xrange(nGames):
         agentList = [margAgentFactory(agentType = agentType, m = m) for i in xrange(nAgents)]
