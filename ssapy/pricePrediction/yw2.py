@@ -119,9 +119,9 @@ def yw2SCPP(**kwargs):
             cs = cs = ['y--p', 'm-*', 'r-o','y-^','y-*']
             graphname = os.path.join(oDir,'ywSCPP_itr_{0}.png'.format(t))
             if not ksList:
-                title = "yw2SCPP, {0}, itr = {1}".format(agentType,t)
+                title = "yw2SCPP, {0}, \n itr = {1}".format(agentType,t)
             else:
-                title = "ywSCPP, {0}, kld = {1}, ks = {2}, itr = {3}".format(agentType,klList[-1],ksList[-1],t)
+                title = "ywSCPP, {0} \n kld = {1}, ks = {2} \nitr = {3}".format(agentType,klList[-1],ksList[-1],t)
             currentDist.graphPdfToFile(fname = graphname,
                                        colorStyles = cs,
                                        title = title)
