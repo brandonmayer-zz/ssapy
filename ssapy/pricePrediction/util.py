@@ -6,6 +6,42 @@ from ssapy.agents.targetPriceDist import *
 from ssapy.agents.riskAware import *
 from ssapy.pricePrediction.margDistSCPP import margDistSCPP
 
+from sklearn import mixture
+import time
+
+def aicFit(X, compRange = range(1,6), verbose = True):
+    if verbose:
+        print 'starting aicFit(...)'
+        start = time.time()
+        
+    clfList = [mixture.GMM(n_components = c) for c in compRange]
+    
+    [clf.fit(X) for clf in clfList]
+    
+    aicList = [clf.aic(X) for clf in clfList]
+    
+    argMinAic = numpy.argmin(aicList)
+    
+    if verbose:
+        print 'Finished aicFit(...) in {0} seconds'.format(time.time()-start)
+        
+    return clfList[argMinAic], aicList, compRange
+
+def drawGMM(clf, nSamples = 8, minPrice = 0, maxPrice = 50):
+    
+    samples = []
+#    for i in xrange(nSamples):
+    while len(samples) < nSamples:
+        s = clf.sample(1)[0]
+        if s < maxPrice and s > minPrice:
+            samples.append(s)
+    samples = numpy.atleast_2d(samples)     
+    return samples
+    
+    
+        
+    
+
 def ksStat(margDist1 = None, margDist2 = None):
     """
     A helper function for computing the maximum Kolmogorov-Smirnov (KS)
