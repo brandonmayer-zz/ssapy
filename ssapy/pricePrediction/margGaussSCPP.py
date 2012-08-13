@@ -3,7 +3,7 @@ from sklearn import mixture
 from ssapy.multiprocessingAdaptor import Consumer
 from ssapy.agents.agentFactory import margAgentFactory
 from ssapy.pricePrediction.margDistSCPP import margDistSCPP
-from ssapy.pricePrediction.util import aicFit, drawGMM
+from ssapy.pricePrediction.util import aicFit, drawGMM, plotMargGMM, apprxMargKL
 
 import matplotlib.pyplot as plt
 from scipy.stats import norm
@@ -15,32 +15,7 @@ import time
 import random
 import itertools
 import argparse
-
-def plotClfList(**kwargs):
     
-    clfList = kwargs.get('clfList')
-    colors  = kwargs.get('colors',['r-o,','b-*','g-^','m-<','c-.'])
-    
-    colorCycle = itertools.cycle(colors)
-    
-    plt.figure()
-    plt.plt() 
-    
-def apprxKL(clf1, clf2, nSamples = 1000):
-    
-    kl = 0
-    for idx, c1 in enumerate(clf1):
-        c2 = clf2[idx]
-        samples1 = clf1.sample(nSamples)
-        samples2 = clf2.sample(nSamples)
-        f1 = c1.eval(samples1)
-        g1 = c2.eval(samples1)
-        f2 = c1.eval(samples2)
-        g2 = c2.eval(samples2)
-        d1 = (1/nSamples)*sum(f1/g1)
-        d2 = (1/nSamples)*sum(g2/f2)
-        kl += (d1 + d2)
-
 def simulateAuctionGMM( **kwargs ):
     agentType  = kwargs.get('agentType')
     nAgents    = kwargs.get('nAgents',8)
@@ -81,7 +56,7 @@ def simulateAuctionGMM( **kwargs ):
         
     return winningBids
 
-
+                     
 def margGaussSCPP(**kwargs):
     oDir = kwargs.get('oDir')
     if not oDir:
@@ -91,12 +66,17 @@ def margGaussSCPP(**kwargs):
     agentType = kwargs.get('agentType',"straightMV")
     nAgents   = kwargs.get('nAgnets',8)
     nGames    = kwargs.get('nGames',10)
+    nSamples  = kwargs.get('nSamples',8)
     m         = kwargs.get('m',5)
     minPrice  = kwargs.get('minPrice',0)
     maxPrice  = kwargs.get('maxPrice',50)
     serial    = kwargs.get('serial',False)
     klSamples = kwargs.get('klSamples',1000)
+    maxItr    = kwargs.get('maxItr', 100)
+    tol       = kwargs.get('tol', 0.01)
+    pltDist   = kwargs.get('pltDist',True)
     verbose   = kwargs.get('verbose',True) 
+    nProc     = kwargs.get('nProc',multiprocessing.cpu_count()-1)
     
     if verbose:
         print 'agentType = {0}'.format(agentType)
@@ -119,28 +99,73 @@ def margGaussSCPP(**kwargs):
     
     clfList = None
     clfPrev = None
-    if serial:
+    
+    for itr in xrange(maxItr):
         
-        for g in xrange(nGames):
-            
+        if serial:
             winningBids = simulateAuctionGMM(agentType = agentType,
                                              nAgents   = nAgents,
                                              clfList   = clfList,
-                                             nSamples  = 8,
+                                             nSamples  = nSamples,
                                              nGames    = nGames,
                                              m         = m)
-            
-            clfList = []
-            for i in xrange(winningBids.shape[1]):
-                clf, aicList, compRange = aicFit(winningBids[:,i])
-                clfList.append(clf)
-                
-            if clfPrev:
-                kl = apprxKl(clfList, clfPrev, nSamples)
-        
-            clfPrev = clfList
         else:
+            pool = multiprocessing.Pool(nProc)
+            
+            winningBids = numpy.zeros((nGames,m))
+            nGameList = [nGames//nProc]*nProc
+            nGameList[-1] += (nGames % nProc)
+            
+            results = []
+            for p in nProc:
+                ka = {'agentType':agentType, 
+                      'nAgents':nAgents,
+                      'clfList':clfList,
+                      'nSamples':nSamples,
+                      'nGames':nGamesList[p],'m':m}
+                results.append(pool.apply_async(simulateAuctionGMM, kwds = ka))
+            
+            pool.close()
+            
+            pool.join()
+            
+            start_row = 0
+            end_row = 0
+            for idx, r in enumerate(results):
+                end_row += nGameList[idx]
+                winningBids[start_row:(end_row-1),:] = r.get()
+                results[idx]._value = []
+                start_row = end_row
+            
             pass
+        
+        
+        clfList = []
+        for i in xrange(winningBids.shape[1]):
+            clf, aicList, compRange = aicFit(winningBids[:,i])
+            clfList.append(clf)
+            
+        
+            
+        if pltDist:
+            pltDir = os.path.join(oDir,'scppPlts')
+            if not os.path.exists(pltDir):
+                os.makedirs(pltDir)
+            oFile = os.path.join(oDir, 'scppPlts', 'gaussMargSCPP_{0}.png'.format(itr))
+            plotMargGMM(clfList = clfList, 
+                        oFile = oFile, 
+                        minPrice = minPrice, 
+                        maxPrice = maxPrice,
+                        title = "Marginal Gaussian SCPP itr = {0}".format(itr))
+            
+        if clfPrev:
+            kl = apprxMargKL(clfList, clfPrev, klSamples)
+            if kl < tol:
+                print 'kld = {0} < tol = {1}'.format(kl,tol)
+                break
+    
+        clfPrev = clfList
+        
     
     
 
@@ -154,10 +179,13 @@ def main():
     parser.add_argument('-v', "--verbose",     action = "store", type = bool,  dest = "verbose",   default = True)
     parser.add_argument('-s', "--serial",      action = "store", type = bool,  dest = "serial",    default = False)
     parser.add_argument('-np',"--nProc",       action = "store", type = int,   dest = "nProc",     default = multiprocessing.cpu_count() - 1)
-    parser.add_argument('-kls', "--klSamples", action = "store", type = int,  dest = "klSamples", defulat = 1000)
+    parser.add_argument('-kls', "--klSamples", action = "store", type = int,   dest = "klSamples", default = 1000)
     parser.add_argument('-mip', "--minPrice",  action = "store", type = int,   dest = "minPrice",  default = 0)
     parser.add_argument('-map', "--maxPrice",  action = "store", type = int,   dest = "maxPrice",  default = 50)
-    parser.add_argument("--serial",            action = "store", type = str,   dest = "serial",    default = False)
+    parser.add_argument("--maxItr",            action = "store", type = int,   dest = "maxItr",    default = 100)
+    parser.add_argument("--tol",               action = "store", type = int,   dest = "tol",       default = 0.01)
+    parser.add_argument("--pltDist",           action = "store", type = bool,  dest = "pltDist",   default = True)
+    
     
     opts = parser.parse_args()
     
@@ -168,6 +196,12 @@ def main():
     verbose   = opts.verbose
     minPrice  = opts.minPrice
     maxPrice  = opts.maxPrice
+    serial    = opts.serial
+    maxItr    = opts.maxItr
+    tol       = opts.tol
+    pltDist   = opts.pltDist
+    klSamples = opts.klSamples
+    nProc     = opts.nProc
     
     margGaussSCPP(oDir      = oDir,
                   agentType = agentType,
@@ -176,6 +210,11 @@ def main():
                   minPrice  = minPrice,
                   maxPrice  = maxPrice,
                   serial    = serial,
+                  maxItr    = maxItr,
+                  tol       = tol,
+                  pltDist   = pltDist,
+                  klSamples = klSamples,
+                  nProc     = nProc,
                   verbose   = verbose)
     
     

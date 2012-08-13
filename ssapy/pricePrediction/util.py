@@ -5,10 +5,60 @@ from ssapy.agents.targetMUS import *
 from ssapy.agents.targetPriceDist import *
 from ssapy.agents.riskAware import *
 from ssapy.pricePrediction.margDistSCPP import margDistSCPP
-
 from sklearn import mixture
-import time
+import matplotlib.pyplot as plt
 
+import time
+import os
+import itertools
+
+def apprxMargKL(clf1, clf2, nSamples = 1000):
+    
+    kl = 0
+    for idx, c1 in enumerate(clf1):
+        c2 = clf2[idx]
+        samples1 = c1.sample(nSamples)
+        samples2 = c2.sample(nSamples)
+        f1 = c1.eval(samples1)[0]
+        g1 = c2.eval(samples1)[0]
+        f2 = c1.eval(samples2)[0]
+        g2 = c2.eval(samples2)[0]
+        d1 = numpy.mean(f1/g1)
+        d2 = numpy.mean(f2/g2)
+        kl += (d1 + d2)
+    return kl
+
+def plotMargGMM(**kwargs):
+    clfList = kwargs.get('clfList')
+    oFile   = kwargs.get('oFile')
+    minPrice = kwargs.get('minPrice',0)
+    maxPrice = kwargs.get('maxPrice',50)
+    colors   = kwargs.get('colors', ['r','g','b','k','m','c','y'])
+    
+    title   = kwargs.get('title', "Marginal Gaussian")
+    xlabel  = kwargs.get('xlabel', "price")
+    ylabel  = kwargs.get(r"$p(closing price)$")
+    
+    colorCycle = itertools.cycle(colors)
+    m = len(clfList)
+    x = numpy.linspace(minPrice, maxPrice, (maxPrice-minPrice)*5 , endpoint = True)
+    
+    ax = plt.subplot(111)
+    for idx, clf in enumerate(clfList):
+#        a = clf.eval(x)
+        plt.plot(x,numpy.exp(clf.eval(x)[0]),
+                 color=next(colorCycle),
+                 label = 'good {0}'.format(idx))
+        
+    leg = ax.legend(loc = 'best',fancybox = True)
+    leg.get_frame().set_alpha(0.5)
+    
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    
+    plt.savefig(oFile)
+    
 def aicFit(X, compRange = range(1,6), verbose = True):
     if verbose:
         print 'starting aicFit(...)'
