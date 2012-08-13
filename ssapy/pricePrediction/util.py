@@ -43,6 +43,7 @@ def plotMargGMM(**kwargs):
     m = len(clfList)
     x = numpy.linspace(minPrice, maxPrice, (maxPrice-minPrice)*5 , endpoint = True)
     
+    fig = plt.figure()
     ax = plt.subplot(111)
     for idx, clf in enumerate(clfList):
 #        a = clf.eval(x)
@@ -58,6 +59,8 @@ def plotMargGMM(**kwargs):
     plt.ylabel(ylabel)
     
     plt.savefig(oFile)
+    
+#    fig.remove()
     
 def aicFit(X, compRange = range(1,6), verbose = True):
     if verbose:

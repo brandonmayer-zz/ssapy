@@ -99,7 +99,7 @@ def margGaussSCPP(**kwargs):
     
     clfList = None
     clfPrev = None
-    
+    klList = []
     for itr in xrange(maxItr):
         
         if serial:
@@ -117,12 +117,12 @@ def margGaussSCPP(**kwargs):
             nGameList[-1] += (nGames % nProc)
             
             results = []
-            for p in nProc:
+            for p in xrange(nProc):
                 ka = {'agentType':agentType, 
                       'nAgents':nAgents,
                       'clfList':clfList,
                       'nSamples':nSamples,
-                      'nGames':nGamesList[p],'m':m}
+                      'nGames':nGameList[p],'m':m}
                 results.append(pool.apply_async(simulateAuctionGMM, kwds = ka))
             
             pool.close()
@@ -133,11 +133,9 @@ def margGaussSCPP(**kwargs):
             end_row = 0
             for idx, r in enumerate(results):
                 end_row += nGameList[idx]
-                winningBids[start_row:(end_row-1),:] = r.get()
+                winningBids[start_row:end_row,:] = r.get()
                 results[idx]._value = []
                 start_row = end_row
-            
-            pass
         
         
         clfList = []
@@ -146,22 +144,33 @@ def margGaussSCPP(**kwargs):
             clfList.append(clf)
             
         
+        if clfPrev:
+            kl = apprxMargKL(clfList, clfPrev, klSamples)
+            klList.append(kl)
             
         if pltDist:
             pltDir = os.path.join(oDir,'scppPlts')
             if not os.path.exists(pltDir):
                 os.makedirs(pltDir)
             oFile = os.path.join(oDir, 'scppPlts', 'gaussMargSCPP_{0}.png'.format(itr))
+            if klList: 
+                title = "margGaussSCPP itr = {0} kld = {1}".format(itr,klList[-1])
+            else:
+                title = "margGaussSCPP itr = {0}".format(itr)
             plotMargGMM(clfList = clfList, 
                         oFile = oFile, 
                         minPrice = minPrice, 
                         maxPrice = maxPrice,
-                        title = "Marginal Gaussian SCPP itr = {0}".format(itr))
+                        title = title)
             
-        if clfPrev:
-            kl = apprxMargKL(clfList, clfPrev, klSamples)
-            if kl < tol:
-                print 'kld = {0} < tol = {1}'.format(kl,tol)
+        if klList:
+            if klList[-1] < tol:
+                klFile = os.path.join(oDir,'kld.json')
+                with open(klFile,'w') as f:
+                    json.dump(klList,f)
+                    
+                print 'kld = {0} < tol = {1}'.format(klList[-1],tol)
+                print 'DONE'
                 break
     
         clfPrev = clfList
