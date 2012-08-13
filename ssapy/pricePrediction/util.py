@@ -38,10 +38,6 @@ def drawGMM(clf, nSamples = 8, minPrice = 0, maxPrice = 50):
     samples = numpy.atleast_2d(samples)     
     return samples
     
-    
-        
-    
-
 def ksStat(margDist1 = None, margDist2 = None):
     """
     A helper function for computing the maximum Kolmogorov-Smirnov (KS)
