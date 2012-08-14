@@ -54,17 +54,6 @@ def margGaussSCPP(**kwargs):
         print 'serial    = {0}'.format(serial)
         print 'nProc     = {0}'.format(nProc)
         print 'minCovar  = {0}'.format(minCovar)
-        
-        
-    
-    binEdges  = numpy.arange(minPrice,maxPrice+1,1)
-    tempDist = []
-    p = float(1)/round(maxPrice - minPrice)
-    a = [p]*(maxPrice - minPrice)
-    for i in xrange(m):
-        tempDist.append((numpy.atleast_1d(a), numpy.atleast_1d(binEdges)))
-        
-    currentDist = margDistSCPP(tempDist)
     
     clfList = None
     clfPrev = None
