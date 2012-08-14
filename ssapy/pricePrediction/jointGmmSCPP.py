@@ -4,7 +4,7 @@ from ssapy.multiprocessingAdaptor import Consumer
 from ssapy.agents.agentFactory import margAgentFactory
 from ssapy.pricePrediction.margDistSCPP import margDistSCPP
 from ssapy.pricePrediction.util import aicFit, drawGMM, plotMargGMM, apprxMargKL
-from ssapy.pricePrediction import simulateAuctionGMM
+from ssapy.pricePrediction.util import simulateAuctionJointGMM
 
 import matplotlib.pyplot as plt
 from scipy.stats import norm
@@ -16,6 +16,7 @@ import time
 import random
 import itertools
 import argparse
+import pickle
 
 def jointGaussSCPP(**kwargs):
     oDir = kwargs.get('oDir')
@@ -37,6 +38,8 @@ def jointGaussSCPP(**kwargs):
     pltDist   = kwargs.get('pltDist',True)
     nProc     = kwargs.get('nProc',multiprocessing.cpu_count()-1)
     minCovar  = kwargs.get('minCovar',9)
+    covarType = kwargs.get('covarType','full')
+    savePkl   = kwargs.get('savePkl',True)
     verbose   = kwargs.get('verbose',True) 
     
     if verbose:
@@ -56,24 +59,23 @@ def jointGaussSCPP(**kwargs):
         
         
     
-    binEdges  = numpy.arange(minPrice,maxPrice+1,1)
-    tempDist = []
-    p = float(1)/round(maxPrice - minPrice)
-    a = [p]*(maxPrice - minPrice)
-    for i in xrange(m):
-        tempDist.append((numpy.atleast_1d(a), numpy.atleast_1d(binEdges)))
+    if savePkl:
+        pklDir = os.path.join(oDir, 'gmmPkl')
+        if not os.path.exists(pklDir):
+            os.makedirs(pklDir)
         
-    currentDist = margDistSCPP(tempDist)
-    
     clfCurr = None
     clfPrev = None
     klList = []
     for itr in xrange(maxItr):
-        
+        if verbose:
+            print 
+            print 'Iteration = {0}'.format(itr)
+            
         if serial:
-            winningBids = simulateAuctionGMM(agentType = agentType,
+            winningBids = simulateAuctionJointGMM(agentType = agentType,
                                              nAgents   = nAgents,
-                                             clfList   = clfList,
+                                             clf       = clfCurr,
                                              nSamples  = nSamples,
                                              nGames    = nGames,
                                              m         = m)
@@ -88,10 +90,10 @@ def jointGaussSCPP(**kwargs):
             for p in xrange(nProc):
                 ka = {'agentType':agentType, 
                       'nAgents':nAgents,
-                      'clfList':clfList,
+                      'clf':clfCurr,
                       'nSamples':nSamples,
                       'nGames':nGameList[p],'m':m}
-                results.append(pool.apply_async(simulateAuctionGMM, kwds = ka))
+                results.append(pool.apply_async(simulateAuctionJointGMM, kwds = ka))
             
             pool.close()
             
@@ -107,6 +109,11 @@ def jointGaussSCPP(**kwargs):
         
         
         clfCurr, aicList, compRange = aicFit(winningBids, minCovar = minCovar)    
+        
+        if savePkl:
+            pklFile = os.path.join(pklDir,'gmm_{0}.pkl'.format(itr))
+            with open(pklFile,'wb') as f:
+                pickle.dump(clfCurr, f)
         
         if clfPrev:
             kl = apprxMargKL(clfCurr, clfPrev, klSamples)

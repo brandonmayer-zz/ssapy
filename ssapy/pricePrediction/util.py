@@ -24,10 +24,23 @@ def apprxMargKL(clf1, clf2, nSamples = 1000):
         g1 = c2.eval(samples1)[0]
         f2 = c1.eval(samples2)[0]
         g2 = c2.eval(samples2)[0]
-        d1 = numpy.mean(f1/g1)
-        d2 = numpy.mean(f2/g2)
+        d1 = numpy.mean(f1-g1)
+        d2 = numpy.mean(f2-g2)
         kl += (d1 + d2)
     return kl
+
+def apprxJointGmmKL(clf1, clf2, nSamples = 1000):
+    
+    samples1 = clf1.sample(nSamples)
+    samples2 = clf2.sample(nSamples)
+    f1 = clf1.eval(samples1)[0]
+    g1 = clf2.eval(samples1)[0]
+    f2 = clf1.eval(samples2)[0]
+    g2 = clf2.eval(samples2)[0]
+    d1 = numpy.mean(f1 - g1)
+    d2 = numpy.mean(f2 - g2)
+    return d1 + d2
+    
 
 def plotMargGMM(**kwargs):
     clfList = kwargs.get('clfList')
@@ -63,14 +76,15 @@ def plotMargGMM(**kwargs):
     
 #    fig.remove()
     
-def aicFit(X, compRange = range(1,6), minCovar = 9, verbose = True):
+def aicFit(X, compRange = range(1,6), minCovar = 9, covarType = 'full', verbose = True):
     if verbose:
         print 'starting aicFit(...)'
         print 'compRange = {0}'.format(compRange)
         print 'minCovar  = {0}'.format(minCovar)
         start = time.time()
         
-    clfList = [mixture.GMM(n_components = c, min_covar = minCovar) for c in compRange]
+    clfList = [mixture.GMM(n_components = c, min_covar = minCovar, \
+                           covariance_type  = covarType) for c in compRange]
     
     [clf.fit(X) for clf in clfList]
     
@@ -96,7 +110,7 @@ def drawGMM(clf, nSamples = 8, minPrice = 0, maxPrice = 50):
 
 def drawJointGMM(clf, nSamples = 8, minPrice = 0, maxPrice = 50):
     samples = []
-    while len(samples < nSamples):
+    while len(samples) < nSamples:
         s = clf.sample(1)[0]
         if ~numpy.any(s > maxPrice) and ~numpy.any( s < minPrice):
             samples.append(s)
@@ -172,7 +186,7 @@ def simulateAuctionJointGMM(**kwargs):
             for agentIdx, agent in enumerate(agentList):
                 expectedPrices = numpy.zeros(m)
                 samples = drawJointGMM(clf,nSamples,minPrice,maxPrice)
-                expectedPrices[clfIdx] = numpy.mean(samples,0)
+                expectedPrices = numpy.mean(samples,0)
                 bids[agentIdx,:] = agent.bid(pointPricePrediction = expectedPrices)
             
         else:
