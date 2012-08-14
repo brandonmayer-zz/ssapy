@@ -65,7 +65,7 @@ def jointGaussSCPP(**kwargs):
         
     currentDist = margDistSCPP(tempDist)
     
-    clfList = None
+    clfCurr = None
     clfPrev = None
     klList = []
     for itr in xrange(maxItr):
@@ -106,28 +106,26 @@ def jointGaussSCPP(**kwargs):
                 start_row = end_row
         
         
-        clf, aicList, compRange = aicFit(winningBids, minCovar = minCovar)
-        clfList.append(clf)
-            
+        clfCurr, aicList, compRange = aicFit(winningBids, minCovar = minCovar)    
         
         if clfPrev:
-            kl = apprxMargKL(clfList, clfPrev, klSamples)
+            kl = apprxMargKL(clfCurr, clfPrev, klSamples)
             klList.append(kl)
             
-        if pltDist:
-            pltDir = os.path.join(oDir,'scppPlts')
-            if not os.path.exists(pltDir):
-                os.makedirs(pltDir)
-            oFile = os.path.join(oDir, 'scppPlts', 'gaussMargSCPP_{0}.png'.format(itr))
-            if klList: 
-                title = "margGaussSCPP itr = {0} kld = {1}".format(itr,klList[-1])
-            else:
-                title = "margGaussSCPP itr = {0}".format(itr)
-            plotMargGMM(clfList = clfList, 
-                        oFile = oFile, 
-                        minPrice = minPrice, 
-                        maxPrice = maxPrice,
-                        title = title)
+#        if pltDist:
+#            pltDir = os.path.join(oDir,'scppPlts')
+#            if not os.path.exists(pltDir):
+#                os.makedirs(pltDir)
+#            oFile = os.path.join(oDir, 'scppPlts', 'gaussMargSCPP_{0}.png'.format(itr))
+#            if klList: 
+#                title = "margGaussSCPP itr = {0} kld = {1}".format(itr,klList[-1])
+#            else:
+#                title = "margGaussSCPP itr = {0}".format(itr)
+#            plotMargGMM(clfList = clfList, 
+#                        oFile = oFile, 
+#                        minPrice = minPrice, 
+#                        maxPrice = maxPrice,
+#                        title = title)
             
         if klList:
             if klList[-1] < tol:
@@ -139,6 +137,6 @@ def jointGaussSCPP(**kwargs):
                 print 'DONE'
                 break
     
-        clfPrev = clfList
+        clfPrev = clfCurr
     
      

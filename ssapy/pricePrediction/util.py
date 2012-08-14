@@ -97,8 +97,8 @@ def drawGMM(clf, nSamples = 8, minPrice = 0, maxPrice = 50):
 def drawJointGMM(clf, nSamples = 8, minPrice = 0, maxPrice = 50):
     samples = []
     while len(samples < nSamples):
-        s = clf.sample(1)
-        if ~numpy.any(s > maxPrice) and ~numpy.any(s<minPrice):
+        s = clf.sample(1)[0]
+        if ~numpy.any(s > maxPrice) and ~numpy.any( s < minPrice):
             samples.append(s)
     samples = numpy.atleast_2d(samples)
     return samples
@@ -146,7 +146,7 @@ def simulateAuctionMargGMM( **kwargs ):
 def simulateAuctionJointGMM(**kwargs):
     agentType  = kwargs.get('agentType')
     nAgents    = kwargs.get('nAgents',8)
-    clfList    = kwargs.get('clfList')
+    clf        = kwargs.get('clf')
     nSamples   = kwargs.get('nSampeles',8)
     nGames     = kwargs.get('nGames')
     minPrice   = kwargs.get('minPrice',0)
@@ -160,20 +160,19 @@ def simulateAuctionJointGMM(**kwargs):
         
         agentList = [margAgentFactory(agentType = agentType, m = m) for i in xrange(nAgents)]
         
-        if clfList == None:
+        if clf == None:
             samples = ((maxPrice - minPrice) *numpy.random.rand(nAgents,nSamples,m)) + minPrice
             expectedPrices = numpy.mean(samples,1)
             bids = numpy.atleast_2d([agent.bid(pointPricePrediction = expectedPrices[i,:]) for idx, agent in enumerate(agentList)])
                     
-        elif isinstance(clfList, list):
+        elif isinstance(clf, mixture.GMM):
             
             bids = numpy.zeros((nAgents,m))
             
             for agentIdx, agent in enumerate(agentList):
                 expectedPrices = numpy.zeros(m)
-                for clfIdx, clf in enumerate(clfList):
-                    samples = drawGMM(clf, nSamples)
-                    expectedPrices[clfIdx] = numpy.mean(samples)
+                samples = drawJointGMM(clf,nSamples,minPrice,maxPrice)
+                expectedPrices[clfIdx] = numpy.mean(samples,0)
                 bids[agentIdx,:] = agent.bid(pointPricePrediction = expectedPrices)
             
         else:
