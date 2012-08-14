@@ -70,6 +70,9 @@ def jointGaussSCPP(**kwargs):
         pltDir = os.path.join(oDir,'gmmPlts')
         if not os.path.exists(pltDir):
             os.makedirs(pltDir)
+        histDir = os.path.join(oDir,'gmmHist')
+        if not os.path.exists(histDir):
+            os.makedirs(histDir)
         
     clfCurr = None
     clfPrev = None
@@ -131,29 +134,41 @@ def jointGaussSCPP(**kwargs):
         
             
         if pltDist:
-#            if m == 2:
-#            
-#                oFile = os.path.join(pltDir, 'gaussMargSCPP_{0}.png'.format(itr))
-#                if klList: 
-#                    title = "margGaussSCPP itr = {0} kld = {1}".format(itr,klList[-1])
-#                else:
-#                    title = "margGaussSCPP itr = {0}".format(itr)
-#                f = plt.figure()
-#                ax = plt.subplot(111,projection='3d')
-#                X = numpy.arange(minPrice,maxPrice,0.25)
-#                Y = numpy.arange(minPrice,maxPrice,0.25)
-#                xx,yy = numpy.meshgrid(X, Y)
-#                s = numpy.atleast_2d([xx.flatten(),yy.flatten()])
-##                Z = numpy.zeros(xx.shape)
-##                for i in xrange(xx.shape[0]):
-##                    for j in xrange(xx.shape[1]):
-##                        Z[i,j] = clfCurr.eval(numpy.atleast_2d([xx[i,j],yy[i,j]]))[0]
-#                Z = clfCurr.eval(numpy.transpose(s))
-#                
-#                surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.jet,
-#                                linewidth=0, antialiased=False)
+            if m == 2:
+            
+                oFile = os.path.join(pltDir, 'gaussMargSCPP_{0}.png'.format(itr))
+                if klList: 
+                    title = "margGaussSCPP itr = {0} kld = {1}".format(itr,klList[-1])
+                else:
+                    title = "margGaussSCPP itr = {0}".format(itr)
+                f = plt.figure()
+                ax = f.add_subplot(111,projection='3d')
+                ax.view_init(26,-142)
+                
+                X = numpy.arange(minPrice,maxPrice,0.5)
+                Y = numpy.arange(minPrice,maxPrice,0.5)
+                xx,yy = numpy.meshgrid(X, Y)
+                s = numpy.transpose(numpy.atleast_2d([xx.ravel(),yy.ravel()]))
+
+                Z = numpy.exp(clfCurr.eval(s)[0].reshape(xx.shape))
+                
+                surf = ax.plot_surface(xx, yy, Z, rstride=1, cstride=1, cmap=cm.jet,
+                                       linewidth=0, antialiased=False)
+                            
 #                f.colorbar(surf,shrink=0.5,aspect=5)
-#                plt.show()
+                
+                plt.savefig(oFile)
+                
+                of2 = os.path.join(histDir,'gaussJointHistSCPP_{0}.png'.format(itr))
+                H, xedges, yedges = numpy.histogram2d(winningBids[:,0], winningBids[:,1], bins = numpy.arange(minPrice,maxPrice+1),normed=True)
+                extent = [yedges[0], yedges[-1], xedges[0], xedges[-1]]
+                plt.figure()
+                plt.imshow(H,extent=extent,interpolation='nearest',origin='lower')
+                plt.colorbar()
+                
+                plt.savefig(of2)
+                
+                
             
         if klList:
             if numpy.abs(klList[-1]) < tol:
