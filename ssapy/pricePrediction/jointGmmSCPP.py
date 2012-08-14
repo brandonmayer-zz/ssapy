@@ -1,10 +1,10 @@
 import numpy
 from sklearn import mixture
 from ssapy.multiprocessingAdaptor import Consumer
-
+from ssapy.agents.agentFactory import margAgentFactory
 from ssapy.pricePrediction.margDistSCPP import margDistSCPP
 from ssapy.pricePrediction.util import aicFit, drawGMM, plotMargGMM, apprxMargKL
-from ssapy.pricePrediction.util import simulateAuctionMargGMM
+from ssapy.pricePrediction import simulateAuctionGMM
 
 import matplotlib.pyplot as plt
 from scipy.stats import norm
@@ -16,8 +16,8 @@ import time
 import random
 import itertools
 import argparse
-                
-def margGaussSCPP(**kwargs):
+
+def jointGaussSCPP(**kwargs):
     oDir = kwargs.get('oDir')
     if not oDir:
         raise ValueError("Must provide output Directory")
@@ -38,7 +38,6 @@ def margGaussSCPP(**kwargs):
     nProc     = kwargs.get('nProc',multiprocessing.cpu_count()-1)
     minCovar  = kwargs.get('minCovar',9)
     verbose   = kwargs.get('verbose',True) 
-    
     
     if verbose:
         print 'agentType = {0}'.format(agentType)
@@ -72,7 +71,7 @@ def margGaussSCPP(**kwargs):
     for itr in xrange(maxItr):
         
         if serial:
-            winningBids = simulateAuctionMargGMM(agentType = agentType,
+            winningBids = simulateAuctionGMM(agentType = agentType,
                                              nAgents   = nAgents,
                                              clfList   = clfList,
                                              nSamples  = nSamples,
@@ -92,7 +91,7 @@ def margGaussSCPP(**kwargs):
                       'clfList':clfList,
                       'nSamples':nSamples,
                       'nGames':nGameList[p],'m':m}
-                results.append(pool.apply_async(simulateAuctionMargGMM, kwds = ka))
+                results.append(pool.apply_async(simulateAuctionGMM, kwds = ka))
             
             pool.close()
             
@@ -107,10 +106,8 @@ def margGaussSCPP(**kwargs):
                 start_row = end_row
         
         
-        clfList = []
-        for i in xrange(winningBids.shape[1]):
-            clf, aicList, compRange = aicFit(winningBids[:,i], minCovar = minCovar)
-            clfList.append(clf)
+        clf, aicList, compRange = aicFit(winningBids, minCovar = minCovar)
+        clfList.append(clf)
             
         
         if clfPrev:
@@ -143,62 +140,5 @@ def margGaussSCPP(**kwargs):
                 break
     
         clfPrev = clfList
-        
     
-    
-
-def main():
-       
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-o', "--oDir",        action = "store", type = str,   dest = "oDir")
-    parser.add_argument('-at', "--agentType",  action = "store", type = str,   dest = "agentType", default = "straightMV")
-    parser.add_argument('-na',"--nAgents",     action = "store", type = int,   dest = "nAgents",   default = 8)
-    parser.add_argument('-ng',"--nGames",      action = "store", type = int,   dest = "nGames",    default = 10000 )
-    parser.add_argument('-v', "--verbose",     action = "store", type = bool,  dest = "verbose",   default = True)
-    parser.add_argument('-s', "--serial",      action = "store", type = bool,  dest = "serial",    default = False)
-    parser.add_argument('-np',"--nProc",       action = "store", type = int,   dest = "nProc",     default = multiprocessing.cpu_count() - 1)
-    parser.add_argument('-kls', "--klSamples", action = "store", type = int,   dest = "klSamples", default = 1000)
-    parser.add_argument('-mip', "--minPrice",  action = "store", type = int,   dest = "minPrice",  default = 0)
-    parser.add_argument('-map', "--maxPrice",  action = "store", type = int,   dest = "maxPrice",  default = 50)
-    parser.add_argument("--maxItr",            action = "store", type = int,   dest = "maxItr",    default = 100)
-    parser.add_argument("--tol",               action = "store", type = int,   dest = "tol",       default = 0.01)
-    parser.add_argument("--pltDist",           action = "store", type = bool,  dest = "pltDist",   default = True)
-    parser.add_argument("--minCovar",          action = "store", type = float, dest = "minCovar",  default = 1.0)
-    
-    opts = parser.parse_args()
-    
-    oDir      = opts.oDir
-    agentType = opts.agentType
-    nAgents   = opts.nAgents
-    nGames    = opts.nGames
-    verbose   = opts.verbose
-    minPrice  = opts.minPrice
-    maxPrice  = opts.maxPrice
-    serial    = opts.serial
-    maxItr    = opts.maxItr
-    tol       = opts.tol
-    pltDist   = opts.pltDist
-    klSamples = opts.klSamples
-    nProc     = opts.nProc
-    minCovar  = opts.minCovar
-    
-    margGaussSCPP(oDir      = oDir,
-                  agentType = agentType,
-                  nAgents   = nAgents,
-                  nGames    = nGames,
-                  minPrice  = minPrice,
-                  maxPrice  = maxPrice,
-                  serial    = serial,
-                  maxItr    = maxItr,
-                  tol       = tol,
-                  pltDist   = pltDist,
-                  klSamples = klSamples,
-                  nProc     = nProc,
-                  minCovar  = minCovar,
-                  verbose   = verbose)
-    
-    
-    
-    
-if __name__ == "__main__":
-    main()
+     

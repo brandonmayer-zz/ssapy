@@ -5,6 +5,7 @@ from ssapy.agents.targetMUS import *
 from ssapy.agents.targetPriceDist import *
 from ssapy.agents.riskAware import *
 from ssapy.pricePrediction.margDistSCPP import margDistSCPP
+from ssapy.agents.agentFactory import margAgentFactory
 from sklearn import mixture
 import matplotlib.pyplot as plt
 
@@ -92,6 +93,95 @@ def drawGMM(clf, nSamples = 8, minPrice = 0, maxPrice = 50):
             samples.append(s)
     samples = numpy.atleast_2d(samples)     
     return samples
+
+def drawJointGMM(clf, nSamples = 8, minPrice = 0, maxPrice = 50):
+    samples = []
+    while len(samples < nSamples):
+        s = clf.sample(1)
+        if ~numpy.any(s > maxPrice) and ~numpy.any(s<minPrice):
+            samples.append(s)
+    samples = numpy.atleast_2d(samples)
+    return samples
+
+def simulateAuctionMargGMM( **kwargs ):
+    agentType  = kwargs.get('agentType')
+    nAgents    = kwargs.get('nAgents',8)
+    clfList    = kwargs.get('clfList')
+    nSamples   = kwargs.get('nSampeles',8)
+    nGames     = kwargs.get('nGames')
+    minPrice   = kwargs.get('minPrice',0)
+    maxPrice   = kwargs.get('maxPrice',50)
+    m          = kwargs.get('m',5)
+    
+        
+    winningBids = numpy.zeros((nGames,m))
+    
+    for g in xrange(nGames):
+        
+        agentList = [margAgentFactory(agentType = agentType, m = m) for i in xrange(nAgents)]
+        
+        if clfList == None:
+            samples = ((maxPrice - minPrice) *numpy.random.rand(nAgents,nSamples,m)) + minPrice
+            expectedPrices = numpy.mean(samples,1)
+            bids = numpy.atleast_2d([agent.bid(pointPricePrediction = expectedPrices[i,:]) for idx, agent in enumerate(agentList)])
+                    
+        elif isinstance(clfList, list):
+            
+            bids = numpy.zeros((nAgents,m))
+            
+            for agentIdx, agent in enumerate(agentList):
+                expectedPrices = numpy.zeros(m)
+                for clfIdx, clf in enumerate(clfList):
+                    samples = drawGMM(clf, nSamples)
+                    expectedPrices[clfIdx] = numpy.mean(samples)
+                bids[agentIdx,:] = agent.bid(pointPricePrediction = expectedPrices)
+            
+        else:
+            raise ValueError("Unknown price dist type.") 
+        
+        winningBids[g,:] = numpy.max(bids,0)
+        
+    return winningBids
+
+def simulateAuctionJointGMM(**kwargs):
+    agentType  = kwargs.get('agentType')
+    nAgents    = kwargs.get('nAgents',8)
+    clfList    = kwargs.get('clfList')
+    nSamples   = kwargs.get('nSampeles',8)
+    nGames     = kwargs.get('nGames')
+    minPrice   = kwargs.get('minPrice',0)
+    maxPrice   = kwargs.get('maxPrice',50)
+    m          = kwargs.get('m',5)
+    
+    
+    winningBids = numpy.zeros((nGames,m))
+    
+    for g in xrange(nGames):
+        
+        agentList = [margAgentFactory(agentType = agentType, m = m) for i in xrange(nAgents)]
+        
+        if clfList == None:
+            samples = ((maxPrice - minPrice) *numpy.random.rand(nAgents,nSamples,m)) + minPrice
+            expectedPrices = numpy.mean(samples,1)
+            bids = numpy.atleast_2d([agent.bid(pointPricePrediction = expectedPrices[i,:]) for idx, agent in enumerate(agentList)])
+                    
+        elif isinstance(clfList, list):
+            
+            bids = numpy.zeros((nAgents,m))
+            
+            for agentIdx, agent in enumerate(agentList):
+                expectedPrices = numpy.zeros(m)
+                for clfIdx, clf in enumerate(clfList):
+                    samples = drawGMM(clf, nSamples)
+                    expectedPrices[clfIdx] = numpy.mean(samples)
+                bids[agentIdx,:] = agent.bid(pointPricePrediction = expectedPrices)
+            
+        else:
+            raise ValueError("Unknown price dist type.") 
+        
+        winningBids[g,:] = numpy.max(bids,0)
+        
+    return winningBids
     
 def ksStat(margDist1 = None, margDist2 = None):
     """
