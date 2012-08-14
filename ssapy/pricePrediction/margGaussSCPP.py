@@ -133,7 +133,7 @@ def margGaussSCPP(**kwargs):
                         title = title)
             
         if klList:
-            if klList[-1] < tol:
+            if numpy.abs(klList[-1]) < tol:
                 klFile = os.path.join(oDir,'kld.json')
                 with open(klFile,'w') as f:
                     json.dump(klList,f)
