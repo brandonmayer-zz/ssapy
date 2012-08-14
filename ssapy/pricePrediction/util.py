@@ -62,12 +62,14 @@ def plotMargGMM(**kwargs):
     
 #    fig.remove()
     
-def aicFit(X, compRange = range(1,6), verbose = True):
+def aicFit(X, compRange = range(1,6), minCovar = 9, verbose = True):
     if verbose:
         print 'starting aicFit(...)'
+        print 'compRange = {0}'.format(compRange)
+        print 'minCovar  = {0}'.format(minCovar)
         start = time.time()
         
-    clfList = [mixture.GMM(n_components = c) for c in compRange]
+    clfList = [mixture.GMM(n_components = c, min_covar = minCovar) for c in compRange]
     
     [clf.fit(X) for clf in clfList]
     

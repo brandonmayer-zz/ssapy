@@ -75,8 +75,10 @@ def margGaussSCPP(**kwargs):
     maxItr    = kwargs.get('maxItr', 100)
     tol       = kwargs.get('tol', 0.01)
     pltDist   = kwargs.get('pltDist',True)
-    verbose   = kwargs.get('verbose',True) 
     nProc     = kwargs.get('nProc',multiprocessing.cpu_count()-1)
+    minCovar  = kwargs.get('minCovar',9)
+    verbose   = kwargs.get('verbose',True) 
+    
     
     if verbose:
         print 'agentType = {0}'.format(agentType)
@@ -85,7 +87,14 @@ def margGaussSCPP(**kwargs):
         print 'm         = {0}'.format(m)
         print 'minPrice  = {0}'.format(minPrice)
         print 'maxPrice  = {0}'.format(maxPrice)
+        print 'maxItr    = {0}'.format(maxItr)
+        print 'tol       = {0}'.format(tol)
         print 'klSamples = {0}'.format(klSamples)
+        print 'pltDist   = {0}'.format(pltDist)
+        print 'serial    = {0}'.format(serial)
+        print 'nProc     = {0}'.format(nProc)
+        print 'minCovar  = {0}'.format(minCovar)
+        
         
     
     binEdges  = numpy.arange(minPrice,maxPrice+1,1)
@@ -140,7 +149,7 @@ def margGaussSCPP(**kwargs):
         
         clfList = []
         for i in xrange(winningBids.shape[1]):
-            clf, aicList, compRange = aicFit(winningBids[:,i])
+            clf, aicList, compRange = aicFit(winningBids[:,i], minCovar = minCovar)
             clfList.append(clf)
             
         
@@ -194,7 +203,7 @@ def main():
     parser.add_argument("--maxItr",            action = "store", type = int,   dest = "maxItr",    default = 100)
     parser.add_argument("--tol",               action = "store", type = int,   dest = "tol",       default = 0.01)
     parser.add_argument("--pltDist",           action = "store", type = bool,  dest = "pltDist",   default = True)
-    
+    parser.add_argument("--minCovar",          action = "store", type = float, dest = "minCovar",  default = 1.0)
     
     opts = parser.parse_args()
     
@@ -211,6 +220,7 @@ def main():
     pltDist   = opts.pltDist
     klSamples = opts.klSamples
     nProc     = opts.nProc
+    minCovar  = opts.minCovar
     
     margGaussSCPP(oDir      = oDir,
                   agentType = agentType,
@@ -224,6 +234,7 @@ def main():
                   pltDist   = pltDist,
                   klSamples = klSamples,
                   nProc     = nProc,
+                  minCovar  = minCovar,
                   verbose   = verbose)
     
     
