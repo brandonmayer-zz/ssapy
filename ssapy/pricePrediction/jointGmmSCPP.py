@@ -3,10 +3,12 @@ from sklearn import mixture
 from ssapy.multiprocessingAdaptor import Consumer
 from ssapy.agents.agentFactory import margAgentFactory
 from ssapy.pricePrediction.margDistSCPP import margDistSCPP
-from ssapy.pricePrediction.util import aicFit, drawGMM, plotMargGMM, apprxMargKL
-from ssapy.pricePrediction.util import simulateAuctionJointGMM
+from ssapy.pricePrediction.util import aicFit, drawGMM, \
+    plotMargGMM, apprxJointGmmKL, simulateAuctionJointGMM
 
+from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
+from matplotlib import cm
 from scipy.stats import norm
 
 import json
@@ -63,6 +65,11 @@ def jointGaussSCPP(**kwargs):
         pklDir = os.path.join(oDir, 'gmmPkl')
         if not os.path.exists(pklDir):
             os.makedirs(pklDir)
+            
+    if pltDist:
+        pltDir = os.path.join(oDir,'gmmPlts')
+        if not os.path.exists(pltDir):
+            os.makedirs(pltDir)
         
     clfCurr = None
     clfPrev = None
@@ -116,26 +123,40 @@ def jointGaussSCPP(**kwargs):
                 pickle.dump(clfCurr, f)
         
         if clfPrev:
-            kl = apprxMargKL(clfCurr, clfPrev, klSamples)
+            kl = apprxJointGmmKL(clfCurr, clfPrev, klSamples)
             klList.append(kl)
+            if verbose:
+                print 'kl = {0}'.format(kl) 
+                
+        
             
-#        if pltDist:
-#            pltDir = os.path.join(oDir,'scppPlts')
-#            if not os.path.exists(pltDir):
-#                os.makedirs(pltDir)
-#            oFile = os.path.join(oDir, 'scppPlts', 'gaussMargSCPP_{0}.png'.format(itr))
-#            if klList: 
-#                title = "margGaussSCPP itr = {0} kld = {1}".format(itr,klList[-1])
-#            else:
-#                title = "margGaussSCPP itr = {0}".format(itr)
-#            plotMargGMM(clfList = clfList, 
-#                        oFile = oFile, 
-#                        minPrice = minPrice, 
-#                        maxPrice = maxPrice,
-#                        title = title)
+        if pltDist:
+#            if m == 2:
+#            
+#                oFile = os.path.join(pltDir, 'gaussMargSCPP_{0}.png'.format(itr))
+#                if klList: 
+#                    title = "margGaussSCPP itr = {0} kld = {1}".format(itr,klList[-1])
+#                else:
+#                    title = "margGaussSCPP itr = {0}".format(itr)
+#                f = plt.figure()
+#                ax = plt.subplot(111,projection='3d')
+#                X = numpy.arange(minPrice,maxPrice,0.25)
+#                Y = numpy.arange(minPrice,maxPrice,0.25)
+#                xx,yy = numpy.meshgrid(X, Y)
+#                s = numpy.atleast_2d([xx.flatten(),yy.flatten()])
+##                Z = numpy.zeros(xx.shape)
+##                for i in xrange(xx.shape[0]):
+##                    for j in xrange(xx.shape[1]):
+##                        Z[i,j] = clfCurr.eval(numpy.atleast_2d([xx[i,j],yy[i,j]]))[0]
+#                Z = clfCurr.eval(numpy.transpose(s))
+#                
+#                surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.jet,
+#                                linewidth=0, antialiased=False)
+#                f.colorbar(surf,shrink=0.5,aspect=5)
+#                plt.show()
             
         if klList:
-            if klList[-1] < tol:
+            if numpy.abs(klList[-1]) < tol:
                 klFile = os.path.join(oDir,'kld.json')
                 with open(klFile,'w') as f:
                     json.dump(klList,f)

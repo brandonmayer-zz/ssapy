@@ -29,8 +29,11 @@ def apprxMargKL(clf1, clf2, nSamples = 1000):
         kl += (d1 + d2)
     return kl
 
-def apprxJointGmmKL(clf1, clf2, nSamples = 1000):
+def apprxJointGmmKL(clf1, clf2, nSamples = 1000, verbose = True):
     
+    if verbose:
+        print 'Approximating symmetric Kl-div with {0} samples'.format(nSamples)
+        start = time.time()
     samples1 = clf1.sample(nSamples)
     samples2 = clf2.sample(nSamples)
     f1 = clf1.eval(samples1)[0]
@@ -39,6 +42,10 @@ def apprxJointGmmKL(clf1, clf2, nSamples = 1000):
     g2 = clf2.eval(samples2)[0]
     d1 = numpy.mean(f1 - g1)
     d2 = numpy.mean(f2 - g2)
+    
+    if verbose:
+        print 'Approximated sym kl-div with {0} samples in {1} seconds'.format(nSamples,time.time()-start)
+    
     return d1 + d2
     
 
