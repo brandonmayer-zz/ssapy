@@ -8,49 +8,57 @@ from ssapy.agents.riskAware import riskEvaluator8, riskEvaluator64, riskAwareTMU
 def margAgentFactory(**kwargs):
     agentType = kwargs.get('agentType')
     m         = kwargs.get('m',5)
+    vmin      = kwargs.get('vmin',0)
+    vmax      = kwargs.get('vmax',50)
 
     agent = None
     
     if agentType == "straightMV":
-        agent = straightMV(m=m)
+        agent = straightMV(m = m, vmin = vmin, vmax = vmax)
     elif agentType == "straightMU":
-        agent = straightMU(m=m)
+        agent = straightMU(m = m, vmin = vmin, vmax = vmax)
     elif agentType == "straightMU8":
-        agent = straightMU8(m=m)
+        agent = straightMU8(m = m, vmin = vmin, vmax = vmax)
     elif agentType == "straightMU64":
-        agent = straightMU64(m=m)
+        agent = straightMU64(m = m, vmin = vmin, vmax = vmax)
     elif agentType == "straightMU256":
-        agent = straightMU256(m=m)
+        agent = straightMU256(m = m, vmin = vmin, vmax = vmax)
     elif agentType == "targetMV":
-        agent = targetMV(m = m)
+        agent = targetMV(m = m, vmin = vmin, vmax = vmax)
     elif agentType == "targetMU":
-        agent = targetMU(m = m)
+        agent = targetMU(m = m, vmin = vmin, vmax = vmax)
     elif agentType == "targetMU8":
-        agent = targetMU8(m=m)
+        agent = targetMU8(m = m, vmin = vmin, vmax = vmax)
     elif agentType == "targetMVS":
-        agent = targetMVS(m=m)
+        agent = targetMVS(m = m, vmin = vmin, vmax = vmax)
     elif agentType == "targetMUS":
-        agent = targetMUS(m=m)
+        agent = targetMUS(m = m, vmin = vmin, vmax = vmax)
     elif agentType == "targetMUS8":
-        agent = targetMUS8(m=m)
+        agent = targetMUS8(m = m, vmin = vmin, vmax = vmax)
     elif agentType == "targetMUS64":
-        agent = targetMUS64(m=m)
+        agent = targetMUS64(m = m, vmin = vmin, vmax = vmax)
     elif agentType == "targetPrice":
-        agent = targetPrice(m=m)
+        agent = targetPrice(m = m, vmin = vmin, vmax = vmax)
     elif agentType == "targetPriceDist":
-        agent = targetPriceDist(m=m)
+        agent = targetPriceDist(m = m, vmin = vmin, vmax = vmax)
     elif agentType == "targetPrice8":
-        agent = targetPrice8(m=m)
+        agent = targetPrice8(m = m, vmin = vmin, vmax = vmax)
     elif agentType == "targetPrice64":
-        agent = targetPrice64(m=m)
+        agent = targetPrice64(m = m, vmin = vmin, vmax = vmax)
     elif agentType == "targetPrice256":
-        agent = targetPrice256(m=m)
+        agent = targetPrice256(m = m, vmin = vmin, vmax = vmax)
     elif agentType == "riskEvaluator8":
-        agent = riskEvaluator8(m=m)
+        agent = riskEvaluator8(m = m, vmin = vmin, vmax = vmax)
     elif agentType == "riskEvaluator64":
-        agent = riskEvaluator64(m=m)
-    elif agenttype == "riskEvaluator256":
-        agent = riskEvaluator256(m=m)
+        agent = riskEvaluator64(m = m, vmin = vmin, vmax = vmax)
+    elif agentType == "riskEvaluator256":
+        agent = riskEvaluator256(m = m, vmin = vmin, vmax = vmax)
+    elif agentType == "averageMU8":
+        agent = averageMU8(m = m, vmin = vmin, vmax = vmax)
+    elif agentType == "averageMU64":
+        agent = averageMU64(m = m, vmin = vmin, vmax = vmax)
+    elif agentType == "averageMU256":
+        agent = averageMU256(m = m, vmin = vmin, vmax = vmax)
         
     return agent
     

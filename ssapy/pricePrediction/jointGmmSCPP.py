@@ -168,18 +168,24 @@ def jointGaussSCPP(**kwargs):
                 
                 plt.savefig(of2)
                 
+        if numpy.abs(klList[-1]) < tol:
+            break
+                
                 
             
-        if klList:
-            if numpy.abs(klList[-1]) < tol:
-                klFile = os.path.join(oDir,'kld.json')
-                with open(klFile,'w') as f:
-                    json.dump(klList,f)
-                    
-                print 'kld = {0} < tol = {1}'.format(klList[-1],tol)
-                print 'DONE'
-                break
+    
     
         clfPrev = clfCurr
+        
+    if klList: 
+        klFile = os.path.join(oDir,'kld.json')
+        with open(klFile,'w') as f:
+            json.dump(klList,f)
+                    
+        print 'kld = {0} < tol = {1}'.format(klList[-1],tol)
+        print 'DONE'
+        break
+    
+    
     
      
