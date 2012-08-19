@@ -64,8 +64,8 @@ def main():
     outfile = os.path.join(outDir,'bayesSCPP_itr_{0}.png'.format(sim))
     title='Bayes SCPP, straightMU8, klD = {0} Number of Samples = {1}'.format(0,sim*nGames)
     currHist.bayesMargDistSCPP().graphPdfToFile(fname=outfile,
-                                                    colorStyles=cs,
-                                                    title=title)
+                                                colorStyles=cs,
+                                                title=title)
     
     klList = []
     ksList = []

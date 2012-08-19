@@ -465,19 +465,15 @@ class margDistSCPP(pointSCPP):
             numpy.testing.assert_(len(kwargs['colorStyles']), len(self.data))
             colorStyles = kwargs['colorStyles']
         else:
-            #pick some random styles
-            colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
-            lineStyles = ['-', '--', '-.', ':']
-            markerStyles = ['o', 'v', '^', '<', '>', 's', 'p', '*', 'h', 'H', 'x', '+', 'D']
-            colorStyles = [j[0] + j[1] for j in itertools.product(markerStyles,[i[0] + i[1] for i in itertools.product(colors,lineStyles)])]
-            numpy.random.shuffle(colorStyles)
-            colorStyles = colorStyles[:len(self.data)]
+            #pick some random colors
+            cmap = plt.cm.get_cmap('hsv')
+            colorStyles = [cmap(i) for i in numpy.linspace(0,0.9,len(self.counts))]
             
         fig = plt.figure()
         ax = fig.add_subplot(111)
         
         for i in xrange(len(self.data)):
-            ax.plot(.5*(self.data[i][1][:-1]+self.data[i][1][1:]),self.data[i][0],colorStyles[i],label='Slot {0}'.format(i))
+            ax.plot(.5*(self.data[i][1][:-1]+self.data[i][1][1:]),self.data[i][0],c=colorStyles[i],label='Slot {0}'.format(i))
             
         if 'xlabel' in kwargs:
             plt.xlabel(kwargs['xlabel'])
