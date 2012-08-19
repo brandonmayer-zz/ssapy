@@ -467,7 +467,7 @@ class margDistSCPP(pointSCPP):
         else:
             #pick some random colors
             cmap = plt.cm.get_cmap('hsv')
-            colorStyles = [cmap(i) for i in numpy.linspace(0,0.9,len(self.counts))]
+            colorStyles = [cmap(i) for i in numpy.linspace(0,0.9,len(self.data))]
             
         fig = plt.figure()
         ax = fig.add_subplot(111)

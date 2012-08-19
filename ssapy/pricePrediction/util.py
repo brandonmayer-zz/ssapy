@@ -5,7 +5,7 @@ from ssapy.agents.targetMUS import *
 from ssapy.agents.targetPriceDist import *
 from ssapy.agents.riskAware import *
 from ssapy.pricePrediction.margDistSCPP import margDistSCPP
-from ssapy.agents.agentFactory import margAgentFactory
+from ssapy.agents.agentFactory import agentFactory
 from sklearn import mixture
 import matplotlib.pyplot as plt
 
@@ -139,7 +139,7 @@ def simulateAuctionMargGMM( **kwargs ):
     
     for g in xrange(nGames):
         
-        agentList = [margAgentFactory(agentType = agentType, m = m) for i in xrange(nAgents)]
+        agentList = [agentFactory(agentType = agentType, m = m) for i in xrange(nAgents)]
         
         if clfList == None:
             samples = ((maxPrice - minPrice) *numpy.random.rand(nAgents,nSamples,m)) + minPrice
@@ -179,7 +179,7 @@ def simulateAuctionJointGMM(**kwargs):
     
     for g in xrange(nGames):
         
-        agentList = [margAgentFactory(agentType = agentType, m = m) for i in xrange(nAgents)]
+        agentList = [agentFactory(agentType = agentType, m = m) for i in xrange(nAgents)]
         
         if clf == None:
             samples = ((maxPrice - minPrice) *numpy.random.rand(nAgents,nSamples,m)) + minPrice
