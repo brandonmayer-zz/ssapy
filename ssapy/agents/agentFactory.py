@@ -4,6 +4,7 @@ from ssapy.agents.targetMUS import targetMVS, targetMUS, targetMUS8, targetMUS64
 from ssapy.agents.targetPrice import targetPrice
 from ssapy.agents.targetPriceDist import targetPriceDist, targetPrice8, targetPrice64, targetPrice256
 from ssapy.agents.riskAware import riskEvaluator8, riskEvaluator64, riskAwareTMUS256
+from ssapy.agents.averageMU import averageMU, averageMU8, averageMU64, averageMU256
 
 def agentFactory(**kwargs):
     agentType = kwargs.get('agentType')
