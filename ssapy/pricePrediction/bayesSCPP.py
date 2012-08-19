@@ -1,5 +1,6 @@
 from ssapy.pricePrediction.util import ksStat, klDiv
 from ssapy.pricePrediction.hist import hist
+from ssapy.agents.agentFactory import agentFactory
 
 import numpy
 import matplotlib.pyplot as plt
@@ -7,7 +8,8 @@ import time
 import os
 import glob
 import json
-import shutil
+
+
 
 def bayesSCPP(**kwargs):
     oDir      = kwargs.get('oDir')
@@ -16,11 +18,11 @@ def bayesSCPP(**kwargs):
     m         = kwargs.get('m',5)
     minPrice  = kwargs.get('minPrice',0)
     maxPrice  = kwargs.get('maxPrice',50)
-    delta     = kwargs.get('delta', 1)
     maxSim    = kwargs.get('maxSim', 1000)
     nGames    = kwargs.get('nGames', 100)
     parallel  = kwargs.get('parallel', False)
     tol       = kwargs.get('tol',0.001)
+    plot      = kwargs.get('plot', True)
     log       = kwargs.get('log', True)
     
     if not oDir:
@@ -44,10 +46,10 @@ def bayesSCPP(**kwargs):
             f.write("m         = {0}".format(m))
             f.write("minPrice  = {0}".format(minPrice))
             f.write("maxPrice  = {0}".format(maxPrice))
-            f.write("delta     = {0}".format(delta))
             f.write("maxSim    = {0}".format(maxSim))
             f.write("nGames    = {0}".format(nGames))
             f.write("parallel  = {0}".format(parallel))
+            f.write("plot      = {0}".format(plot))
         
     
     
@@ -56,4 +58,54 @@ def bayesSCPP(**kwargs):
     title='bayesSCPP, {0}, Initial Distribution'.format(agentType)
     currHist.bayesMargDistSCPP().graphPdfToFile(fname = oFile,
                                                 title=title)
+    
+    klList = []
+    ksList = []
+    
+    agentFactoryParams = {'agentType' : agentType,
+                          'm'         : m,
+                          'minPrice'  : minPrice,
+                          'maxPrice'  : maxPrice}
+                          
+    
+    for sim in xrange(maxSim):
+        oldHist = currHist
+        
+        for i in xrange(nGames):
+            agentList = [agentFactory(**agentFactoryParams) for i in xrange(nAgents)]
+            
+            bids = numpy.atleast_2d([agent.bid(margDistPrediction = currHist.bayesMargDistSCPP()) for agent in agentList])
+            
+            winningBids = numpy.max(bids,0)
+            
+            [currHist.upcount(idx, wb, mag=1) for idx, wb in enumerate(winningBids)]
+        
+        klList.append(klDiv(currHist.bayesMargDistSCPP(), oldHist.bayesMargDistSCPP()))
+        
+        ksList.append(ksStat(currHist.bayesMargDistSCPP(), oldHist.bayesMargDistSCPP()))
+        
+        if plot:
+            oPlot = os.path.join(oDir,'bayesSCPP_agent_{0}_itr_{1}.png'.format(agentType,sim*nGames))
+            title='BayesSCPP straightMU8, klD = {0:.6}, ks = {1:.6} itr = {2}'.format(kl,ks,sim*nGames)
+            currHist.bayesMargDistSCPP().graphPdfToFile(fname = oPlot, title=title)
+        
+        if klList[-1] < tol:
+            break
+      
+    if log:  
+        with open(logFile,'a') as f:
+            f.write('Done after {0} games ({1} iterations)'.format(sim*nGames,sim))
+            f.write('kl = {0}'.format(klList))
+            f.write('ks = {0}'.format(ksList))
+        
+    klFile = os.path.join(oDir,'kl.json')
+    with open(klFile,'w') as f:
+        json.dump(klList,f)
+        
+    ksFile = os.path.join(oDir,'ks.json')
+    with open(ksFile,'w') as f:
+        json.dump(ksList,f)
+        
+        
+        
     

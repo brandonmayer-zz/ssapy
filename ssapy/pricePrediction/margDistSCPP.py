@@ -490,7 +490,8 @@ class margDistSCPP(pointSCPP):
         else:
             plt.title('Price Distribution')
             
-        plt.legend()
+        leg = ax.legend(loc='best',fancybox=True)
+        leg.get_frame().set_alpha(0.5)
         
         plt.savefig(filename)
         

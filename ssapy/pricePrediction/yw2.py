@@ -1,7 +1,7 @@
 import numpy
 
 from ssapy.multiprocessingAdaptor import Consumer
-from ssapy.agents.agentFactory import margAgentFactory
+from ssapy.agents.agentFactory import agentFactory
 from ssapy.pricePrediction.margDistSCPP import margDistSCPP
 
 from ssapy.pricePrediction.util import klDiv, ksStat, updateDist
@@ -21,7 +21,7 @@ def simulateAuction( **kwargs ):
     winningBids = numpy.zeros((nGames,m))
     
     for g in xrange(nGames):
-        agentList = [margAgentFactory(agentType = agentType, m = m) for i in xrange(nAgents)]
+        agentList = [agentFactory(agentType = agentType, m = m) for i in xrange(nAgents)]
     
         bids = numpy.atleast_2d([agent.bid(margDistPrediction = margDist) for agent in agentList])
         
