@@ -168,6 +168,22 @@ def bayesSCPP(**kwargs):
     if verbose:
         print 'Done'
         
+def agentTypeListHelper(oDir, agentType, nAgents, m, minPrice, maxPrice, 
+                        maxSim, nGames, parallel, nProc, tol, plot, log, verbose):
+    bayesSCPP(oDir      = oDir,
+              agentType = agentType,
+              nAgents   = nAgents,
+              m         = m,
+              minPrice  = minPrice,
+              maxPrice  = maxPrice,
+              maxSim    = maxSim,
+              nGames    = nGames,
+              parallel  = parallel,
+              nProc     = nProc,
+              tol       = tol,
+              plot      = plot,
+              log       = log,
+              verbose   = verbose)
 
 def agentTypeListBayesSCPP(**kwargs):
     agentTypeList = kwargs.get('agentTypeList')
@@ -190,30 +206,59 @@ def agentTypeListBayesSCPP(**kwargs):
               "In bayesSCPP(...)\n" +\
               "Must Provide output directory\n"
         raise ValueError(str)
+    
     oDir = os.path.realpath(oDir)
+    if not os.path.exists(oDir):
+        os.makedirs(oDir)
     
-    pool = multiprocessing.Pool(nProc)
-    
-    for agentType in agentTypeList:
-        od = os.path.join(oDir,agentType)
-        kwa = {'oDir': od,
-               'nAgents': nAgents,
-               'm':m,
-               'minPrice':minPrice,
-               'maxPrice':maxPrice,
-               'maxSim':maxSim,
-               'nGames':nGames,
-               'parallel':False,
-               'tol':tol,
-               'plot':plot,
-               'log':log,
-               'verbose':verbose}
+    if parallel:
+        print 'in parallel'
         
-        pool.apply_async(bayesSCPP, kwds = kwa)
+        nProc = nProc if nProc < len(agentTypeList) else len(agentTypeList)
         
-    pool.close()
+        pool = multiprocessing.Pool(nProc)
         
-    pool.join()
+        
+        
+        for agentType in agentTypeList:
+            od = os.path.join(oDir,agentType)
+#            kwa = {'oDir': od,
+#                   'nAgents': nAgents,
+#                   'm':m,
+#                   'minPrice':minPrice,
+#                   'maxPrice':maxPrice,
+#                   'maxSim':maxSim,
+#                   'nGames':nGames,
+#                   'parallel':False,
+#                   'tol':tol,
+#                   'plot':plot,
+#                   'log':log,
+#                   'verbose':verbose}
+            
+            pool.apply_async(bayesSCPP, (od, agentType, nAgents, m, minPrice, 
+                                         maxPrice, maxSim, nGames, parallel, 
+                                         nProc, tol, plot, log, verbose,))
+            
+        pool.close()
+            
+        pool.join()
+    else:
+        for agentType in agentTypeList:
+            od = os.path.join(oDir,agentType)
+            kwa = {'oDir': od,
+                   'nAgents': nAgents,
+                   'm':m,
+                   'minPrice':minPrice,
+                   'maxPrice':maxPrice,
+                   'maxSim':maxSim,
+                   'nGames':nGames,
+                   'parallel':False,
+                   'tol':tol,
+                   'plot':plot,
+                   'log':log,
+                   'verbose':verbose}
+#            apply(agentTypeListBayesSCPP, (agentType,od))
+            apply(agentTypeListHelper, (agentType,od))
     
     print 'Done'
         

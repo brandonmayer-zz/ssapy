@@ -171,10 +171,6 @@ def jointGaussSCPP(**kwargs):
         if numpy.abs(klList[-1]) < tol:
             break
                 
-                
-            
-    
-    
         clfPrev = clfCurr
         
     if klList: 
