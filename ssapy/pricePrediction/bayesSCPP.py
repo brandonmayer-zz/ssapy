@@ -168,8 +168,9 @@ def bayesSCPP(**kwargs):
     if verbose:
         print 'Done'
         
-def agentTypeListHelper(oDir, agentType, nAgents, m, minPrice, maxPrice, 
-                        maxSim, nGames, parallel, nProc, tol, plot, log, verbose):
+def agentTypeListHelper(oDir, agentType, 
+                        nAgents = 8, m = 5, minPrice = 0, maxPrice = 5, 
+                        maxSim=1000, nGames = 100,  tol = 0.01, plot = True, log = True, verbose = True):
     bayesSCPP(oDir      = oDir,
               agentType = agentType,
               nAgents   = nAgents,
@@ -178,8 +179,8 @@ def agentTypeListHelper(oDir, agentType, nAgents, m, minPrice, maxPrice,
               maxPrice  = maxPrice,
               maxSim    = maxSim,
               nGames    = nGames,
-              parallel  = parallel,
-              nProc     = nProc,
+              parallel  = False,
+              nProc     = 1,
               tol       = tol,
               plot      = plot,
               log       = log,
@@ -220,24 +221,13 @@ def agentTypeListBayesSCPP(**kwargs):
         
         
         
-        for agentType in agentTypeList:
-            od = os.path.join(oDir,agentType)
-#            kwa = {'oDir': od,
-#                   'nAgents': nAgents,
-#                   'm':m,
-#                   'minPrice':minPrice,
-#                   'maxPrice':maxPrice,
-#                   'maxSim':maxSim,
-#                   'nGames':nGames,
-#                   'parallel':False,
-#                   'tol':tol,
-#                   'plot':plot,
-#                   'log':log,
-#                   'verbose':verbose}
-            
-            pool.apply_async(bayesSCPP, (od, agentType, nAgents, m, minPrice, 
-                                         maxPrice, maxSim, nGames, parallel, 
-                                         nProc, tol, plot, log, verbose,))
+#        for agentType in agentTypeList:
+#            od = os.path.join(oDir,agentType)
+#            
+#            pool.apply_async(bayesSCPP, (od, agentType, nAgents, m, minPrice, 
+#                                         maxPrice, maxSim, nGames, parallel, 
+#                                         nProc, tol, plot, log, verbose,))
+        [pool.apply_async(agentTypeListHelper, (os.path.join(oDir,agentType), agentType,) ) for agentType in agentTypeList]
             
         pool.close()
             
