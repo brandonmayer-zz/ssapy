@@ -142,7 +142,7 @@ class simYW(agentBase):
         bundles.
         
         If there are bundles with equal "value" to the agent pick the one
-        that completes the taks first, e.g.
+        that completes the tasks first, e.g.
         
         if $\lambda$ = 2 and m = 5 [1 1 0 0 0 ] should be prefered to [1 0 0 0 1]
         given both have equal utility
@@ -376,7 +376,7 @@ class simYW(agentBase):
             
         # just checking the index wasn't
         # past the maximum bundle
-        if len(binList) > self.m: raise ValueError, "simYW::bundleFromIndex Error: Dec-Binary Conversion"
+        if len(binList) > nGoods: raise ValueError, "simYW::bundleFromIndex Error: Dec-Binary Conversion"
         
         for i in xrange(nGoods-len(binList)):
             binList.insert(0,0)
