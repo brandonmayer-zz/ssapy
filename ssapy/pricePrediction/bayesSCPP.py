@@ -47,8 +47,9 @@ def bayesSCPP(**kwargs):
         if not os.path.exists(pltDir):
             os.makedirs(pltDir)
         else:
-            shutil.rmtree(pltDir,ignore_errors=True)
-            os.makedirs(pltDir)
+            [os.remove(filename) for filename in glob.glob(os.path.join(pltDir,'*.png'))]
+#            shutil.rmtree(pltDir,ignore_errors=True)
+#            os.makedirs(pltDir)
     
     if not os.path.exists(oDir):
         os.makedirs(oDir)
@@ -145,7 +146,7 @@ def bayesSCPP(**kwargs):
         
         if plot:
             oPlot = os.path.join(pltDir,'bayesSCPP_{0}_{1}.png'.format(agentType,(sim+1)*nGames))
-            title='BayesSCPP straightMU8, klD = {0:.6}, ks = {1:.6} itr = {2}'.format(klList[-1],ksList[-1],(sim+1)*nGames)
+            title='BayesSCPP {0}, klD = {1:.6}, ks = {2:.6} itr = {3}'.format(agentType,klList[-1],ksList[-1],(sim+1)*nGames)
             currHist.bayesMargDistSCPP().graphPdfToFile(fname = oPlot, title=title)
         
         if klList[-1] < tol:
@@ -212,44 +213,26 @@ def agentTypeListBayesSCPP(**kwargs):
     if not os.path.exists(oDir):
         os.makedirs(oDir)
     
-    if parallel:
-        print 'in parallel'
-        
-        nProc = nProc if nProc < len(agentTypeList) else len(agentTypeList)
-        
-        pool = multiprocessing.Pool(nProc)
-        
-        
-        
-#        for agentType in agentTypeList:
-#            od = os.path.join(oDir,agentType)
-#            
-#            pool.apply_async(bayesSCPP, (od, agentType, nAgents, m, minPrice, 
-#                                         maxPrice, maxSim, nGames, parallel, 
-#                                         nProc, tol, plot, log, verbose,))
-        [pool.apply_async(agentTypeListHelper, (os.path.join(oDir,agentType), agentType,) ) for agentType in agentTypeList]
+    for agentType in agentTypeList:
+        od = os.path.join(oDir,agentType)
+        if not od:
+            os.makedirs(od)
             
-        pool.close()
-            
-        pool.join()
-    else:
-        for agentType in agentTypeList:
-            od = os.path.join(oDir,agentType)
-            kwa = {'oDir': od,
-                   'nAgents': nAgents,
-                   'm':m,
-                   'minPrice':minPrice,
-                   'maxPrice':maxPrice,
-                   'maxSim':maxSim,
-                   'nGames':nGames,
-                   'parallel':False,
-                   'tol':tol,
-                   'plot':plot,
-                   'log':log,
-                   'verbose':verbose}
-#            apply(agentTypeListBayesSCPP, (agentType,od))
-            apply(agentTypeListHelper, (agentType,od))
-    
+        bayesSCPP(oDir = od,
+                  agentType = agentType,
+                  nAgents   = nAgents,
+                  m         = m,
+                  minPrice  = minPrice,
+                  maxPrice  = maxPrice,
+                  maxSim    = maxSim,
+                  nGames    = nGames,
+                  parallel  = parallel,
+                  nProce    = nProc,
+                  tol       = tol,
+                  plot      = plot,
+                  log       = log,
+                  verbose   = verbose)
+              
     print 'Done'
         
     

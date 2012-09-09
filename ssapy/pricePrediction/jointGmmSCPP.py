@@ -1,7 +1,7 @@
 import numpy
 from sklearn import mixture
 from ssapy.multiprocessingAdaptor import Consumer
-from ssapy.agents.agentFactory import margAgentFactory
+from ssapy.agents.agentFactory import agentFactory
 from ssapy.pricePrediction.margDistSCPP import margDistSCPP
 from ssapy.pricePrediction.util import aicFit, drawGMM, \
     plotMargGMM, apprxJointGmmKL, simulateAuctionJointGMM
@@ -19,6 +19,7 @@ import random
 import itertools
 import argparse
 import pickle
+import glob
 
 def jointGaussSCPP(**kwargs):
     oDir = kwargs.get('oDir')
@@ -43,21 +44,27 @@ def jointGaussSCPP(**kwargs):
     covarType = kwargs.get('covarType','full')
     savePkl   = kwargs.get('savePkl',True)
     verbose   = kwargs.get('verbose',True) 
+    aicCompMin = kwargs.get('aicCompMin',1)
+    aicCompMax = kwargs.get('aicCompMax',10)
+    aicMinCovar = kwargs.get('aicMinCovar',9)
     
     if verbose:
-        print 'agentType = {0}'.format(agentType)
-        print 'nAgents   = {0}'.format(nAgents)
-        print 'nGames    = {0}'.format(nGames)
-        print 'm         = {0}'.format(m)
-        print 'minPrice  = {0}'.format(minPrice)
-        print 'maxPrice  = {0}'.format(maxPrice)
-        print 'maxItr    = {0}'.format(maxItr)
-        print 'tol       = {0}'.format(tol)
-        print 'klSamples = {0}'.format(klSamples)
-        print 'pltDist   = {0}'.format(pltDist)
-        print 'serial    = {0}'.format(serial)
-        print 'nProc     = {0}'.format(nProc)
-        print 'minCovar  = {0}'.format(minCovar)
+        print 'agentType  = {0}'.format(agentType)
+        print 'nAgents     = {0}'.format(nAgents)
+        print 'nGames      = {0}'.format(nGames)
+        print 'm           = {0}'.format(m)
+        print 'minPrice    = {0}'.format(minPrice)
+        print 'maxPrice    = {0}'.format(maxPrice)
+        print 'maxItr      = {0}'.format(maxItr)
+        print 'tol         = {0}'.format(tol)
+        print 'klSamples   = {0}'.format(klSamples)
+        print 'pltDist     = {0}'.format(pltDist)
+        print 'serial      = {0}'.format(serial)
+        print 'nProc       = {0}'.format(nProc)
+        print 'minCovar    = {0}'.format(minCovar)
+        print 'aicCompMin  = {0}'.format(aicCompMin)
+        print 'aicCompMax  = {0}'.format(aicCompMax)
+        print 'aicMinCovar = {0}'.format(aicMinCovar)
         
         
     
@@ -70,6 +77,8 @@ def jointGaussSCPP(**kwargs):
         pltDir = os.path.join(oDir,'gmmPlts')
         if not os.path.exists(pltDir):
             os.makedirs(pltDir)
+        else:
+            [os.remove(f) for f in glob.glob(os.path.join(pltDir,'*.png'))]
         histDir = os.path.join(oDir,'gmmHist')
         if not os.path.exists(histDir):
             os.makedirs(histDir)
@@ -117,8 +126,9 @@ def jointGaussSCPP(**kwargs):
                 results[idx]._value = []
                 start_row = end_row
         
-        
-        clfCurr, aicList, compRange = aicFit(winningBids, minCovar = minCovar)    
+        clfCurr, aicList, compRange = aicFit(winningBids,
+                                             compRange = range(aicCompMin,aicCompMax), 
+                                             minCovar = aicMinCovar)    
         
         if savePkl:
             pklFile = os.path.join(pklDir,'gmm_{0}.pkl'.format(itr))
@@ -135,27 +145,32 @@ def jointGaussSCPP(**kwargs):
             
         if pltDist:
             if m == 2:
+                if verbose:
+                    print 'plotting'
             
-                oFile = os.path.join(pltDir, 'gaussMargSCPP_{0}.png'.format(itr))
+                oFile = os.path.join(pltDir, 'jointGmmSCPP_{0}.png'.format(itr))
                 if klList: 
-                    title = "margGaussSCPP itr = {0} kld = {1}".format(itr,klList[-1])
+                    title = "jointGmmSCPP itr = {0} kld = {1}".format(itr,klList[-1])
                 else:
-                    title = "margGaussSCPP itr = {0}".format(itr)
+                    title = "jointGmmSCPP itr = {0}".format(itr)
                 f = plt.figure()
                 ax = f.add_subplot(111,projection='3d')
                 ax.view_init(26,-142)
                 
-                X = numpy.arange(minPrice,maxPrice,0.5)
-                Y = numpy.arange(minPrice,maxPrice,0.5)
+                X = numpy.arange(minPrice,maxPrice,0.25)
+                Y = numpy.arange(minPrice,maxPrice,0.25)
                 xx,yy = numpy.meshgrid(X, Y)
                 s = numpy.transpose(numpy.atleast_2d([xx.ravel(),yy.ravel()]))
 
                 Z = numpy.exp(clfCurr.eval(s)[0].reshape(xx.shape))
                 
                 surf = ax.plot_surface(xx, yy, Z, rstride=1, cstride=1, cmap=cm.jet,
-                                       linewidth=0, antialiased=False)
+                                       linewidth=0, antialiased=True)
                             
 #                f.colorbar(surf,shrink=0.5,aspect=5)
+                
+                nComp = clfCurr.means_.shape[0]
+                ax.set_title("nComp = {0}".format(nComp))
                 
                 plt.savefig(oFile)
                 
@@ -168,8 +183,9 @@ def jointGaussSCPP(**kwargs):
                 
                 plt.savefig(of2)
                 
-        if numpy.abs(klList[-1]) < tol:
-            break
+        if klList:
+            if numpy.abs(klList[-1]) < tol:
+                break
                 
         clfPrev = clfCurr
         
@@ -180,7 +196,7 @@ def jointGaussSCPP(**kwargs):
                     
         print 'kld = {0} < tol = {1}'.format(klList[-1],tol)
         print 'DONE'
-        break
+        
     
     
     
