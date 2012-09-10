@@ -27,26 +27,27 @@ def jointGaussSCPP(**kwargs):
         raise ValueError("Must provide output Directory")
     oDir = os.path.realpath(oDir)
     
-    agentType = kwargs.get('agentType',"straightMV")
-    nAgents   = kwargs.get('nAgnets',8)
-    nGames    = kwargs.get('nGames',10)
-    nSamples  = kwargs.get('nSamples',8)
-    m         = kwargs.get('m',5)
-    minPrice  = kwargs.get('minPrice',0)
-    maxPrice  = kwargs.get('maxPrice',50)
-    serial    = kwargs.get('serial',False)
-    klSamples = kwargs.get('klSamples',1000)
-    maxItr    = kwargs.get('maxItr', 100)
-    tol       = kwargs.get('tol', 0.01)
-    pltDist   = kwargs.get('pltDist',True)
-    nProc     = kwargs.get('nProc',multiprocessing.cpu_count()-1)
-    minCovar  = kwargs.get('minCovar',9)
-    covarType = kwargs.get('covarType','full')
-    savePkl   = kwargs.get('savePkl',True)
-    verbose   = kwargs.get('verbose',True) 
-    aicCompMin = kwargs.get('aicCompMin',1)
-    aicCompMax = kwargs.get('aicCompMax',10)
-    aicMinCovar = kwargs.get('aicMinCovar',9)
+    agentType    = kwargs.get('agentType',"straightMV")
+    nAgents      = kwargs.get('nAgnets',8)
+    nGames       = kwargs.get('nGames',10)
+    nSamples     = kwargs.get('nSamples',8)
+    m            = kwargs.get('m',5)
+    minPrice     = kwargs.get('minPrice',0)
+    maxPrice     = kwargs.get('maxPrice',50)
+    serial       = kwargs.get('serial',False)
+    klSamples    = kwargs.get('klSamples',1000)
+    maxItr       = kwargs.get('maxItr', 100)
+    tol          = kwargs.get('tol', 0.01)
+    pltDist      = kwargs.get('pltDist',True)
+    nProc        = kwargs.get('nProc',multiprocessing.cpu_count()-1)
+    minCovar     = kwargs.get('minCovar',9)
+    covarType    = kwargs.get('covarType','full')
+    savePkl      = kwargs.get('savePkl',True)
+    verbose      = kwargs.get('verbose',True) 
+    aicCompMin   = kwargs.get('aicCompMin',1)
+    aicCompMax   = kwargs.get('aicCompMax',10)
+    aicMinCovar  = kwargs.get('aicMinCovar',9)
+    plotMarginal = kwargs.get('pltMarg',True)
     
     if verbose:
         print 'agentType  = {0}'.format(agentType)
@@ -80,8 +81,17 @@ def jointGaussSCPP(**kwargs):
         else:
             [os.remove(f) for f in glob.glob(os.path.join(pltDir,'*.png'))]
         histDir = os.path.join(oDir,'gmmHist')
+        
         if not os.path.exists(histDir):
             os.makedirs(histDir)
+            
+    if pltMarg:
+        margDir = os.path.join(oDir,'pltMarg')
+        if not os.path.exists(pltDir):
+            os.makedirs(pltDir)
+        else:
+            [os.remove(f) for f in glob.glob(os.path.join(pltMarg,'*.png'))]
+        
         
     clfCurr = None
     clfPrev = None
@@ -146,7 +156,7 @@ def jointGaussSCPP(**kwargs):
         if pltDist:
             if m == 2:
                 if verbose:
-                    print 'plotting'
+                    print 'plotting joint distribution'
             
                 oFile = os.path.join(pltDir, 'jointGmmSCPP_{0}.png'.format(itr))
                 if klList: 
@@ -182,6 +192,18 @@ def jointGaussSCPP(**kwargs):
                 plt.colorbar()
                 
                 plt.savefig(of2)
+                
+            if pltMarg:
+                if verbose:
+                    print 'plotting marginal distribution'
+                nComp = clf.means_.shape[0]
+                
+                for goodIdx in xrange(m):
+                    x = numpy.linspace(minPrice,maxPrice,10000)
+                    
+                    for (w,m,c) in zip(clf.weights_,clf.means_,clf.covars_):
+                        pass
+                    
                 
         if klList:
             if numpy.abs(klList[-1]) < tol:
