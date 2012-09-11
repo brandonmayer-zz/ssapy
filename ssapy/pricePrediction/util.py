@@ -1,4 +1,3 @@
-import numpy
 from ssapy.agents.straightMU import *
 from ssapy.agents.targetMU import *
 from ssapy.agents.targetMUS import *
@@ -8,6 +7,8 @@ from ssapy.pricePrediction.margDistSCPP import margDistSCPP
 from ssapy.agents.agentFactory import agentFactory
 from sklearn import mixture
 import matplotlib.pyplot as plt
+import numpy
+from scipy.stats import norm
 
 import time
 import os
@@ -48,6 +49,47 @@ def apprxJointGmmKL(clf1, clf2, nSamples = 1000, verbose = True):
     
     return d1 + d2
     
+def pltMargFromJoint(**kwargs):
+    clf      = kwargs.get('clf')
+    oFile    = kwargs.get('oFile')
+    nPts     = kwargs.get('nPts',10000)
+    minPrice = kwargs.get('minPrice',0)
+    maxPrice = kwargs.get('maxPrice',50)
+    colors   = kwargs.get('colors')
+    title   = kwargs.get('title', "Marginals of Joint Gaussian")
+    xlabel  = kwargs.get('xlabel', "price")
+    ylabel  = kwargs.get(r"$p(closing price)$")
+    
+    
+    
+    nComps = clf.means_.shape[0]
+    nGoods = clf.means_.shape[1]
+    if not colors:
+        cmap = plt.cm.get_cmap('hsv')
+        colorStyles = [cmap(i) for i in numpy.linspace(0,0.9,nGoods)]
+        colorCycle = itertools.cycle(colorStyles)
+    
+    X = numpy.linspace(minPrice, maxPrice, nPts)
+    
+    fig = plt.figure()
+    ax  = plt.subplot(111)
+    for goodIdx in xrange(nGoods):
+        margDist = numpy.zeros(X.shape[0])
+        for (w,mean,cov) in zip(clf.weights_,clf.means_, clf.covars_):
+            margMean = mean[goodIdx]
+            margCov  = cov[goodIdx,goodIdx]
+            rv = norm(loc=margMean, scale=numpy.sqrt(margCov))
+            margDist += w*rv.pdf(X)
+        plt.plot(X,margDist,color=next(colorCycle),label = 'good {0}'.format(goodIdx))
+        
+    
+    leg = ax.legend(loc = 'best',fancybox = True)
+    leg.get_frame().set_alpha(0.5)
+    ax.set_title(title)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    
+    plt.savefig(oFile)
 
 def plotMargGMM(**kwargs):
     clfList = kwargs.get('clfList')

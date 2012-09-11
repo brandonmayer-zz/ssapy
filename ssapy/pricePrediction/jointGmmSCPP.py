@@ -4,7 +4,7 @@ from ssapy.multiprocessingAdaptor import Consumer
 from ssapy.agents.agentFactory import agentFactory
 from ssapy.pricePrediction.margDistSCPP import margDistSCPP
 from ssapy.pricePrediction.util import aicFit, drawGMM, \
-    plotMargGMM, apprxJointGmmKL, simulateAuctionJointGMM
+    plotMargGMM, apprxJointGmmKL, simulateAuctionJointGMM, pltMargFromJoint
 
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
@@ -40,14 +40,13 @@ def jointGaussSCPP(**kwargs):
     tol          = kwargs.get('tol', 0.01)
     pltDist      = kwargs.get('pltDist',True)
     nProc        = kwargs.get('nProc',multiprocessing.cpu_count()-1)
-    minCovar     = kwargs.get('minCovar',9)
     covarType    = kwargs.get('covarType','full')
     savePkl      = kwargs.get('savePkl',True)
     verbose      = kwargs.get('verbose',True) 
     aicCompMin   = kwargs.get('aicCompMin',1)
     aicCompMax   = kwargs.get('aicCompMax',10)
     aicMinCovar  = kwargs.get('aicMinCovar',9)
-    plotMarginal = kwargs.get('pltMarg',True)
+    pltMarg      = kwargs.get('pltMarg',True)
     
     if verbose:
         print 'agentType  = {0}'.format(agentType)
@@ -62,10 +61,10 @@ def jointGaussSCPP(**kwargs):
         print 'pltDist     = {0}'.format(pltDist)
         print 'serial      = {0}'.format(serial)
         print 'nProc       = {0}'.format(nProc)
-        print 'minCovar    = {0}'.format(minCovar)
         print 'aicCompMin  = {0}'.format(aicCompMin)
         print 'aicCompMax  = {0}'.format(aicCompMax)
         print 'aicMinCovar = {0}'.format(aicMinCovar)
+        print 'pltMarg     = {0}'.format(pltMarg)
         
         
     
@@ -87,10 +86,10 @@ def jointGaussSCPP(**kwargs):
             
     if pltMarg:
         margDir = os.path.join(oDir,'pltMarg')
-        if not os.path.exists(pltDir):
-            os.makedirs(pltDir)
+        if not os.path.exists(margDir):
+            os.makedirs(margDir)
         else:
-            [os.remove(f) for f in glob.glob(os.path.join(pltMarg,'*.png'))]
+            [os.remove(f) for f in glob.glob(os.path.join(margDir,'*.png'))]
         
         
     clfCurr = None
@@ -194,15 +193,16 @@ def jointGaussSCPP(**kwargs):
                 plt.savefig(of2)
                 
             if pltMarg:
+                
+                of = os.path.join(margDir,'jointGmmSCPP_marg_{0}.png'.format(itr))
+                
                 if verbose:
                     print 'plotting marginal distribution'
-                nComp = clf.means_.shape[0]
                 
-                for goodIdx in xrange(m):
-                    x = numpy.linspace(minPrice,maxPrice,10000)
-                    
-                    for (w,m,c) in zip(clf.weights_,clf.means_,clf.covars_):
-                        pass
+                pltMargFromJoint(clf = clfCurr,
+                                 oFile = of,
+                                 minPrice = minPrice,
+                                 maxPrice = maxPrice)
                     
                 
         if klList:
