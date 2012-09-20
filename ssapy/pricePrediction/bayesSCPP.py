@@ -16,7 +16,7 @@ import shutil
 
 def bidHelper(**kwargs):
     agent = kwargs.get('agent')
-    dist  = kwargs.get('bayesMargDist')
+    dist  = kwargs.geto('bayesMargDist')
     
     return agent.bid(margDistPrediction = dist)
 
