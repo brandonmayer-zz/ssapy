@@ -25,6 +25,12 @@ def main():
     
     parser.add_argument( "--maxPrice", action = 'store', dest = 'maxPrice', default = 50, type = float)
     
+    parser.add_argument( "--maxSim", action = 'store', dest = 'maxSim', default = 1000000, type = int,
+                         help = "Maximum number of updates allowed before termination.")
+    
+    parser.add_argument( "--nGames", action = 'store', dest = 'nGames', default = 100, type = int,
+                         help = "Number of auctions simulated prior to checking convergence.")
+    
     parser.add_argument( "--parallel", action = 'store', dest = 'parallel', default = False, type = bool,
                          help = "In general this should be false as it is only an approximation to the algorithm")
     
@@ -45,7 +51,7 @@ def main():
     
     args = parser.parse_args().__dict__
     
-    bayesSCPP(args)
+    bayesSCPP(**args)
         
 if __name__ == "__main__":
     main()    
