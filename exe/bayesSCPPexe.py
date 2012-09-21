@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from ssapy.pricePrediction.bayesSCPP import bayesSCPP
                
 import multiprocessing                
