@@ -33,21 +33,15 @@ def writeBidsFile(**kwargs):
     expectedPriceVector = numpy.atleast_1d(expectedPriceVector)
     
     agent = agentFactory.agentFactory(agentType = agentType, m = 5, minPrice = 0, maxPrice = 50)
-    
-    
-    
+        
     output = numpy.zeros(data.shape)
     for row, sim in enumerate(data):
         output[row,0:6] = sim[0:6]
         agent.l = int(sim[0])
         agent.v = sim[1:6]
-#        print agent.l
-#        print agent.v
-        print 'wellman bid = {0}'.format(sim[6:])
         
         bidVector = agent.bid(expectedPrices = expectedPriceVector)
-        print 'brandon bid = {0}'.format(bidVector)
-#        output[row,7:] = agent.bid(expectedPrices = expectedPriceVector)
+
         output[row,6:] = bidVector
         
     oFile = os.path.join(oDir, '{0}-bids.txt'.format(agentType))
