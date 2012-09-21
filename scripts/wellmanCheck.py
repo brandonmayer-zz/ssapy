@@ -1,19 +1,15 @@
-#!/usr/env/ python
+#!/usr/bin/env python
 
 from ssapy.agents import agentFactory
 import numpy
 import os
+import argparse
 
-def readBidsFile(filename):
-    data = numpy.loadtxt(filename)
-    
-    return data
-
-def computeExpectedValues(ppCounts):
-    pass
-    
-
-def writeBidsFile(oDir, agentType, bidsFile, ppFile):
+def writeBidsFile(**kwargs):
+    oDir = kwargs.get('oDir')
+    agentType = kwargs.get('agentType')
+    ppFile = kwargs.get('ppFile')
+    bidsFile = kwargs.get('bidsFile')
     
     bidsFile = os.path.realpath(bidsFile)
     ppFile = os.path.realpath(ppFile)
@@ -23,7 +19,7 @@ def writeBidsFile(oDir, agentType, bidsFile, ppFile):
     
     data = numpy.loadtxt(bidsFile)
     
-    ppCounts = numpy.loadtxt(ppFile,delimiter=",")
+    ppCounts = numpy.loadtxt(ppFile,delimiter=",",dtype=numpy.float)
     
     prob = []
     for counts in ppCounts:
@@ -38,31 +34,46 @@ def writeBidsFile(oDir, agentType, bidsFile, ppFile):
     
     agent = agentFactory.agentFactory(agentType = agentType, m = 5, minPrice = 0, maxPrice = 50)
     
+    
+    
     output = numpy.zeros(data.shape)
     for row, sim in enumerate(data):
         output[row,0:6] = sim[0:6]
-        agent.l = sim[0]
+        agent.l = int(sim[0])
         agent.v = sim[1:6]
-        output[7:] = agent.bid(pointPricePrediction = expectedPriceVector)
+#        print agent.l
+#        print agent.v
+        print 'wellman bid = {0}'.format(sim[6:])
+        
+        bidVector = agent.bid(expectedPrices = expectedPriceVector)
+        print 'brandon bid = {0}'.format(bidVector)
+#        output[row,7:] = agent.bid(expectedPrices = expectedPriceVector)
+        output[row,6:] = bidVector
         
     oFile = os.path.join(oDir, '{0}-bids.txt'.format(agentType))
     numpy.savetxt(oFile, output)
     
     
 
-#def main():
-#    desc = 'Given Price Prediction strategy, search for self-confirming price prediction using marginal bayesian method'
-#    parser = argparse.ArgumentParser(description=desc)
+def main():
+    desc = 'Given Price Prediction strategy, search for self-confirming price prediction using marginal bayesian method'
+    parser = argparse.ArgumentParser(description=desc)
     
-#    parser.add_argument('--agentType', action = 'store', dest = 'oDir')
+    parser.add_argument('--oDir', action = 'store', dest = 'oDir', required = True,
+                        help = "Must provide output directory")
+    
+    parser.add_argument('--bidsFile', action = 'store', dest = 'bidsFile', required = True,
+                        help = "Wellmans [agent-type]-bids.txt file to use as ground truth")
+    
+    parser.add_argument('--ppFile', action = 'store', dest = 'ppFile', required = True,
+                        help = "Wellmans price prediction file [agentParameters].csv to use a price prediction")
+    
+    parser.add_argument('--agentType', action = 'store', dest = 'agentType', required = True,
+                        help = "Mayer's equivalent agent type.")
+
+    args = parser.parse_args().__dict__
+    
+    writeBidsFile(**args)
     
 if __name__ == "__main__":
-    bidsFile = "/gpfs/main/research/tac/joint-results/wellmanSimulations/javaResults/AvgMU-bids.txt"
-
-    ppFile = "/gpfs/main/research/tac/joint-results/wellmanSimulations/javaResults/OSSCDP_AverageMU64_HB_N5M5V50.csv"
-    
-    oDir = "/gpfs/main/research/tac/joint-results/wellmanSimulations/pythonResults"
-    
-    agentType = "averageMU"
-    
-    writeBidsFile(oDir, agentType, bidsFile, ppFile)
+    main()

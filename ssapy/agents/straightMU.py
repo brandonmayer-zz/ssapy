@@ -49,7 +49,7 @@ class straightMU(margDistPredictionAgent):
                              l                    = kwargs['l'],
                              valuation            = kwargs['valuation'])
         
-    def bid2(self,**kwargs):
+    def bid(self,**kwargs):
         
         expectedPrices = numpy.asarray(kwargs.get('expectedPrices'))
         m              = kwargs.get('m',self.m)
