@@ -7,6 +7,18 @@ import os
     
     
 def main():
+    """
+    Formats of txt files:
+        for probability distributions;
+            rows alternate probability distribution - bins
+            e.g. row 1 is probability distribution for good 1
+                 row 2 is bins for prob. in row 1
+                 row 3 is probability distribution for good 2
+                 row 4 is bins for prob. in row 2
+                 
+                 
+        for histograms, it is the same pattern only replacing probabilities with integer counts. 
+    """
     desc = 'Given Price Prediction strategy, search for self-confirming price prediction using marginal bayesian method'
     parser = argparse.ArgumentParser(description=desc)
     
@@ -41,6 +53,15 @@ def main():
     parser.add_argument("--tol", action = 'store', dest = 'tol', default = 0.001, type = float,
                         help = "KL-divergence tolerance for scpp")
     
+    parser.add_argument("--saveBayesTxt", action = 'store', dest = 'saveBayesTxt', default = True, type = bool,
+                        help = "Save a text file of the bayes marginal probability distribution after every iteration.")
+    
+    parser.add_argument("--saveBayesPkl", action = 'store', dest = 'saveBayesPkl', default = True, type = bool,
+                        help = "Save a pickle dump of the margDistSCPP class with the current bayes marginal distribution after every iteration.")
+    
+    parser.add_argument("--saveHistPkl", action = 'store', dest = 'saveHistPkl', default = True, type = bool,
+                        help = "Save a pickle dump of the original hist class (raw counts not bayes prob dist) after every iteration.")
+
     parser.add_argument("--plot", action = 'store', dest = 'plot', default = False, type = bool,
                         help = "When running on the grid, this should be set to false")
     

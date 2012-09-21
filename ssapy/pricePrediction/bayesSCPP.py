@@ -13,28 +13,38 @@ import json
 import sys
 import copy
 import shutil
+import pickle
 
-def bidHelper(**kwargs):
-    agent = kwargs.get('agent')
-    dist  = kwargs.geto('bayesMargDist')
-    
-    return agent.bid(margDistPrediction = dist)
+#def bidHelper(**kwargs):
+#    agent = kwargs.get('agent')
+#    dist  = kwargs.geto('bayesMargDist')
+#    
+#    return agent.bid(margDistPrediction = dist)if not os.path.exists()
 
 def bayesSCPP(**kwargs):
-    oDir      = kwargs.get('oDir')
-    agentType = kwargs.get('agentType')
-    nAgents   = kwargs.get('nAgents',8)
-    m         = kwargs.get('m',5)
-    minPrice  = kwargs.get('minPrice',0)
-    maxPrice  = kwargs.get('maxPrice',50)
-    maxSim    = kwargs.get('maxSim', 1000)
-    nGames    = kwargs.get('nGames', 100)
-    parallel  = kwargs.get('parallel', False)
-    nProc     = kwargs.get('nProc', multiprocessing.cpu_count() - 1)
-    tol       = kwargs.get('tol',0.001)
-    plot      = kwargs.get('plot', True)
-    log       = kwargs.get('log', True)
-    verbose   = kwargs.get('verbose', True)
+    """
+    save pkl will save the hist class; to recover bayesian probabilities must call hist.bayesMargDistSCPP()
+    """
+    oDir         = kwargs.get('oDir')
+    agentType    = kwargs.get('agentType')
+    nAgents      = kwargs.get('nAgents',8)
+    m            = kwargs.get('m',5)
+    minPrice     = kwargs.get('minPrice',0)
+    maxPrice     = kwargs.get('maxPrice',50)
+    maxSim       = kwargs.get('maxSim', 1000)
+    nGames       = kwargs.get('nGames', 100)
+    parallel     = kwargs.get('parallel', False)
+    nProc        = kwargs.get('nProc', multiprocessing.cpu_count() - 1)
+    tol          = kwargs.get('tol',0.001)
+    plot         = kwargs.get('plot', True)
+    log          = kwargs.get('log', True)
+    saveBayesPkl = kwargs.get('saveBayesPkl',True)
+#    saveBayesNpz = kwargs.get('saveBayesNpz',True)
+    saveBayesTxt = kwargs.get('saveBayesTxt',True)
+    saveHistPkl  = kwargs.get('saveHistPkl',False)
+#    saveHistNpz  = kwargs.get('saveHistNpz',False)
+    savenpz      = kwargs.get('savenpz',False)
+    verbose      = kwargs.get('verbose', True)
     
     if not oDir:
         str = "-----ERROR-----\n" +\
@@ -53,7 +63,31 @@ def bayesSCPP(**kwargs):
     
     if not os.path.exists(oDir):
         os.makedirs(oDir)
-        
+    
+    if saveBayesPkl:
+        bayesPklDir = os.path.join(oDir,'bayesSCPP_bayesPkl')
+        if not os.path.exists(bayesPklDir):
+            os.makedirs(bayesPklDir)
+        else:
+            [os.remove(f) for f in glob.glob(os.path.join(bayesPklDir,'*.pkl'))]
+            
+            
+    if saveBayesTxt:
+        bayesTxtDir = os.path.join(oDir,'bayesSCPP_bayesTxt')
+        if not os.path.exists(bayesTxtDir):
+            os.makedirs(bayesTxtDir)
+        else:
+            [os.remove(f) for f in glob.glob(os.path.join(bayesTxtDir,'*txt'))]
+            
+            
+    if saveHistPkl:
+        histPklDir = os.path.join(oDir,'bayesSCPP_histPkl')
+        if not os.path.exists(histPklDir):
+            os.makedirs(histPklDir)
+        else:
+            [os.remove(f) for f in glob.glob(os.path.join(histPklDir,'*.pkl'))]
+
+                
     if log:
         logFile = os.path.join(oDir,'bayesSCPP_{0}.txt'.format(agentType))
         if os.path.exists(logFile):
@@ -131,10 +165,13 @@ def bayesSCPP(**kwargs):
             for idx, wb in enumerate(winningBids):
                 currHist.upcount(idx,wb,mag=1)
 #            [currHist.upcount(idx, wb, mag=1) for idx, wb in enumerate(winningBids)]
+
+        currBayesMargDist = currHist.bayesMargDistSCPP()
+        oldBayesMargDist  = oldHist.bayesMargDistSCPP()
         
-        klList.append(klDiv(currHist.bayesMargDistSCPP(), oldHist.bayesMargDistSCPP()))
+        klList.append(klDiv(currBayesMargDist, oldBayesMargDist))
         
-        ksList.append(ksStat(currHist.bayesMargDistSCPP(), oldHist.bayesMargDistSCPP()))
+        ksList.append(ksStat(currBayesMargDist, oldBayesMargDist))
         
         if verbose:
             print ''
@@ -147,8 +184,30 @@ def bayesSCPP(**kwargs):
         if plot:
             oPlot = os.path.join(pltDir,'bayesSCPP_{0}_{1}.png'.format(agentType,(sim+1)*nGames))
             title='BayesSCPP {0}, klD = {1:.6}, ks = {2:.6} itr = {3}'.format(agentType,klList[-1],ksList[-1],(sim+1)*nGames)
-            currHist.bayesMargDistSCPP().graphPdfToFile(fname = oPlot, title=title)
+            currBayesMargDist.graphPdfToFile(fname = oPlot, title=title)
+            
+            
+        if saveBayesPkl:
+            of = os.path.join(bayesPklDir,'bayesSCPP_bayesMargDist_{0}_{1}.pkl'\
+                              .format(agentType,int((sim+1)*nGames)))
+            with open(of, 'w') as f:
+                pickle.dump(currBayesMargDist,f)
+                
+        if saveBayesTxt:
+            of = os.path.join(bayesTxtDir,'bayesSCPP_bayesTxt_{0}_{1}.txt'\
+                              .format(agentType,int((sim+1)*nGames)))
+            
+            currBayesMargDist.savetxt(of)
+            
+         
+        if saveHistPkl:
+            of = os.path.join(bayesPklDir,'bayesSCPP_hist_{0}_{1}.pkl'\
+                              .format(agentType,(sim+1)*nGames))
+            with open(of, 'w') as f:
+                pickle.dump(currHist,f)
+                
         
+            
         if klList[-1] < tol:
             break
       
@@ -234,7 +293,6 @@ def agentTypeListBayesSCPP(**kwargs):
                   verbose   = verbose)
               
     print 'Done'
-        
     
         
         

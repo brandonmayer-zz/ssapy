@@ -19,6 +19,17 @@ class margDistSCPP(pointSCPP):
             [3,4] notice the last bin edge is inclusive
     
     savePickle and loadPickle are inherited from the pointSCPP class
+    
+    Formats of txt files:
+        for probability distributions;
+            rows alternate probability distribution - bins
+            e.g. row 1 is probability distribution for good 1
+                 row 2 is bins for prob. in row 1
+                 row 3 is probability distribution for good 2
+                 row 4 is bins for prob. in row 2
+                 
+                 
+        for histograms, it is the same pattern only replacing probabilities with integer counts.
     """
 #    def __init__(self, margDistData = None):
     def __init__(self, *args, **kwargs):
@@ -494,4 +505,15 @@ class margDistSCPP(pointSCPP):
         leg.get_frame().set_alpha(0.5)
         
         plt.savefig(filename)
+        
+    def savetxt(self,filename):
+        with open(filename,'w') as f:
+            for d in self.data:
+                numpy.savetxt(f,d[0],newline=" ")
+                f.write("\n")
+                numpy.savetxt(f,d[1],newline=" ")
+                f.write("\n")
+            
+        
+            
         

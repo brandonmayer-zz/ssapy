@@ -54,12 +54,17 @@ def agentFactory(**kwargs):
         agent = riskEvaluator64(m = m, vmin = minPrice, vmax = maxPrice)
     elif agentType == "riskEvaluator256":
         agent = riskEvaluator256(m = m, vmin = minPrice, vmax = maxPrice)
+    elif agentType == "averageMU":
+        agent = averageMU(m = m, vmin = minPrice, vmax = maxPrice)
     elif agentType == "averageMU8":
         agent = averageMU8(m = m, vmin = minPrice, vmax = maxPrice)
     elif agentType == "averageMU64":
         agent = averageMU64(m = m, vmin = minPrice, vmax = maxPrice)
     elif agentType == "averageMU256":
         agent = averageMU256(m = m, vmin = minPrice, vmax = maxPrice)
+        
+    if agent == None:
+        raise ValueError("{0} not defined in agentFactory".format(agentType))
         
     return agent
     
