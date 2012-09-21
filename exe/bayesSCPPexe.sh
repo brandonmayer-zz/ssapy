@@ -1,2 +1,2 @@
 #!/bin/bash
-python bayesSCPPexe.py "$@"
+bayesSCPPexe.py "$@"
