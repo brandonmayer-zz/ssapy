@@ -15,11 +15,7 @@ import copy
 class straightMU(margDistPredictionAgent):
     def __init__(self,**kwargs):
         super(straightMU,self).__init__(**kwargs)
-        
-#        self._bundles = kwargs.get('bundles',self.allBundles(self.m))
-#        self._valuation= kwargs.get('valuation',self.valuation(self._bundles, self.v, self.l))
-        
-               
+                
     @staticmethod
     def type():
         return "straightMU"
@@ -30,38 +26,53 @@ class straightMU(margDistPredictionAgent):
         Calculate the expected marginal price vector given marginal distributions
         over good prices. 
         
-        We consider in the average, the price associated with a bin to be the
-        bins center. The average is then calculated as summing the product 
+        For the base strategy straightMU.SS(...)
+        the required inputs are:
+            pricePrediction
+            bundles
+            valuation
+            l
+        
+        pricePrediction may be a margDistSCPP instance, in which case the expected 
+        expected price vector will be calculated by summing the product 
         of the bin centers multiplied by the bin probability.
+        
+        pricePrediction may be a numpy.ndarray with shape (m,1) or a python list
+        in specifying the expected price vector. This will then be used to call straightMV
         """
-        expectedPrices = None
-        if 'expectedPrices' in kwargs:
-            expectedPrices = kwargs['expectedPrices']
-        else:
-            #check validity of args
-            pricePrediction = margDistPredictionAgent.SS(**kwargs)
+        
+        pricePrediction = kwargs.get('pricePrediction')
+        if pricePrediction == None:
+            raise KeyError("straightMU.SS(...) - must specify pricePrediction")
+        
+        bundles = kwargs.get('bundles')
+        if bundles == None:
+            raise KeyError("straightMU.SS(...) - must specify bundles")
+                
+        valuation = kwargs.get('valuation')
+        if valuation == None:
+            raise KeyError("straightMU8 - must specify valuation")
+        
+        l = kwargs.get('l')
+        if l == None:
+            raise KeyError("straightMU8 - must specify l (target number of time slots)")
+        
+        if isinstance(pricePrediction, margDistSCPP):
+            expectedPrices = pricePrediction(method='average')
             
-            #AGENT SPECIFIC LOGIC
-            expectedPrices = kwargs.get('expectedPrices',pricePrediction.expectedPrices())            
-
+        elif isinstance(pricePrediction, numpy.ndarray):
+            expectedPrices = pricePrediction
+            
+        elif isinstance(pricePrediction, list):
+            expectedPrices = numpy.asarray(pricePrediction)
+            
+        else:
+            raise ValueError("Unknown Price Prediction Type.")
+        
         return straightMV.SS(pointPricePrediction = expectedPrices,
-                             bundles              = kwargs['bundles'],
-                             l                    = kwargs['l'],
-                             valuation            = kwargs['valuation'])
-        
-    def bid(self,**kwargs):
-        
-        expectedPrices = numpy.asarray(kwargs.get('expectedPrices'))
-        m              = kwargs.get('m',self.m)
-        bundles        = kwargs.get('bundles',self.allBundles(m))
-        l              = kwargs.get('l',self.l)
-        v              = kwargs.get('v',self.v)
-        valuation      = kwargs.get('valuation',self.valuation(bundles, v, l))
-        
-        return straightMV.SS( pointPricePrediction = expectedPrices,
-                              bundles              = bundles,
-                              l                    = l,
-                              valuation            = valuation)
+                             bundles             = bundles,
+                             l                   = l,
+                             valuation           = valuation)
                
 class straightMU8(margDistPredictionAgent):
     """

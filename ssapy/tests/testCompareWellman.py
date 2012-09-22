@@ -40,8 +40,9 @@ def writeBidsFile(**kwargs):
         agent.l = int(sim[0])
         agent.v = sim[1:6]
         
-        bidVector = agent.bid(expectedPrices = expectedPriceVector)
-
+        bidVector = agent.bid(pricePrediction = expectedPriceVector)
+        print 'Mayer  Bid = {0}'.format(bidVector)
+        print 'Welman Bid = {0}'.format(sim[6:])
         output[row,6:] = bidVector
         
     oFile = os.path.join(oDir, '{0}-bids.txt'.format(agentType))

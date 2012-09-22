@@ -68,17 +68,14 @@ class margDistPredictionAgent(pricePredictionAgent):
         m                  = kwargs.get('m', self.m)
         v                  = kwargs.get('v', self.v)
         l                  = kwargs.get('l', self.l)
-        margDistPrediction = kwargs.get('margDistPrediction', self.pricePrediction)
+        pricePrediction    = kwargs.get('pricePrediction', self.pricePrediction)
         bundles            = kwargs.get('bundles', self.allBundles(m))
         
-        numpy.testing.assert_(isinstance(margDistPrediction,margDistSCPP),
-            msg="margDistPrediction must be a valid instance of margDistSCPP.")
+        return self.SS( pricePrediction = pricePrediction,
+                        bundles         = bundles,
+                        l               = l,
+                        valuation       = simYW.valuation(bundles,self.v,self.l))
         
-        return self.SS( margDistPrediction = margDistPrediction,
-                        bundles            = bundles,
-                        l                  = l,
-                        valuation          = simYW.valuation(bundles,self.v,self.l) )
-    
     def printSummary(self,**kwargs):
         """
         Print a summary of the agent's state to standard output.

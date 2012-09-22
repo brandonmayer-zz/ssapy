@@ -136,7 +136,7 @@ class simYW(agentBase):
                            l           = self.l)
     
     @staticmethod
-    def minMaxhelper(_bundles, utility, _l):
+    def minMaxHelper(_bundles, _utility, _l):
         if _bundles.shape[0] == 1:
         #if there is one bundle and utility
             _optBundle   = _bundles[0]
