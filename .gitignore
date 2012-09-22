@@ -1,0 +1,7 @@
+#Compiled source#
+#################
+*.pyc
+*.o
+*.so
+*.exe
+*.dll
