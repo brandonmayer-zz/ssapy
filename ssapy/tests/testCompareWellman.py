@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from ssapy.agents import agentFactory
+from ssapy.pricePrediction.margDistSCPP import margDistSCPP
 import numpy
 import os
 import argparse
@@ -24,12 +25,12 @@ def writeBidsFile(**kwargs):
     prob = []
     for counts in ppCounts:
         prob.append(counts/sum(counts))
-        
+            
     expectedPriceVector = []
+    
     for p in prob:
         expectedPriceVector.append(numpy.dot(p,numpy.arange(0,51)))
-        
-        
+            
     expectedPriceVector = numpy.atleast_1d(expectedPriceVector)
     
     agent = agentFactory.agentFactory(agentType = agentType, m = 5, minPrice = 0, maxPrice = 50)
@@ -41,7 +42,7 @@ def writeBidsFile(**kwargs):
         agent.v = sim[1:6]
         
         bidVector = agent.bid(pricePrediction = expectedPriceVector)
-        print 'Mayer  Bid = {0}'.format(bidVector)
+        print 'Mayer Bid  = {0}'.format(bidVector)
         print 'Welman Bid = {0}'.format(sim[6:])
         output[row,6:] = bidVector
         
