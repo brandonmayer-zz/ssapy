@@ -459,7 +459,7 @@ class symmetricDPPworker(object):
             
 #            agent = riskAware(m = self.args['m'])
             agentList = []
-            for i in xrange(args['nAgents']):
+            for i in xrange(self.args['nAgents']):
                 agentList.append(riskAware(m=self.args['m']))
             
             bids=[numpy.array(agent.bid({'margDistPrediction': margDistPrediciton})).astype('float') for agent in agentList]
@@ -468,5 +468,5 @@ class symmetricDPPworker(object):
             
         else:
             print 'symmetricDPPworker.__call(self.margDistPrediction)'
-            print 'Unknown Agent Type: {0}'.format(agentType)
+            print 'Unknown Agent Type: {0}'.format(self.args['agentType'])
             raise AssertionError
