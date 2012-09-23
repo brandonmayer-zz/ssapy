@@ -43,10 +43,10 @@ class margDistSCPP(pointSCPP):
         
         if margDist:
             if isinstance(margDist,numpy.ndarray):
-                if self.validateData(margDistData=margDistData):
-                    self.data = margDistData
-                    if isinstance(margDistData,list):
-                        self.m = len(margDistData)
+                if self.validateData(margDistData=margDist):
+                    self.data = margDist
+                    if isinstance(margDist,list):
+                        self.m = len(margDist)
                     else:
                         self.m = 1
             elif isinstance(margDist, basestring):
@@ -122,11 +122,19 @@ class margDistSCPP(pointSCPP):
         
         method = kwargs.get('method','average')
                         
-        if method == 'average':
+        if method == 'centerBinAverage':
             e = []
             for hist, binEdges in self.data:
                 e.append(self.centerBinAvg(hist     = hist,
                                            binEdges = binEdges))
+                
+            return numpy.atleast_1d(e)
+        
+        if method == 'average':
+            e = []
+            for hist, binEdges in self.data:
+                e.append(self.histAvg(hist     = hist,
+                                      binEdges = binEdges))
                 
             return numpy.atleast_1d(e)
         
@@ -144,6 +152,23 @@ class margDistSCPP(pointSCPP):
             print 'Unknown method'
             raise AssertionError
     
+    @staticmethod
+    def histAvg(**kwargs):
+        """
+        Compute expected value of a histogram with out centering bins
+        """
+        hist     = kwargs.get('hist')
+        if hist == None:
+            raise KeyError("margDist.histAvg(...) - must provide histogram")
+        
+        binEdges = kwargs.get('hist')
+        if binEdges == None:
+            raise KeyError("margDist.binEdges(...) - must provide bin edges")
+        
+        p = hist / numpy.sum(hist*numpy.diff(binEdges),dtype=numpy.float)
+        
+        return numpy.dot(p,binEdges)
+        
     @staticmethod
     def centerBinAvg(**kwargs):
         """

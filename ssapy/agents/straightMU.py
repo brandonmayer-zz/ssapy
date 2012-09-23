@@ -12,6 +12,8 @@ from margDistPredictionAgent import *
 from straightMV import *
 import copy
 
+import sklearn.mixture
+
 class straightMU(margDistPredictionAgent):
     def __init__(self,**kwargs):
         super(straightMU,self).__init__(**kwargs)
@@ -89,18 +91,33 @@ class straightMU8(margDistPredictionAgent):
         Then bid via straightMV with the resulting expected prices
         """
         
-        pricePrediction = margDistPredictionAgent.SS(**kwargs)
+        pricePrediction = kwargs.get('pricePrediction')
+        if pricePrediction == None:
+            raise KeyError("straightMU8.SS(...) - must specify pricePrediction")
         
-        if 'expectedPrices' not in kwargs:
-            expectedPrices = pricePrediction.expectedPrices( method   = 'iTsample',
-                                                             nSamples = 8)
+        bundles = kwargs.get('bundles')
+        if bundles == None:
+            raise KeyError("straightMU8.SS(...) - must specify bundles")
+                
+        valuation = kwargs.get('valuation')
+        if valuation == None:
+            raise KeyError("straightMU8 - must specify valuation")
         
-        bundles = kwargs.get('bundles', simYW.allBundles(pricePrediction.m))
+        l = kwargs.get('l')
+        if l == None:
+            raise KeyError("straightMU8 - must specify l (target number of time slots)")
         
-        return straightMU.SS( expectedPrices = expectedPrices,
-                              bundles        = bundles,
-                              valuation      = kwargs['valuation'],
-                              l              = kwargs['l'])
+        if isinstance(pricePrediction, margDistSCPP):
+                expectedPrices = pricePrediction.expectedPrices(method = 'iTsample', nSamples = 8)
+            
+        if isinstance(pricePrediction, sklearn.mixture.GMM):
+            samples = pricePrediction.sample(8)
+            expectedPrices = numpy.mean(samples,0)
+        
+        return straightMV.SS( pointPricePrediction = expectedPrices,
+                              bundles              = bundles,
+                              valuation            = valuation,
+                              l                    = l)
         
     def printSummary(self,**kwargs):
         tkwargs = copy.deepcopy(kwargs)
@@ -126,17 +143,37 @@ class straightMU64(margDistPredictionAgent):
         Then bid via straightMV with the resulting expected prices
         """
         
-        pricePrediction = margDistPredictionAgent.SS(**kwargs)
+        """
+        Calculate the expected using inverse sampling method and 8 samples
+        Then bid via straightMV with the resulting expected prices
+        """
+        pricePrediction = kwargs.get('pricePrediction')
+        if pricePrediction == None:
+            raise KeyError("straightMU8.SS(...) - must specify pricePrediction")
         
-        expectedPrices = pricePrediction.expectedPrices( method   = 'iTsample',
-                                                         nSamples = 64)
+        bundles = kwargs.get('bundles')
+        if bundles == None:
+            raise KeyError("straightMU8.SS(...) - must specify bundles")
+                
+        valuation = kwargs.get('valuation')
+        if valuation == None:
+            raise KeyError("straightMU8 - must specify valuation")
         
-        bundles = kwargs.get('bundles', simYW.allBundles(pricePrediction.m))
+        l = kwargs.get('l')
+        if l == None:
+            raise KeyError("straightMU8 - must specify l (target number of time slots)")
         
-        return straightMU.SS( expectedPrices = expectedPrices,
-                              bundles        = bundles,
-                              valuation      = kwargs['valuation'],
-                              l              = kwargs['l'])
+        if isinstance(pricePrediction, margDistSCPP):
+                expectedPrices = pricePrediction.expectedPrices(method = 'iTsample', nSamples = 64)
+            
+        if isinstance(pricePrediction, sklearn.mixture.GMM):
+            samples = pricePrediction.sample(64)
+            expectedPrices = numpy.mean(samples,0)
+        
+        return straightMV.SS( pointPricePrediction = expectedPrices,
+                              bundles              = bundles,
+                              valuation            = valuation,
+                              l                    = l)
                 
         
     def printSummary(self,**kwargs):
@@ -162,18 +199,38 @@ class straightMU256(margDistPredictionAgent):
         Calculate the expected using inverse sampling method and 8 samples
         Then bid via straightMV with the resulting expected prices
         """
+        """
+        Calculate the expected using inverse sampling method and 8 samples
+        Then bid via straightMV with the resulting expected prices
+        """
         
-        pricePrediction = margDistPredictionAgent.SS(**kwargs)
+        pricePrediction = kwargs.get('pricePrediction')
+        if pricePrediction == None:
+            raise KeyError("straightMU8.SS(...) - must specify pricePrediction")
         
-        expectedPrices = pricePrediction.expectedPrices( method   = 'iTsample',
-                                                         nSamples = 256)
+        bundles = kwargs.get('bundles')
+        if bundles == None:
+            raise KeyError("straightMU8.SS(...) - must specify bundles")
+                
+        valuation = kwargs.get('valuation')
+        if valuation == None:
+            raise KeyError("straightMU8 - must specify valuation")
         
-        bundles = kwargs.get('bundles', simYW.allBundles(pricePrediction.m))
+        l = kwargs.get('l')
+        if l == None:
+            raise KeyError("straightMU8 - must specify l (target number of time slots)")
         
-        return straightMU.SS( expectedPrices = expectedPrices,
-                              bundles        = bundles,
-                              valuation      = kwargs['valuation'],
-                              l              = kwargs['l'])
+        if isinstance(pricePrediction, margDistSCPP):
+                expectedPrices = pricePrediction.expectedPrices(method = 'iTsample', nSamples = 256)
+            
+        if isinstance(pricePrediction, sklearn.mixture.GMM):
+            samples = pricePrediction.sample(256)
+            expectedPrices = numpy.mean(samples,0)
+        
+        return straightMV.SS( pointPricePrediction = expectedPrices,
+                              bundles              = bundles,
+                              valuation            = valuation,
+                              l                    = l)
         
     def printSummary(self,**kwargs):
         tkwargs = copy.deepcopy(kwargs)

@@ -5,3 +5,9 @@
 *.so
 *.exe
 *.dll
+
+#Eclipse Project Files#
+#######################
+.project
+.pydevproject
+.settings
