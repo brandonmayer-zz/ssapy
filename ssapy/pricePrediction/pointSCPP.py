@@ -1,5 +1,6 @@
 import pickle
 import numpy
+import os
 
 class pointSCPP(object):
     """
