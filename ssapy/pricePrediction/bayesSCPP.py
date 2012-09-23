@@ -15,11 +15,11 @@ import copy
 import shutil
 import pickle
 
-#def bidHelper(**kwargs):
-#    agent = kwargs.get('agent')
-#    dist  = kwargs.geto('bayesMargDist')
-#    
-#    return agent.bid(margDistPrediction = dist)if not os.path.exists()
+def bidHelper(**kwargs):
+    agent = kwargs.get('agent')
+    dist  = kwargs.geto('bayesMargDist')
+    
+    return agent.bid(margDistPrediction = dist)
 
 def bayesSCPP(**kwargs):
     """
