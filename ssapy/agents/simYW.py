@@ -356,16 +356,8 @@ class simYW(agentBase):
         
         valuation = numpy.atleast_1d(valuation)
         
-        #there must be a valuation for each corresponding bundle
-        assert bundles.shape[0] == valuation.shape[0],\
-            "simYW::surplus bundles.shape[0] = {0} != valuation.shape[0] = {1}".format(bundles.shape[1],valuation.shape[0])
-        
-        price = numpy.atleast_1d(priceVector)
-        
-        #there must be a price for each good
-        assert bundles.shape[1] == priceVector.shape[0]
-            
-        return numpy.atleast_1d([c for c in itertools.imap(operator.sub,valuation, simYW.cost(bundles=bundles, price=price))])
+        return valuation - simYW.cost(bundles = bundles, price = priceVector)
+
     
     def finalSurplus(self):
         numpy.testing.assert_(isinstance(self.bundleWon,numpy.ndarray),
