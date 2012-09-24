@@ -19,19 +19,19 @@ class averageMU(margDistPredictionAgent):
         
         pricePrediction = kwargs.get('pricePrediction')
         if pricePrediction == None:
-            raise KeyError("straightMU.SS(...) - must specify pricePrediction")
+            raise KeyError("averageMU.SS(...) - must specify pricePrediction")
         
         bundles = kwargs.get('bundles')
         if bundles == None:
-            raise KeyError("straightMU.SS(...) - must specify bundles")
+            raise KeyError("averageMU.SS(...) - must specify bundles")
                 
         valuation = kwargs.get('valuation')
         if valuation == None:
-            raise KeyError("straightMU8 - must specify valuation")
+            raise KeyError("averageMU - must specify valuation")
         
         l = kwargs.get('l')
         if l == None:
-            raise KeyError("straightMU8 - must specify l (target number of time slots)")
+            raise KeyError("averageMU - must specify l (target number of time slots)")
         
         n_samples = kwargs.get('n_samples', 8)
         
