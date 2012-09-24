@@ -54,6 +54,7 @@ class straightMU(margDistPredictionAgent):
         if bundles == None:
             raise KeyError("straightMU.SS(...) - must specify bundles")
                 
+        # a list of scalar valuations
         valuation = kwargs.get('valuation')
         if valuation == None:
             raise KeyError("straightMU8 - must specify valuation")

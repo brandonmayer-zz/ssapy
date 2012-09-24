@@ -324,7 +324,7 @@ class simYW(agentBase):
     @staticmethod
     def surplus(bundles=None, valuation = None, priceVector = None):
         """
-        Calculate the surplus for a given array of bundles, prices and a valuation vector.
+        Calculate the surplus for a given array of bundles, prices and a valuation (scalar).
         Surplus equals valuation less cost.
         """
                    
@@ -435,6 +435,35 @@ class simYW(agentBase):
         return simYW.minMaxBundle(bundles = bundles[optBundleIdxList],
                                   utility = surplus[optBundleIdxList],
                                   l       = l)
+        
+    @staticmethod
+    def marginalUtility(bundles, priceVector, valuation, l, goodIdx):
+#        priceVector = numpy.atleast_1d(priceVector)
+        priceVector = numpy.asarray(priceVector,dtype = numpy.float)
+        
+        tempPriceInf = priceVector.copy()
+        tempPriceInf[goodIdx] = numpy.float('inf')
+        
+        tempPriceZero = priceVector.copy()
+        tempPriceZero[goodIdx] = numpy.float(0.0)
+        
+
+        optBundleInf, predictedSurplusInf = simYW.acqYW(bundles     = bundles,
+                                                        valuation   = valuation,
+                                                        l           = l,
+                                                        priceVector = tempPriceInf)
+            
+        optBundleZero, predictedSurplusZero = simYW.acqYW(bundles     = bundles,
+                                                          valuation   = valuation,
+                                                          l           = l, 
+                                                          priceVector = tempPriceZero)
+    
+    
+        margUtil = predictedSurplusZero - predictedSurplusInf
+        if margUtil < 0:
+            raise ValueError("simYW.marginalUtility(...) - Negative Marginal Utility (shouldn't happen).")
+        
+        return margUtil
             
     def validatePriceVector(self,priceVector):
         """

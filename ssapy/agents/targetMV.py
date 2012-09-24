@@ -67,47 +67,46 @@ class targetMV(pointPredictionAgent):
         vector.
         """
         
-        assert 'pointPricePrediction' in kwargs,\
-            "Must specify pointPricePrediciton in kwargs parameter."
-            
-        assert isinstance(kwargs['pointPricePrediction'],pointSCPP) or\
-                isinstance(kwargs['pointPricePrediction'], numpy.ndarray),\
-               "kwargs['pointPricePrediction'] must be either a pointSCPP or numpy.ndarray"
-            
-        assert 'bundles' in kwargs,\
-            "Must specify bundles in kwargs parameter."
-            
-        assert 'valuation' in kwargs,\
-            "Must specify the valuation of each bundle in kwargs parameter."
-            
-        assert 'l' in kwargs,\
-            "Must specify l, the target number of goods in kwargs parameter."
+        pointPricePrediction = kwargs.get('pointPricePrediction')
+        if pointPricePrediction == None:
+            raise KeyError("targetMV.SS(...) - must specify pricePrediction")
         
-        pricePrediction = None
-
-        if isinstance(kwargs['pointPricePrediction'], pointSCPP):
-                        
-            pricePrediction = kwargs['pointPricePrediction'].data
+        bundles = kwargs.get('bundles')
+        if bundles == None:
+            raise KeyError("targetMV.SS(...) - must specify bundles")
+                
+        valuation = kwargs.get('valuation')
+        if valuation == None:
+            raise KeyError("targetMV - must specify valuation")
+        
+        l = kwargs.get('l')
+        if l == None:
+            raise KeyError("targetMV - must specify l (target number of time slots)")
+        
+        if isinstance(pointPricePrediction, pointSCPP):
+            pricePrediction = numpy.asarray(pointPricePrediction.data, dtype = numpy.float)
             
-        elif isinstance(kwargs['pointPricePrediction'],numpy.ndarray):
-            
-            pricePrediction = numpy.atleast_1d(kwargs['pointPricePrediction'])
+        elif isinstance(pointPricePrediction, numpy.ndarray):
+            pricePrediction = pointPricePrediction
             
         else:
-            # this should never happen
-            print 'Even HAL made mistakes...'
-            raise AssertionError
+            raise ValueError("targetMV - Unknown pointPricePrediction type")
         
                 
         # solve acq for optimal bundle
         # size checks of parameters will be done in acq
-        [optBundle, optSurplus] = simYW.acqYW(bundles       = kwargs['bundles'],
-                                              valuation     = kwargs['valuation'],
-                                              l             = kwargs['l'],
+        [optBundle, optSurplus] = simYW.acqYW(bundles       = bundles,
+                                              valuation     = valuation,
+                                              l             = l,
                                               priceVector   = pricePrediction)
+        
+        n_goods = bundles.shape[1]
+        bid = numpy.zeros(n_goods,dtype=numpy.float)
+        
+        for goodIdx, good in enumerate(optBundle):
+            if good:
+                bid[goodIdx] = simYW.marginalUtility(bundles, pricePrediction, valuation, l, goodIdx)
+        
             
-        return targetMV.bundleBid(pointPricePrediction      = pricePrediction,
-                                  bundle                    = numpy.atleast_1d(optBundle),
-                                  valuation                 = kwargs['valuation'],
-                                  l                         = kwargs['l'])
-          
+        return bid
+            

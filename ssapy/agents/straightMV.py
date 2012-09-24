@@ -61,29 +61,12 @@ class straightMV(pointPredictionAgent):
         else:
             raise ValueError("straightMV - Unknown pointPricePrediction type")
         
-        marginalValueBid = []
-        for idx in xrange(kwargs['bundles'].shape[1]):
-            tempPriceInf = pricePrediction.copy()
-            tempPriceInf[idx] = float('inf')
-            tempPriceZero = pricePrediction.copy()
-            tempPriceZero[idx] = 0 
-            
-            optBundleInf, predictedSurplusInf = simYW.acqYW(bundles     = bundles,
-                                                            valuation   = valuation,
-                                                            l           = l,
-                                                            priceVector = tempPriceInf)
-            
-            optBundleZero, predictedSurplusZero = simYW.acqYW(bundles     = bundles,
-                                                              valuation   = valuation,
-                                                              l           = l, 
-                                                              priceVector = tempPriceZero)
-                
-            #this shouldn't happend but just in case.
-            if predictedSurplusZero - predictedSurplusInf < 0:
-                marginalValueBid.append(0)
-            else:
-                marginalValueBid.append(predictedSurplusZero - predictedSurplusInf)
-            
-        return numpy.atleast_1d(marginalValueBid).astype('float')
+        
+        n_goods = bundles.shape[1]
+        marginalValueBid = numpy.zeros(n_goods,dtype=numpy.float64)
+        for goodIdx in xrange(n_goods):
+            marginalValueBid[goodIdx] = simYW.marginalUtility(bundles, pointPricePrediction, valuation, l, goodIdx)
+
+        return marginalValueBid
         
             
