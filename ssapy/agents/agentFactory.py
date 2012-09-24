@@ -52,8 +52,8 @@ def agentFactory(**kwargs):
         agent = riskEvaluator8(m = m, vmin = minPrice, vmax = maxPrice)
     elif agentType == "riskEvaluator64":
         agent = riskEvaluator64(m = m, vmin = minPrice, vmax = maxPrice)
-    elif agentType == "riskEvaluator256":
-        agent = riskEvaluator256(m = m, vmin = minPrice, vmax = maxPrice)
+#    elif agentType == "riskEvaluator256":
+#        agent = riskEvaluator256(m = m, vmin = minPrice, vmax = maxPrice)
     elif agentType == "averageMU":
         agent = averageMU(m = m, vmin = minPrice, vmax = maxPrice)
     elif agentType == "averageMU8":
