@@ -30,9 +30,12 @@ class targetMVS(pointPredictionAgent):
         
         l = kwargs['l']
         
+        pricePrediction = kwargs.get('pointPricePrediction')
+        
+        
         # set the price of all goods not in the optimal bundle to infinity
         # deep copy price to preserve original price vector
-        pricePredictionInf = numpy.array(pricePrediction).astype(numpy.float)
+        pricePredictionInf = numpy.asarray(pricePrediction, dtype = numpy.float).copy()
         pricePredictionInf[ (numpy.atleast_1d(bundle) == 0) ] = float('inf')
         
         m = int(bundle.shape[0])
@@ -42,9 +45,9 @@ class targetMVS(pointPredictionAgent):
         marginalValueBid = []
         for idx in xrange(m):
             if bundle[idx] == 1:
-                tempPriceInf = pricePredictionInf.astype(numpy.float)
+                tempPriceInf = pricePredictionInf.copy()
                 tempPriceInf[idx] = float('inf')
-                tempPriceZero = pricePredictionInf
+                tempPriceZero = pricePredictionInf.copy()
                 tempPriceZero[idx] = 0
                 
                 [optBundleInf, predictedSurplusInf]   = targetMVS.acqYW(bundles     = allBundles,
