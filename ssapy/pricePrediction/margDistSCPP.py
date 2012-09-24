@@ -386,36 +386,22 @@ class margDistSCPP(pointSCPP):
             
     def iTsample(self, **kwargs):
         """
-        Function to sample independently from marginal distributions
+        Kept for backwards-combatibility of function call.
         """
-        nSamples = None
-        if 'nSamples' not in kwargs:
-            nSamples = 8
-        else:
-            nSamples = kwargs['nSamples']
-            
-        numpy.testing.assert_equal(isinstance(nSamples,int),
-                                   True)
-        m = len(self.data)
+        return self.sample(n_samples = kwargs.get('nSamples',8))
+    
+    def sample(self,n_samples = 8):
+#        n_samples = kwargs.get('n_samples')
         
-        samples = numpy.zeros( (nSamples,m) )
+        samples = numpy.zeros((n_samples,len(self.data)))
         
-        for m in xrange(len(self.data)):
-            #calculate the cdf
-            hist, binEdges = self.data[m]
-            #make sure hist is normalized
-            normHist = hist / numpy.float( numpy.dot(hist,numpy.diff(binEdges)) )
-            cdf = numpy.cumsum(normHist)
+        for goodIdx in xrange(len(self.data)):
+            hist,binEdges = self.data[goodIdx]
             
-            #get some random numbers (0.0,1.0]
-            randNumbers = numpy.random.random_sample(nSamples)
+            p = hist / numpy.float( numpy.dot(hist, numpy.diff(binEdges)) )
             
-            for idx in xrange(randNumbers.shape[0]):
-                if randNumbers[idx] < cdf[0]:
-                    binIdx = 0
-                else:
-                    binIdx = numpy.nonzero(cdf <= randNumbers[idx])[0][-1]
-                samples[idx][m] = binEdges[binIdx]
+            for sampIdx in xrange(n_samples):
+                samples[sampIdx,goodIdx] = binEdges[numpy.random.multinomial(1,p).argmax()]
                 
         return samples
     
