@@ -161,13 +161,13 @@ class margDistSCPP(pointSCPP):
         if hist == None:
             raise KeyError("margDist.histAvg(...) - must provide histogram")
         
-        binEdges = kwargs.get('hist')
+        binEdges = kwargs.get('binEdges')
         if binEdges == None:
             raise KeyError("margDist.binEdges(...) - must provide bin edges")
         
         p = hist / numpy.sum(hist*numpy.diff(binEdges),dtype=numpy.float)
         
-        return numpy.dot(p,binEdges)
+        return numpy.dot(p,binEdges[:len(p)])
         
     @staticmethod
     def centerBinAvg(**kwargs):
@@ -403,7 +403,9 @@ class margDistSCPP(pointSCPP):
         for m in xrange(len(self.data)):
             #calculate the cdf
             hist, binEdges = self.data[m]
-            cdf = numpy.cumsum(hist)
+            #make sure hist is normalized
+            normHist = hist / numpy.float( numpy.dot(hist,numpy.diff(binEdges)) )
+            cdf = numpy.cumsum(normHist)
             
             #get some random numbers (0.0,1.0]
             randNumbers = numpy.random.random_sample(nSamples)
@@ -538,6 +540,17 @@ class margDistSCPP(pointSCPP):
                 f.write("\n")
                 numpy.savetxt(f,d[1],newline=" ")
                 f.write("\n")
+                
+    def loadWellmanCsv(self,filename):
+        filename = os.path.realpath(filename)
+        allCounts = numpy.loadtxt(filename,delimiter=",",dtype=numpy.float)
+        self.m = allCounts.shape[0]
+        maxPrice = allCounts.shape[1]
+        self.data = []
+        for margCounts in allCounts:
+            self.data.append( (margCounts / numpy.sum(margCounts,dtype=numpy.float), 
+                               numpy.arange(0,maxPrice+1)) )
+            
             
         
             
