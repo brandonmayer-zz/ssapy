@@ -37,9 +37,6 @@ def writeBidsFile(**kwargs):
     margDist.loadWellmanCsv(ppFile)
     expectedPriceVector = margDist.expectedPrices(method='average')
     
-    sampleExpectedVector = margDist.sample(n_samples=1000)
-    sampleExpectedVector = numpy.mean(sampleExpectedVector,0)
-    
     agent = agentFactory.agentFactory(agentType = agentType, m = 5, minPrice = 0, maxPrice = 50)
         
     output = numpy.zeros(data.shape)
