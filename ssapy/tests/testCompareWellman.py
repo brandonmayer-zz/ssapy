@@ -20,19 +20,6 @@ def writeBidsFile(**kwargs):
     
     data = numpy.loadtxt(bidsFile)
     
-#    ppCounts = numpy.loadtxt(ppFile,delimiter=",",dtype=numpy.float)
-#    
-#    prob = []
-#    for counts in ppCounts:
-#        prob.append(counts/sum(counts))
-#            
-#    expectedPriceVector = []
-#    
-#    for p in prob:
-#        expectedPriceVector.append(numpy.dot(p,numpy.arange(0,51)))
-#            
-#    expectedPriceVector = numpy.atleast_1d(expectedPriceVector)
-    
     margDist = margDistSCPP()
     margDist.loadWellmanCsv(ppFile)
     expectedPriceVector = margDist.expectedPrices(method='average')
