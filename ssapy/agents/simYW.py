@@ -178,30 +178,6 @@ class simYW(agentBase):
         numpy.testing.assert_equal(bundles.shape[0], utility.shape[0],
                                    err_msg="Each bundle must have a corresponding utility.")
         
-        
-#        def helper(_bundles,_utility,_l):
-#                if _bundles.shape[0] == 1:
-#                #if there is one bundle and utility
-#                    _optBundle   = _bundles[0]
-#                    _optUtility  = _utility[0]
-#                    return _optBundle, _optUtility
-#                else:
-#                    t = numpy.float('inf')
-#                    _optBundle  = None
-#                    _optUtility = None
-#                    for idx in xrange(_bundles.shape[0]):
-#                        tempBinList = _bundles[idx]
-#                        cs          = numpy.cumsum(tempBinList)
-#                        tNew        = (numpy.array(cs) >= _l).nonzero()
-#                        if tNew[0].any():
-#                            tNew = tNew[0][0]
-#                            if tNew < t:
-#                                t = tNew
-#                                _optBundle        = _bundles[idx]
-#                                _optUtility       = _utility[idx]
-#                                
-#                    return _optBundle, _optUtility
-        
         optBundle = None
         optUtility = None
         
