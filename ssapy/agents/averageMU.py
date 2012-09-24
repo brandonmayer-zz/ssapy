@@ -15,51 +15,46 @@ class averageMU(margDistPredictionAgent):
         return "averageMU"
     
     @staticmethod
-    def SS(**kwargs):        
+    def SS(**kwargs):     
         
-        pricePrediction = margDistPredictionAgent.SS(**kwargs)
+        pricePrediction = kwargs.get('pricePrediction')
+        if pricePrediction == None:
+            raise KeyError("straightMU.SS(...) - must specify pricePrediction")
         
-        nSamples = kwargs.get('nSamples', 8)
+        bundles = kwargs.get('bundles')
+        if bundles == None:
+            raise KeyError("straightMU.SS(...) - must specify bundles")
                 
-        priceSamples = pricePrediction.iTsample(nSamples = nSamples)
-
-        bundles = kwargs.get('bundles', averageMU.allBundles(pricePrediction.m))
+        valuation = kwargs.get('valuation')
+        if valuation == None:
+            raise KeyError("straightMU8 - must specify valuation")
         
-        #for each price vector, we calculate the marginal
-        #value of the ith good
-        avgMV = numpy.zeros(pricePrediction.m,dtype=numpy.float)
+        l = kwargs.get('l')
+        if l == None:
+            raise KeyError("straightMU8 - must specify l (target number of time slots)")
         
-        for idx in xrange(priceSamples.shape[1]):
-            mv = []
-            for s in priceSamples:
-                tempPriceInf = numpy.array(s).astype(numpy.float)
-                tempPriceInf[idx] = float('inf')
-                tempPriceZero = numpy.array(s)
-                tempPriceZero[idx] = 0
-                
-                [optBundleInf, predictedSurplusInf]    = averageMU.acqYW(bundles     = bundles,
-                                                                         valuation   = kwargs['valuation'],
-                                                                         l           = kwargs['l'],
-                                                                         priceVector = tempPriceInf)
-                
-                [optBundleZero, predictedSurplusZero] = averageMU.acqYW(bundles     = bundles,
-                                                                        valuation   = kwargs['valuation'],
-                                                                        l           = kwargs['l'],
-                                                                        priceVector = tempPriceZero )
-                
-                if predictedSurplusZero - predictedSurplusInf < 0:
-                    print''
-                    sys.stderr.write('----WARNING----\n')
-                    sys.stderr.write('averageMU8: predictedSurplusZero - predictedSurplusInf < 0 \n')
-                    print ''
-                    mv.append(0)
-                else:
-                    mv.append(predictedSurplusZero - predictedSurplusInf)
-                    
-            avgMV[idx]=numpy.mean(mv)
+        n_samples = kwargs.get('n_samples', 8)
+        
+        if isinstance(pricePrediction, margDistSCPP):
+            samples = pricePrediction.sample(n_samples = n_samples)
             
-        return avgMV
-    
+            
+        elif isinstance(pricePrediction, jointGMM):
+            samples = pricePrediction.sample(n_samples = n_samples)
+        else:
+            raise ValueError("Unknown Price Prediction Type.")
+        
+        smu_of_samples = numpy.zeros(samples.shape)
+        
+        for row, sample in enumerate(samples):
+            smu_of_samples[row,:] = straightMV.SS( pointPricePrediction = sample,
+                                                   bundles              = bundles,
+                                                   valuation            = valuation,
+                                                   l                    = l)
+            
+        avgMu = numpy.mean(smu_of_samples,0)
+        return numpy.mean(avgMu)
+            
 class averageMU8(averageMU):
     @staticmethod
     def type():
@@ -67,7 +62,7 @@ class averageMU8(averageMU):
     
     @staticmethod
     def SS(**kwargs):
-        kwargs['nSamples'] = 8
+        kwargs['n_samples'] = 8
         
         return averageMU.SS(**kwargs)
     
@@ -78,7 +73,7 @@ class averageMU64(averageMU):
     
     @staticmethod
     def SS(**kwargs):
-        kwargs['nSamples'] = 64
+        kwargs['n_samples'] = 64
         
         return averageMU.SS(**kwargs)
     
@@ -89,6 +84,6 @@ class averageMU256(averageMU):
     
     @staticmethod
     def SS(**kwargs):
-        kwargs['nSamples'] = 256
+        kwargs['n_samples'] = 256
         
         return averageMU.SS(**kwargs)
