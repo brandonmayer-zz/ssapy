@@ -20,7 +20,7 @@ class targetPrice(pointPredictionAgent):
     def bundleBid(**kwargs):
         """
         Given a price prediciton and an optimal bundle,
-        place construct a bid vector
+        construct a bid vector
         """
         pointPricePrediction = kwargs['pointPricePrediction']
         
