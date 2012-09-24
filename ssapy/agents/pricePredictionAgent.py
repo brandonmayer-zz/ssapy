@@ -42,7 +42,7 @@ class pricePredictionAgent(simYW):
             self.loadPricePredictionPickle(self,pricePrediction)
             
         elif isinstance(pricePrediction,pointSCPP) or\
-             isinstance(pricePrediction,margSCPP):
+             isinstance(pricePrediction,margDistSCPP):
             self.setPricePrediction(pricePrediction)
             
         else:
