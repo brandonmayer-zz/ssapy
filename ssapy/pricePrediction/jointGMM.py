@@ -1,7 +1,10 @@
 import numpy
 import sklearn.mixture
-import matplotlib.pyplot as plt
 from scipy.stats import norm
+
+import matplotlib.pyplot as plt
+from matplotlib import cm
+from mpl_toolkits.mplot3d import Axes3D
 
 import itertools
 import time
@@ -126,5 +129,45 @@ class jointGMM(object):
             plt.show()
         else:
             plt.savefig(oFile)
+            
+    def plt(self,**kwargs):
+        minPrice = kwargs.get('minPrice',self.minPrice)
+        maxPrice = kwargs.get('maxPrice',self.maxPrice)
+        oFile   = kwargs.get('oFile')
+        
+        verbose = kwargs.get('verbose',True)
+        
+        if self.gmm.means_.shape[1] == 2:
+            if verbose:
+                print 'plotting joint distribution'
+        
+            
+            f = plt.figure()
+            ax = f.add_subplot(111,projection='3d')
+            ax.view_init(26,-142)
+            
+            X = numpy.arange(minPrice,maxPrice,0.5)
+            Y = numpy.arange(minPrice,maxPrice,0.5)
+            xx,yy = numpy.meshgrid(X, Y)
+            s = numpy.transpose(numpy.atleast_2d([xx.ravel(),yy.ravel()]))
+
+            Z = numpy.exp(self.gmm.eval(s)[0].reshape(xx.shape))
+            
+            surf = ax.plot_surface(xx, yy, Z, rstride=1, cstride=1, cmap=cm.jet,
+                                   linewidth=0, antialiased=True)
+                        
+#                f.colorbar(surf,shrink=0.5,aspect=5)
+            
+            nComp = self.gmm.means_.shape[0]
+            ax.set_title("nComp = {0}".format(nComp))
+            
+            if not oFile:
+                plt.show()
+            else:
+                plt.savefig(oFile)
+        else:
+            print 'Cannot plot joint distribution with dimension greater than 2.'
+            
+
         
         
