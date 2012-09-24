@@ -27,19 +27,19 @@ class targetMU(margDistPredictionAgent):
         """
         pricePrediction = kwargs.get('pricePrediction')
         if pricePrediction == None:
-            raise KeyError("straightMU.SS(...) - must specify pricePrediction")
+            raise KeyError("targetMU.SS(...) - must specify pricePrediction")
         
         bundles = kwargs.get('bundles')
         if bundles == None:
-            raise KeyError("straightMU.SS(...) - must specify bundles")
+            raise KeyError("targetMU.SS(...) - must specify bundles")
                 
         valuation = kwargs.get('valuation')
         if valuation == None:
-            raise KeyError("straightMU8 - must specify valuation")
+            raise KeyError("targetMU - must specify valuation")
         
         l = kwargs.get('l')
         if l == None:
-            raise KeyError("straightMU8 - must specify l (target number of time slots)")
+            raise KeyError("targetMU - must specify l (target number of time slots)")
         
         if isinstance(pricePrediction, margDistSCPP):
             expectedPrices = pricePrediction(method='average')
@@ -98,7 +98,7 @@ class targetMU8(margDistPredictionAgent):
             expectedPrices = numpy.mean(samples,0)
             
         else:
-            raise ValueError("straightMU8 - Unknown price prediction type.")
+            raise ValueError("targetMU8 - Unknown price prediction type.")
         
         return targetMV.SS( pointPricePrediction = expectedPrices,
                             bundles              = bundles,
