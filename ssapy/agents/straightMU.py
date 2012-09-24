@@ -111,7 +111,7 @@ class straightMU8(margDistPredictionAgent):
                 expectedPrices = pricePrediction.expectedPrices(method = 'iTsample', nSamples = 8)
             
         if isinstance(pricePrediction, sklearn.mixture.GMM):
-            samples = pricePrediction.sample(8)
+            samples = pricePrediction.sample(n_samples=8)
             expectedPrices = numpy.mean(samples,0)
         
         return straightMV.SS( pointPricePrediction = expectedPrices,
@@ -167,7 +167,7 @@ class straightMU64(margDistPredictionAgent):
                 expectedPrices = pricePrediction.expectedPrices(method = 'iTsample', nSamples = 64)
             
         if isinstance(pricePrediction, sklearn.mixture.GMM):
-            samples = pricePrediction.sample(64)
+            samples = pricePrediction.sample(n_samples=64)
             expectedPrices = numpy.mean(samples,0)
         
         return straightMV.SS( pointPricePrediction = expectedPrices,
@@ -224,7 +224,7 @@ class straightMU256(margDistPredictionAgent):
                 expectedPrices = pricePrediction.expectedPrices(method = 'iTsample', nSamples = 256)
             
         if isinstance(pricePrediction, sklearn.mixture.GMM):
-            samples = pricePrediction.sample(256)
+            samples = pricePrediction.sample(n_samples=256)
             expectedPrices = numpy.mean(samples,0)
         
         return straightMV.SS( pointPricePrediction = expectedPrices,
