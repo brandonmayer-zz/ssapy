@@ -426,37 +426,32 @@ class simYW(agentBase):
             valuation     :=     an numpy array of valuations, one for each bundle
         
         """    
-        bundles     = numpy.atleast_2d(kwargs['bundles'])
-#        valuation   = numpy.atleast_1d(kwargs['valuation'])
-        priceVector = numpy.atleast_1d(kwargs['priceVector'])
-        l           = kwargs['l']
+        bundles = kwargs.get('bundles')
+        if bundles == None:
+            raise KeyError("simYW.acqYW(...) - Must specify possible bundles")
         
-#        numpy.testing.assert_equal(bundles.shape[0], 
-#                                   valuation.shape[0], 
-#                                   err_msg="simYW::acq There must be a single valuation for each bundle")
-            
-        numpy.testing.assert_equal(priceVector.shape[0],
-                                   bundles.shape[1],
-                                   err_msg="simYW::acq there must be a price for each good in a bundle")
+        bundles = numpy.atleast_2d(bundles)
         
-        numpy.testing.assert_(isinstance(l,int) and l <= bundles.shape[1] and l>=0,
-                              msg="simYW::acq l must be a positive integer less than the total number of available goods.\n"+\
-                                  "l = {0}, bundles.shape[1] = {1}".format(l,bundles.shape[1]))
-
-#        surplus = simYW.surplus(bundles     = bundles,
-#                                valuation   = valuation,
-#                                priceVector = priceVector)
+        valuation = kwargs.get('valuation')
+        if valuation == None:
+            raise KeyError("simYW.acqYW(...) - Must specify valuation vector")
+        
+        valuation = numpy.atleast_1d(valuation)
+                                     
+        priceVector = kwargs.get('priceVector')
+        if priceVector == None:
+            raise KeyError("simYW.acqYW(...) - Must specify valuation")
+        
+        priceVector = numpy.atleast_1d(priceVector)
+        
+        l = kwargs.get('l')
+        if l == None:
+            raise KeyError("simYW.acqYW(...) - Must specify l (number of target goods")
         
         surplus = numpy.atleast_1d( kwargs.get('surplus', simYW.surplus(bundles     = bundles,
-                                                                        valuation   = kwargs['valuation'],
-                                                                        priceVector = priceVector)) )
+                                                                        valuation   = valuation,
+                                                                        priceVector = priceVector)) )        
         
-        numpy.testing.assert_equal(surplus.shape[0], bundles.shape[0],
-                                   err_msg="There must be one surplus value per bundle.")
-        
-        # initialize to the null bundle
-        optBundle = [0]*bundles.shape[1]
-        optSurplus = 0
         # there may be more than one "optimal bundles" i.e. bundles with
         # the same maximal surplus
         optBundleIdxList = numpy.nonzero(surplus == numpy.max(surplus))[0]

@@ -10,6 +10,8 @@ Yoon and Wellman (2011)
 #from auctionSimulator.hw4.agents.pointPredictionAgent import *
 from pointPredictionAgent import *
 
+import copy
+
 class straightMV(pointPredictionAgent):
     """
     straightMV bids marginal values for all goods.
@@ -34,50 +36,46 @@ class straightMV(pointPredictionAgent):
             l                        The target number of goods
         """
 
-        assert 'pointPricePrediction' in kwargs,\
-            "Must specify pointPricePrediction in kwargs parameter."
+        pointPricePrediction = kwargs.get('pointPricePrediction')
+        if pointPricePrediction == None:
+            raise KeyError("straightMV.SS(...) - must specify pricePrediction")
+        
+        bundles = kwargs.get('bundles')
+        if bundles == None:
+            raise KeyError("straightMV.SS(...) - must specify bundles")
+                
+        valuation = kwargs.get('valuation')
+        if valuation == None:
+            raise KeyError("straightMV - must specify valuation")
+        
+        l = kwargs.get('l')
+        if l == None:
+            raise KeyError("straightMV - must specify l (target number of time slots)")
+        
+        if isinstance(pointPricePrediction, pointSCPP):
+            pricePrediction = numpy.asarray(pointPricePrediction.data, dtype = numpy.float)
             
-        assert isinstance(kwargs['pointPricePrediction'],pointSCPP) or\
-                isinstance(kwargs['pointPricePrediction'], numpy.ndarray),\
-               "kwargs['pointPricePrediction'] must be either a pointSCPP or numpy.ndarray"
-            
-        assert 'bundles' in kwargs,\
-            "Must specify bundles in kwargs parameter."
-            
-        assert 'valuation' in kwargs,\
-            "Must specify the valuation of each bundle in the kwargs parameter."
-            
-        assert 'l' in kwargs,\
-            "Must specify l, the target number of goods in kwargs parameter."
-            
-        if isinstance(kwargs['pointPricePrediction'], pointSCPP):
-                        
-            pricePrediction = kwargs['pointPricePrediction'].data
-            
-        elif isinstance(kwargs['pointPricePrediction'],numpy.ndarray):
-            
-            pricePrediction = numpy.atleast_1d(kwargs['pointPricePrediction'])
+        elif isinstance(pointPricePrediction, numpy.ndarray):
+            pricePrediction = pointPricePrediction
             
         else:
-            # this should never happen
-            pricePrediction = None
-            raise AssertionError
+            raise ValueError("straightMV - Unknown pointPricePrediction type")
         
         marginalValueBid = []
         for idx in xrange(kwargs['bundles'].shape[1]):
-            tempPriceInf = numpy.array(pricePrediction).astype(numpy.float)
+            tempPriceInf = pricePrediction.copy()
             tempPriceInf[idx] = float('inf')
-            tempPriceZero = numpy.array(pricePrediction)
+            tempPriceZero = pricePrediction.copy()
             tempPriceZero[idx] = 0 
             
-            optBundleInf, predictedSurplusInf = simYW.acqYW(bundles     = kwargs['bundles'],
-                                                            valuation   = kwargs['valuation'],
-                                                            l           = kwargs['l'],
+            optBundleInf, predictedSurplusInf = simYW.acqYW(bundles     = bundles,
+                                                            valuation   = valuation,
+                                                            l           = l,
                                                             priceVector = tempPriceInf)
             
-            optBundleZero, predictedSurplusZero = simYW.acqYW(bundles     = kwargs['bundles'],
-                                                              valuation   = kwargs['valuation'],
-                                                              l           = kwargs['l'], 
+            optBundleZero, predictedSurplusZero = simYW.acqYW(bundles     = bundles,
+                                                              valuation   = valuation,
+                                                              l           = l, 
                                                               priceVector = tempPriceZero)
                 
             #this shouldn't happend but just in case.
