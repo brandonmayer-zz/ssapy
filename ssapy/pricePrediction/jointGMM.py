@@ -26,6 +26,7 @@ class jointGMM(object):
         self.thresh          = kwargs.get('thresh',0.01)
         self.min_covar       = kwargs.get('min_covar',0.001)
         self.n_iter          = kwargs.get('n_itr',100)
+        self.n_init          = kwargs.get('n_init',1)
         self.params          = kwargs.get('params','wmc')
         self.init_params     = kwargs.get('init_params','wmc')
         
@@ -35,6 +36,7 @@ class jointGMM(object):
         
         minPrice  = kwargs.get('minPrice',self.minPrice)
         maxPrice  = kwargs.get('maxPrice',self.maxPrice)
+        
         n_samples = kwargs.get('n_samples', 1)
         random_state = kwargs.get('random_state')
         
@@ -55,18 +57,37 @@ class jointGMM(object):
     def aicFit(self, **kwargs):
         X               = kwargs.get('X')
         compRange       = kwargs.get('compRange',numpy.arange(1,6))
-        min_covar       = kwargs.get('min_covar', self.min_covar)
-        covariance_type = kwargs.get('covariance_type', self.covariance_type)
+        
+        #accept new mixture model params as arguments
+        #and store on instance
+        self.covariance_type = kwargs.get('covariance_type', self.covariance_type)
+        self.random_state    = kwargs.get('random_state',self.random_state)
+        self.thresh          = kwargs.get('thresh',self.thresh)
+        self.min_covar       = kwargs.get('min_covar', self.min_covar)
+        self.n_iter          = kwargs.get('n_itr',self.n_iter)
+        self.n_init          = kwargs.get('n_init',self.n_init)
+        self.params          = kwargs.get('params','wmc')
+        self.init_params     = kwargs.get('init_params','wmc')
+    
         verbose         = kwargs.get('verbose',True)
         
         if verbose:
             print 'starting aicFit(...)'
             print 'compRange = {0}'.format(compRange)
-            print 'minCovar  = {0}'.format(min_covar)
+            print 'minCovar  = {0}'.format(self.min_covar)
             start = time.time()
             
-        clfList = [sklearn.mixture.GMM(n_components = c, min_covar = min_covar, \
-                                       covariance_type  = covariance_type) for c in compRange]
+        clfList = [sklearn.mixture.GMM(n_components    = c, 
+                                       covariance_type = self.covariance_type,
+                                       random_state    = self.random_state,
+                                       min_covar       = self.min_covar,
+                                       thresh          = self.thresh,
+                                       n_iter          = self.n_iter,
+                                       n_init          = self.n_init,
+                                       params          = self.params,
+                                       init_params     = self.init_params)\
+                                       for c in compRange] 
+                                       
         
         [clf.fit(X) for clf in clfList]
         
