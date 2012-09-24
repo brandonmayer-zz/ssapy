@@ -8,11 +8,14 @@ Specialized agent class to replicate straightMU from Yoon and Wellman 2011.
 This is just a wrapper around targetMV and accepts a price prediction distribution
 and calculates the mean(s) for price prediction
 """
-from margDistPredictionAgent import *
-from straightMV import *
-import copy
+import numpy
 
-import sklearn.mixture
+from margDistPredictionAgent import margDistPredictionAgent
+from ssapy.agents.straightMV import straightMV
+from ssapy.pricePrediction.margDistSCPP import margDistSCPP
+from ssapy.pricePrediction.jointGMM import jointGMM
+
+import copy
 
 class straightMU(margDistPredictionAgent):
     def __init__(self,**kwargs):
@@ -108,11 +111,14 @@ class straightMU8(margDistPredictionAgent):
             raise KeyError("straightMU8 - must specify l (target number of time slots)")
         
         if isinstance(pricePrediction, margDistSCPP):
-                expectedPrices = pricePrediction.expectedPrices(method = 'iTsample', nSamples = 8)
-            
-        if isinstance(pricePrediction, sklearn.mixture.GMM):
+            expectedPrices = pricePrediction.expectedPrices(method = 'iTsample', nSamples = 8)
+                   
+        elif isinstance(pricePrediction, jointGMM):
             samples = pricePrediction.sample(n_samples=8)
             expectedPrices = numpy.mean(samples,0)
+            
+        else:
+            raise ValueError("straightMU8 - Unknown price prediction type.")
         
         return straightMV.SS( pointPricePrediction = expectedPrices,
                               bundles              = bundles,
@@ -164,11 +170,14 @@ class straightMU64(margDistPredictionAgent):
             raise KeyError("straightMU8 - must specify l (target number of time slots)")
         
         if isinstance(pricePrediction, margDistSCPP):
-                expectedPrices = pricePrediction.expectedPrices(method = 'iTsample', nSamples = 64)
-            
-        if isinstance(pricePrediction, sklearn.mixture.GMM):
-            samples = pricePrediction.sample(n_samples=64)
+            expectedPrices = pricePrediction.expectedPrices(method = 'iTsample', nSamples = 64)
+                   
+        elif isinstance(pricePrediction, jointGMM):
+            samples = pricePrediction.sample(n_samples = 64)
             expectedPrices = numpy.mean(samples,0)
+            
+        else:
+            raise ValueError("straightMU64 - Unknown price prediction type.")
         
         return straightMV.SS( pointPricePrediction = expectedPrices,
                               bundles              = bundles,
@@ -221,11 +230,14 @@ class straightMU256(margDistPredictionAgent):
             raise KeyError("straightMU8 - must specify l (target number of time slots)")
         
         if isinstance(pricePrediction, margDistSCPP):
-                expectedPrices = pricePrediction.expectedPrices(method = 'iTsample', nSamples = 256)
-            
-        if isinstance(pricePrediction, sklearn.mixture.GMM):
-            samples = pricePrediction.sample(n_samples=256)
+            expectedPrices = pricePrediction.expectedPrices(method = 'iTsample', nSamples = 256)
+                   
+        elif isinstance(pricePrediction, jointGMM):
+            samples = pricePrediction.sample(n_samples = 256)
             expectedPrices = numpy.mean(samples,0)
+            
+        else:
+            raise ValueError("straightMU64 - Unknown price prediction type.")
         
         return straightMV.SS( pointPricePrediction = expectedPrices,
                               bundles              = bundles,
