@@ -24,14 +24,12 @@ class jointGMM(sklearn.mixture.GMM):
                                       covariance_type = kwargs.get('covariance_type','full'),
                                       random_state    = kwargs.get('random_state',None),
                                       min_covar       = kwargs.get('min_covar',1e-3),
-                                      n_itr           = kwargs.get('n_itr',100),
+                                      n_iter           = kwargs.get('n_iter',100),
                                       n_init          = kwargs.get('n_init',1),
                                       params          = kwargs.get('params','wmc'),
-                                      init_params     = kwargs.get('init_params','wmc'))
+                                      init_params     = kwargs.get('init_params','wmc') )
         
     def sample(self, **kwargs):
-        if self.gmm == None:
-            raise ValueError("jointGMM.sample(...) - gmm is not yet defined")
         
         minPrice  = kwargs.get('minPrice',self.minPrice)
         maxPrice  = kwargs.get('maxPrice',self.maxPrice)
@@ -42,7 +40,7 @@ class jointGMM(sklearn.mixture.GMM):
         
         sampleFncPtr = super(jointGMM,self).sample
         
-        samples = numpy.zeros((n_samples, self.gmm.means_.shape[1]))
+        samples = numpy.zeros((n_samples, self.means_.shape[1]))
                 
         # inefficient way of restricting sample domain
         # to valid prices but works for now...
@@ -69,7 +67,7 @@ class jointGMM(sklearn.mixture.GMM):
         n_iter          = kwargs.get('n_itr',self.n_iter)
         n_init          = kwargs.get('n_init',self.n_init)
         params          = kwargs.get('params',self.params)
-        init_params     = kwargs.get('init_params',self.wmc)
+        init_params     = kwargs.get('init_params',self.init_params)
     
         verbose         = kwargs.get('verbose',True)
         
@@ -111,9 +109,9 @@ class jointGMM(sklearn.mixture.GMM):
     def pltMargDist(self,**kwargs):
         
         oFile    = kwargs.get('oFile')
-        nPts     = kwargs.get('nPts',10000)
-        minPrice = kwargs.get('minPrice',self.minPrice)
-        maxPrice = kwargs.get('maxPrice',self.maxPrice)
+        nPts     = kwargs.get('nPts',1000)
+        minPrice = kwargs.get('minPrice',0)
+        maxPrice = kwargs.get('maxPrice',50)
         colors   = kwargs.get('colors')
         title   = kwargs.get('title', "Marginals of Joint Gaussian")
         xlabel  = kwargs.get('xlabel', "price")
@@ -121,8 +119,8 @@ class jointGMM(sklearn.mixture.GMM):
         
         
         
-        nComps = self.gmm.means_.shape[0]
-        nGoods = self.gmm.means_.shape[1]
+        nComps = self.means_.shape[0]
+        nGoods = self.means_.shape[1]
         if not colors:
             cmap = plt.cm.get_cmap('hsv')
             colorStyles = [cmap(i) for i in numpy.linspace(0,0.9,nGoods)]
@@ -136,7 +134,7 @@ class jointGMM(sklearn.mixture.GMM):
         ax  = plt.subplot(111)
         for goodIdx in xrange(nGoods):
             margDist = numpy.zeros(X.shape[0])
-            for (w,mean,cov) in zip(self.gmm.weights_,self.gmm.means_, self.gmm.covars_):
+            for (w,mean,cov) in zip(self.weights_,self.means_, self.covars_):
                 margMean = mean[goodIdx]
                 margCov  = cov[goodIdx,goodIdx]
                 rv = norm(loc=margMean, scale=numpy.sqrt(margCov))
@@ -150,19 +148,19 @@ class jointGMM(sklearn.mixture.GMM):
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
         
-        if not oFile:
+        if oFile is None:
             plt.show()
         else:
             plt.savefig(oFile)
             
     def plt(self,**kwargs):
-        minPrice = kwargs.get('minPrice',self.minPrice)
-        maxPrice = kwargs.get('maxPrice',self.maxPrice)
+        minPrice = kwargs.get('minPrice',0)
+        maxPrice = kwargs.get('maxPrice',50)
         oFile   = kwargs.get('oFile')
         
         verbose = kwargs.get('verbose',True)
         
-        if self.gmm.means_.shape[1] == 2:
+        if self.means_.shape[1] == 2:
             if verbose:
                 print 'plotting joint distribution'
         
@@ -176,14 +174,14 @@ class jointGMM(sklearn.mixture.GMM):
             xx,yy = numpy.meshgrid(X, Y)
             s = numpy.transpose(numpy.atleast_2d([xx.ravel(),yy.ravel()]))
 
-            Z = numpy.exp(self.gmm.eval(s)[0].reshape(xx.shape))
+            Z = numpy.exp(self.eval(s)[0].reshape(xx.shape))
             
             surf = ax.plot_surface(xx, yy, Z, rstride=1, cstride=1, cmap=cm.jet,
                                    linewidth=0, antialiased=True)
                         
 #                f.colorbar(surf,shrink=0.5,aspect=5)
             
-            nComp = self.gmm.means_.shape[0]
+            nComp = self.means_.shape[0]
             ax.set_title("nComp = {0}".format(nComp))
             
             if not oFile:
