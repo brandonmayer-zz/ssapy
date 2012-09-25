@@ -9,6 +9,7 @@ from sklearn import mixture
 import matplotlib.pyplot as plt
 import numpy
 from scipy.stats import norm
+from ssapy.pricePrediction.jointGMM import jointGMM
 
 import time
 import os
@@ -208,8 +209,8 @@ def simulateAuctionMargGMM( **kwargs ):
 
 def simulateAuctionJointGMM(**kwargs):
     agentType  = kwargs.get('agentType')
-    nAgents    = kwargs.get('nAgents',8)
-    clf        = kwargs.get('clf')
+    nAgents    = kwargs.get('njointGMMAgents',8)
+    gmm        = kwargs.get('jointGMM')
     nSamples   = kwargs.get('nSampeles',8)
     nGames     = kwargs.get('nGames')
     minPrice   = kwargs.get('minPrice',0)
@@ -221,23 +222,32 @@ def simulateAuctionJointGMM(**kwargs):
     
     for g in xrange(nGames):
         
-        agentList = [agentFactory(agentType = agentType, m = m) for i in xrange(nAgents)]
+        agentList = [agentFactory(agentType = agentType, m = m, vmin = minPrice, vmax = maxPrice) for i in xrange(nAgents)]
         
-        if clf == None:
-            samples = ((maxPrice - minPrice) *numpy.random.rand(nAgents,nSamples,m)) + minPrice
+        if gmm is None:
+            samples = ((maxPrice - minPrice) * numpy.random.rand(nAgents,nSamples,m)) + minPrice
             expectedPrices = numpy.mean(samples,1)
-            bids = numpy.atleast_2d([agent.bid(pointPricePrediction = expectedPrices[i,:]) for idx, agent in enumerate(agentList)])
+            bids = numpy.atleast_2d([agent.bid(pricePrediction = expectedPrices[i,:]) for idx, agent in enumerate(agentList)])
                     
-        elif isinstance(clf, mixture.GMM):
+        elif isinstance(gmm, mixture.GMM):
+            
+            if nSamples is none:
+                raise KeyError("simulateAuctionJointGMM - Must specify number of samples if gmm is a sklearn.mixture.GMM instance.")
             
             bids = numpy.zeros((nAgents,m))
             
             for agentIdx, agent in enumerate(agentList):
                 expectedPrices = numpy.zeros(m)
-                samples = drawJointGMM(clf,nSamples,minPrice,maxPrice)
+                samples = drawJointGMM(gmm,nSamples,minPrice,maxPrice)
                 expectedPrices = numpy.mean(samples,0)
-                bids[agentIdx,:] = agent.bid(pointPricePrediction = expectedPrices)
+                bids[agentIdx,:] = agent.bid(pricePrediction = expectedPrices)
+                
+        elif isinstance(gmm, jointGMM):
+            bids = numpy.zeros((nAgents,m))
             
+            for agentIdx, agent in enumerate(agents):
+                bids[agentIdx] = agent.bid(pricePrediction = gmm) 
+                
         else:
             raise ValueError("Unknown price dist type.") 
         

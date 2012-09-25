@@ -92,6 +92,9 @@ class targetMU8(margDistPredictionAgent):
         
         if isinstance(pricePrediction, margDistSCPP):
             expectedPrices = pricePrediction.expectedPrices(method = 'iTsample', nSamples = 8)
+            
+        elif isinstance(pricePrediction, numpy.ndarray):
+                expectedPrices = pricePrediction
                    
         elif isinstance(pricePrediction, jointGMM):
             samples = pricePrediction.sample(n_samples=8)
@@ -143,7 +146,10 @@ class targetMU64(margDistPredictionAgent):
         
         if isinstance(pricePrediction, margDistSCPP):
             expectedPrices = pricePrediction.expectedPrices(method = 'iTsample', nSamples = 64)
-                   
+        
+        elif isinstance(pricePrediction, numpy.ndarray):
+            expectedPrices = pricePrediction
+        
         elif isinstance(pricePrediction, jointGMM):
             samples = pricePrediction.sample(n_samples = 64)
             expectedPrices = numpy.mean(samples,0)
@@ -194,6 +200,9 @@ class targetMU256(margDistPredictionAgent):
         
         if isinstance(pricePrediction, margDistSCPP):
             expectedPrices = pricePrediction.expectedPrices(method = 'iTsample', nSamples = 256)
+            
+        elif isinstance(pricePrediction, numpy.ndarray):
+            expectedPrices = pricePrediction
                    
         elif isinstance(pricePrediction, jointGMM):
             samples = pricePrediction.sample(n_samples = 256)

@@ -19,7 +19,7 @@ def bidHelper(**kwargs):
     agent = kwargs.get('agent')
     dist  = kwargs.geto('bayesMargDist')
     
-    return agent.bid(margDistPrediction = dist)
+    return agent.bid(pricePrediction = dist)
 
 def bayesSCPP(**kwargs):
     """
@@ -159,7 +159,7 @@ def bayesSCPP(**kwargs):
                     r._value = []
                     
             else:
-                bids = numpy.atleast_2d([agent.bid(margDistPrediction = currHist.bayesMargDistSCPP()) for agent in agentList])
+                bids = numpy.atleast_2d([agent.bid(pricePrediction = currHist.bayesMargDistSCPP()) for agent in agentList])
                 
             winningBids = numpy.max(bids,0)
             for idx, wb in enumerate(winningBids):

@@ -20,6 +20,7 @@ import itertools
 import argparse
 import pickle
 import glob
+import copy
 
 def jointGaussSCPP(**kwargs):
     oDir = kwargs.get('oDir')
@@ -102,11 +103,11 @@ def jointGaussSCPP(**kwargs):
             
         if serial:
             winningBids = simulateAuctionJointGMM(agentType = agentType,
-                                             nAgents   = nAgents,
-                                             clf       = clfCurr,
-                                             nSamples  = nSamples,
-                                             nGames    = nGames,
-                                             m         = m)
+                                                  nAgents   = nAgents,
+                                                  clf       = clfCurr,
+                                                  nSamples  = nSamples,
+                                                  nGames    = nGames,
+                                                  m         = m)
         else:
             pool = multiprocessing.Pool(nProc)
             
@@ -135,9 +136,8 @@ def jointGaussSCPP(**kwargs):
                 results[idx]._value = []
                 start_row = end_row
         
-        clfCurr, aicList, compRange = aicFit(winningBids,
-                                             compRange = range(aicCompMin,aicCompMax), 
-                                             minCovar = aicMinCovar)    
+        clfCurr = jointGMM(minPrice = minPrice, maxPrice = maxPrice)
+        clfCurr.aicFit(X = winningBids, compRange = range(aicCompMin, aicCompMax),min_covar = aicMinCovar)
         
         if savePkl:
             pklFile = os.path.join(pklDir,'gmm_{0}.pkl'.format(itr))
@@ -149,8 +149,6 @@ def jointGaussSCPP(**kwargs):
             klList.append(kl)
             if verbose:
                 print 'kl = {0}'.format(kl) 
-                
-        
             
         if pltDist:
             if m == 2:
@@ -209,7 +207,7 @@ def jointGaussSCPP(**kwargs):
             if numpy.abs(klList[-1]) < tol:
                 break
                 
-        clfPrev = clfCurr
+        clfPrev = copy.deepcopy(clfCurr)
         
     if klList: 
         klFile = os.path.join(oDir,'kld.json')

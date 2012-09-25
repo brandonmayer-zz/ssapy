@@ -37,8 +37,7 @@ class averageMU(margDistPredictionAgent):
         
         if isinstance(pricePrediction, margDistSCPP):
             samples = pricePrediction.sample(n_samples = n_samples)
-            
-            
+                
         elif isinstance(pricePrediction, jointGMM):
             samples = pricePrediction.sample(n_samples = n_samples)
         else:
