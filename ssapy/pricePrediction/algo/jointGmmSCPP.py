@@ -5,6 +5,8 @@ from ssapy.agents.agentFactory import agentFactory
 from ssapy.pricePrediction.margDistSCPP import margDistSCPP
 from ssapy.pricePrediction.util import aicFit, drawGMM, \
     plotMargGMM, apprxJointGmmKL, simulateAuctionJointGMM, pltMargFromJoint
+    
+from ssapy.pricePrediction.jointGMM import jointGMM
 
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
@@ -113,7 +115,9 @@ def jointGaussSCPP(**kwargs):
                                                   nGames    = nGames,
                                                   m         = m,
                                                   minPrice  = minPrice,
-                                                  maxPrice  = maxPrice)
+                                                  maxPrice  = maxPrice,
+                                                  minValuation = minValuation,
+                                                  maxValuation = maxValuation)
         else:
             pool = multiprocessing.Pool(nProc)
             
@@ -130,7 +134,9 @@ def jointGaussSCPP(**kwargs):
                       'nGames':nGameList[p],
                       'm':m,
                       'minPrice':minPrice,
-                      'maxPrice':maxPrice}
+                      'maxPrice':maxPrice,
+                      'minValuation':minValuation,
+                      'maxValuation':maxValuation}
                 results.append(pool.apply_async(simulateAuctionJointGMM, kwds = ka))
             
             pool.close()

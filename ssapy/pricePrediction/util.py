@@ -36,8 +36,8 @@ def apprxJointGmmKL(clf1, clf2, nSamples = 1000, verbose = True):
     if verbose:
         print 'Approximating symmetric Kl-div with {0} samples'.format(nSamples)
         start = time.time()
-    samples1 = clf1.sample(nSamples)
-    samples2 = clf2.sample(nSamples)
+    samples1 = clf1.sample(n_samples = nSamples)
+    samples2 = clf2.sample(n_samples = nSamples)
     f1 = clf1.eval(samples1)[0]
     g1 = clf2.eval(samples1)[0]
     f2 = clf1.eval(samples2)[0]
@@ -227,7 +227,8 @@ def simulateAuctionJointGMM(**kwargs):
         agentList = [agentFactory(agentType = agentType, m = m, vmin = minValuation, vmax = maxValuation) for i in xrange(nAgents)]
         
         if gmm is None:
-            samples = ((maxPrice - minPrice) * numpy.random.rand(nAgents,nSamples,m)) + minPrice
+            #choose randomly from the range of the valuation
+            samples = ((maxValuation - minValuation) * numpy.random.rand(nAgents,nSamples,m)) + minValuation
             expectedPrices = numpy.mean(samples,1)
             bids = numpy.atleast_2d([agent.bid(pricePrediction = expectedPrices[i,:]) for idx, agent in enumerate(agentList)])
                     

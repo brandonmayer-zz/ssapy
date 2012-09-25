@@ -10,7 +10,7 @@ import itertools
 import time
 import os
 
-class jointGMM(object):
+class jointGMM(sklearn.mixture.GMM):
     """
     A wrapper around sklearn.mixture.GMM to add some additional functionality
     """
@@ -18,17 +18,16 @@ class jointGMM(object):
         self.minPrice        = kwargs.get('minPrice',0)
         self.maxPrice        = kwargs.get('maxPrice',numpy.float('inf'))
         
-        self.gmm             = None
-        
-        # parameters for sklearn.mixture.GMM
-        self.covariance_type = kwargs.get('covariance_type','full')
-        self.random_state    = kwargs.get('random_state',None)
-        self.thresh          = kwargs.get('thresh',0.01)
-        self.min_covar       = kwargs.get('min_covar',0.001)
-        self.n_iter          = kwargs.get('n_itr',100)
-        self.n_init          = kwargs.get('n_init',1)
-        self.params          = kwargs.get('params','wmc')
-        self.init_params     = kwargs.get('init_params','wmc')
+#        self.gmm             = None
+
+        super(jointGMM,self).__init__(n_components = kwargs.get('n_components',1),
+                                      covariance_type = kwargs.get('covariance_type','full'),
+                                      random_state    = kwargs.get('random_state',None),
+                                      min_covar       = kwargs.get('min_covar',1e-3),
+                                      n_itr           = kwargs.get('n_itr',100),
+                                      n_init          = kwargs.get('n_init',1),
+                                      params          = kwargs.get('params','wmc'),
+                                      init_params     = kwargs.get('init_params','wmc'))
         
     def sample(self, **kwargs):
         if self.gmm == None:
@@ -38,7 +37,10 @@ class jointGMM(object):
         maxPrice  = kwargs.get('maxPrice',self.maxPrice)
         
         n_samples = kwargs.get('n_samples', 1)
-        random_state = kwargs.get('random_state')
+        
+        random_state = kwargs.get('random_state',self.random_state)
+        
+        sampleFncPtr = super(jointGMM,self).sample
         
         samples = numpy.zeros((n_samples, self.gmm.means_.shape[1]))
                 
@@ -46,7 +48,7 @@ class jointGMM(object):
         # to valid prices but works for now...
         idx = 0
         while idx < n_samples:
-            s = self.gmm.sample(1,random_state)[0]
+            s = sampleFncPtr(1,random_state)[0]
             if ~numpy.any(s > maxPrice) and ~numpy.any(s < minPrice):
                 samples[idx,:] = s
                 idx += 1
@@ -66,8 +68,8 @@ class jointGMM(object):
         self.min_covar       = kwargs.get('min_covar', self.min_covar)
         self.n_iter          = kwargs.get('n_itr',self.n_iter)
         self.n_init          = kwargs.get('n_init',self.n_init)
-        self.params          = kwargs.get('params','wmc')
-        self.init_params     = kwargs.get('init_params','wmc')
+        self.params          = kwargs.get('params',self.params)
+        self.init_params     = kwargs.get('init_params',self.wmc)
     
         verbose         = kwargs.get('verbose',True)
         
@@ -95,7 +97,9 @@ class jointGMM(object):
         
         argMinAic = numpy.argmin(aicList)
         
-        self.gmm = clfList[argMinAic]
+        # set the data of this class associated with the 
+        # derived class to match the fitted distribution
+        self.__dict__.update(clfList[argMinAic].__dict__)
         
         if verbose:
             print 'Finished aicFit(...) in {0} seconds'.format(time.time()-start)
