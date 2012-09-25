@@ -43,10 +43,7 @@ def main():
     
     parser.add_argument('--tol', action = 'store', dest = 'tol', default = 0.001,
                         help = "Inter-iteration KL-Divergence tolerence.")
-    
-    parser.add_argument('--pltDist', action = 'store', dest = 'pltDist', default = False,
-                        help = "Generate surface plots of the distribution every iteration. Will only work if m = 2.")
-    
+        
     parser.add_argument('--nProc', action = 'store', dest = 'nProc', default = multiprocessing.cpu_count(), type = int,
                         help = "Number of processors to use if parallel option is true. (Defaults to all available)")
     
@@ -67,6 +64,9 @@ def main():
     
     parser.add_argument('--aicMinCovar', action = 'store', dest = 'aicMinCovar', default = 1.0,
                         help = "Minimum diagonal covariance to avoid sinularities in GMM EM fitting algorithm.")
+    
+    parser.add_argument('--pltSurf', action = 'store', dest = 'pltSurf', default = False, type = bool,
+                        help = "Make surface plot of joint probability distribution every iteration. Only works if m = 2.")
     
     parser.add_argument('--pltMarg', action = 'store', dest = 'pltMarg', default = True, type = bool,
                         help = "Plot the marginal distributions of each good from the corresponding joint distribution at each iteration.")

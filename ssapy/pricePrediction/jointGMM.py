@@ -115,7 +115,7 @@ class jointGMM(sklearn.mixture.GMM):
         colors   = kwargs.get('colors')
         title   = kwargs.get('title', "Marginals of Joint Gaussian")
         xlabel  = kwargs.get('xlabel', "price")
-        ylabel  = kwargs.get(r"$p(closing price)$")
+        ylabel  = kwargs.get('ylabel', r"$p(closing price)$")
         
         
         
@@ -189,7 +189,7 @@ class jointGMM(sklearn.mixture.GMM):
             else:
                 plt.savefig(oFile)
         else:
-            print 'Cannot plot joint distribution with dimension greater than 2.'
+            print 'Cannot plot joint distribution surface with dimension greater than 2.'
             
 
         
