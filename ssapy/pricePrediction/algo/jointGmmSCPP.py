@@ -37,11 +37,11 @@ def jointGaussSCPP(**kwargs):
     maxPrice     = kwargs.get('maxPrice',numpy.float('inf'))
     minValuation = kwargs.get('minValuation',0)
     maxValuation = kwargs.get('maxValuation',50)
-    serial       = kwargs.get('serial',False)
+#    serial       = kwargs.get('serial',False)
+    parallel     = kwargs.get('parallel',False)
     klSamples    = kwargs.get('klSamples',1000)
     maxItr       = kwargs.get('maxItr', 100)
     tol          = kwargs.get('tol', 0.01)
-    
     nProc        = kwargs.get('nProc',multiprocessing.cpu_count()-1)
     covarType    = kwargs.get('covarType','full')
     savePkl      = kwargs.get('savePkl',True)
@@ -57,7 +57,8 @@ def jointGaussSCPP(**kwargs):
     oDir = os.path.realpath(oDir)
     
     if verbose:
-        print 'agentType  = {0}'.format(agentType)
+        print 'oDir         = {0}'.format(oDir)
+        print 'agentType   = {0}'.format(agentType)
         print 'nAgents     = {0}'.format(nAgents)
         print 'nGames      = {0}'.format(nGames)
         print 'm           = {0}'.format(m)
@@ -67,7 +68,7 @@ def jointGaussSCPP(**kwargs):
         print 'tol         = {0}'.format(tol)
         print 'klSamples   = {0}'.format(klSamples)
         print 'pltSurf     = {0}'.format(pltSurf)
-        print 'serial      = {0}'.format(serial)
+        print 'parallel      = {0}'.format(parallel)
         print 'nProc       = {0}'.format(nProc)
         print 'aicCompMin  = {0}'.format(aicCompMin)
         print 'aicCompMax  = {0}'.format(aicCompMax)
@@ -105,7 +106,7 @@ def jointGaussSCPP(**kwargs):
             print 
             print 'Iteration = {0}'.format(itr)
             
-        if serial:
+        if not parallel:
             winningBids = simulateAuctionJointGMM(agentType = agentType,
                                                   nAgents   = nAgents,
                                                   clf       = clfCurr,
@@ -122,6 +123,12 @@ def jointGaussSCPP(**kwargs):
             winningBids = numpy.zeros((nGames,m))
             nGameList = [nGames//nProc]*nProc
             nGameList[-1] += (nGames % nProc)
+            
+            if verbose:
+                print 'Running parallel simulation.'
+                print 'Number of cores = {0}'.format(nProc)
+                print 'Number of simulations per core = {0}'.format(nGameList)
+                print 'Total Number of simulations = {0}'.format(sum(nGameList))
             
             results = []
             for p in xrange(nProc):
@@ -150,7 +157,8 @@ def jointGaussSCPP(**kwargs):
                 start_row = end_row
         
         clfCurr = jointGMM(minPrice = minPrice, maxPrice = maxPrice)
-        clfCurr.aicFit(X = winningBids, compRange = range(aicCompMin, aicCompMax),min_covar = aicMinCovar)
+        clfCurr.aicFit(X = winningBids, compRange = range(aicCompMin, aicCompMax), 
+                       covariance_type = covarType, min_covar = aicMinCovar)
         
         if savePkl:
             pklFile = os.path.join(pklDir,'gmm_{0}.pkl'.format(itr))
