@@ -32,8 +32,11 @@ def main():
     parser.add_argument('--maxPrice', action = 'store', dest = 'maxPriceString', default = "inf",
                         help = "The maximum valid price for a good. inf -> no price ceiling.")
     
-    parser.add_argument('--serial', action = 'store', dest = 'serial', default = True, type = bool,
-                        help = "Run the simulations in serial or parallel.")
+    parser.add_argument('--parallel', action = 'store', dest = 'parallel', default = False, type = bool,
+                        help = "Run the simulations in serial or parallel")
+    
+    parser.add_argument('--nProc', action = 'store', dest = 'nProc', default = multiprocessing.cpu_count(), type = int,
+                        help = "Number of processors to use if parallel option is true. (Defaults to all available)")
     
     parser.add_argument('--klSamples', action = 'store', dest = 'klSamples', default = 10000, type = int,
                         help = "Number of samples drawn from current and old distributions to approximate KL-Divergence.")
@@ -43,9 +46,6 @@ def main():
     
     parser.add_argument('--tol', action = 'store', dest = 'tol', default = 0.001,
                         help = "Inter-iteration KL-Divergence tolerence.")
-        
-    parser.add_argument('--nProc', action = 'store', dest = 'nProc', default = multiprocessing.cpu_count(), type = int,
-                        help = "Number of processors to use if parallel option is true. (Defaults to all available)")
     
     parser.add_argument('--covarType', action = 'store', dest = 'covarType', default = 'full',
                         help = "Complexity of covariance matrix: 'full', 'diag', 'sphere'")
