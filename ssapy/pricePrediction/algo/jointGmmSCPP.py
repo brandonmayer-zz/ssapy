@@ -1,6 +1,6 @@
 import numpy
 from sklearn import mixture
-from ssapy.multiprocessingAdaptor import Consumer
+#from ssapy.multiprocessingAdaptor import Consumer
 from ssapy.agents.agentFactory import agentFactory
 from ssapy.pricePrediction.margDistSCPP import margDistSCPP
 from ssapy.pricePrediction.util import aicFit, drawGMM, \
@@ -23,18 +23,18 @@ import glob
 import copy
 
 def jointGaussSCPP(**kwargs):
-    oDir = kwargs.get('oDir')
-    if not oDir:
-        raise ValueError("Must provide output Directory")
-    oDir = os.path.realpath(oDir)
     
+    
+    oDir         = kwargs.get('oDir')
     agentType    = kwargs.get('agentType',"straightMV")
     nAgents      = kwargs.get('nAgnets',8)
     nGames       = kwargs.get('nGames',10)
     nSamples     = kwargs.get('nSamples',8)
     m            = kwargs.get('m',5)
-    minPrice     = kwargs.get('minPrice',0)
-    maxPrice     = kwargs.get('maxPrice',50)
+    minPrice     = kwargs.get('minPrice',0.0)
+    maxPrice     = kwargs.get('maxPrice',numpy.float('inf'))
+    minValuation = kwargs.get('minValuation',0)
+    maxValuation = kwargs.get('maxValuation',50)
     serial       = kwargs.get('serial',False)
     klSamples    = kwargs.get('klSamples',1000)
     maxItr       = kwargs.get('maxItr', 100)
@@ -48,6 +48,10 @@ def jointGaussSCPP(**kwargs):
     aicCompMax   = kwargs.get('aicCompMax',10)
     aicMinCovar  = kwargs.get('aicMinCovar',9)
     pltMarg      = kwargs.get('pltMarg',True)
+    
+    if oDir is None:
+        raise ValueError("Must provide output Directory")
+    oDir = os.path.realpath(oDir)
     
     if verbose:
         print 'agentType  = {0}'.format(agentType)
@@ -107,7 +111,9 @@ def jointGaussSCPP(**kwargs):
                                                   clf       = clfCurr,
                                                   nSamples  = nSamples,
                                                   nGames    = nGames,
-                                                  m         = m)
+                                                  m         = m,
+                                                  minPrice  = minPrice,
+                                                  maxPrice  = maxPrice)
         else:
             pool = multiprocessing.Pool(nProc)
             
@@ -121,7 +127,10 @@ def jointGaussSCPP(**kwargs):
                       'nAgents':nAgents,
                       'clf':clfCurr,
                       'nSamples':nSamples,
-                      'nGames':nGameList[p],'m':m}
+                      'nGames':nGameList[p],
+                      'm':m,
+                      'minPrice':minPrice,
+                      'maxPrice':maxPrice}
                 results.append(pool.apply_async(simulateAuctionJointGMM, kwds = ka))
             
             pool.close()

@@ -16,7 +16,7 @@ class jointGMM(object):
     """
     def __init__(self,**kwargs):
         self.minPrice        = kwargs.get('minPrice',0)
-        self.maxPrice        = kwargs.get('maxPrice',50)
+        self.maxPrice        = kwargs.get('maxPrice',numpy.float('inf'))
         
         self.gmm             = None
         

@@ -215,6 +215,8 @@ def simulateAuctionJointGMM(**kwargs):
     nGames     = kwargs.get('nGames')
     minPrice   = kwargs.get('minPrice',0)
     maxPrice   = kwargs.get('maxPrice',50)
+    minValuation = kwargs.get('minValuation',0)
+    maxValuation = kwargs.get('maxValuation',50)
     m          = kwargs.get('m',5)
     
     
@@ -222,7 +224,7 @@ def simulateAuctionJointGMM(**kwargs):
     
     for g in xrange(nGames):
         
-        agentList = [agentFactory(agentType = agentType, m = m, vmin = minPrice, vmax = maxPrice) for i in xrange(nAgents)]
+        agentList = [agentFactory(agentType = agentType, m = m, vmin = minValuation, vmax = maxValuation) for i in xrange(nAgents)]
         
         if gmm is None:
             samples = ((maxPrice - minPrice) * numpy.random.rand(nAgents,nSamples,m)) + minPrice
