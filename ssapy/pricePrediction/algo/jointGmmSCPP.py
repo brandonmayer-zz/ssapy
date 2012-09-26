@@ -68,11 +68,12 @@ def jointGaussSCPP(**kwargs):
         print 'tol         = {0}'.format(tol)
         print 'klSamples   = {0}'.format(klSamples)
         print 'pltSurf     = {0}'.format(pltSurf)
-        print 'parallel      = {0}'.format(parallel)
+        print 'parallel    = {0}'.format(parallel)
         print 'nProc       = {0}'.format(nProc)
         print 'aicCompMin  = {0}'.format(aicCompMin)
         print 'aicCompMax  = {0}'.format(aicCompMax)
         print 'aicMinCovar = {0}'.format(aicMinCovar)
+        print 'pltSurf     = {0}'.format(pltSurf)
         print 'pltMarg     = {0}'.format(pltMarg)
     
     if savePkl:
