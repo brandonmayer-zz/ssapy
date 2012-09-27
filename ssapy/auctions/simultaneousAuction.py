@@ -40,14 +40,14 @@ class simultaneousAuction(auctionBase):
         """
         Replace the current agent list with a single or list of agents.
         """
-        numpy.testing.assert_(isinstance(agentList,list) 
-                                or isinstance(agentList,agentBase), 
-                              msg = "agentList must be a list of or a single agentBase")
-        
-        if isinstance(agentList,agentBase):
-            for agent in agentList:
-                numpy.testing.assert_(isinstance(agent,agentBase),
-                                      msg = "Agents must be subtype of agentBase")
+#        numpy.testing.assert_(isinstance(agentList,list) 
+#                                or isinstance(agentList,agentBase), 
+#                              msg = "agentList must be a list of or a single agentBase")
+#        
+#        if isinstance(agentList,agentBase):
+#            for agent in agentList:
+#                numpy.testing.assert_(isinstance(agent,agentBase),
+#                                      msg = "Agents must be subtype of agentBase")
             
         self.agentList = agentList
         
@@ -59,7 +59,7 @@ class simultaneousAuction(auctionBase):
             for agent in agentList:
                 numpy.testing.assert_(isinstance(agent,agentBase))
                 self.agentList.append(agent)
-        elif instance(agentList,agentBase):
+        elif isinstance(agentList,agentBase):
             self.agentList.append(agentBase)
         else:
             print 'Must specify a list of agents of subtype agentBase or a single such agent.'

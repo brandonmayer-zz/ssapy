@@ -234,7 +234,7 @@ def simulateAuctionJointGMM(**kwargs):
                     
         elif isinstance(gmm, mixture.GMM):
             
-            if nSamples is none:
+            if nSamples is None:
                 raise KeyError("simulateAuctionJointGMM - Must specify number of samples if gmm is a sklearn.mixture.GMM instance.")
             
             bids = numpy.zeros((nAgents,m))
