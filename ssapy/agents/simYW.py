@@ -89,7 +89,8 @@ class simYW(agentBase):
         else:
             self.v = self.randomValueVector(vmin = self.vmin, 
                                             vmax = self.vmax, 
-                                            m    = self.m)
+                                            m    = self.m,
+                                            l    = self.l)[0]
             
         # a bit vector indicating which items where won
         # at auction
@@ -101,12 +102,19 @@ class simYW(agentBase):
         super(simYW,self).__init__(**kwargs)
         
     @staticmethod
-    def randomValueVector(vmin = 1, vmax = 50, m = 5):
-        v = numpy.random.random_integers(low = vmin, high = vmax, size = m)
-        v.sort()
-        v = v[::-1]
+    def randomValueVector(vmin = 1, vmax = 50, m = 5, l = None):
+        if l is None:
+            l = numpy.random.random_integers(low = 1, high = m)
+            
+        v = numpy.zeros(m)
         
-        return v
+        sortedRandInts = numpy.random.random_integers(low = vmin, high=vmax, size = (m-l+1))
+        sortedRandInts.sort()
+        sortedRandInts = sortedRandInts[::-1]
+        
+        v[(l-1):] = sortedRandInts
+    
+        return v, l 
     
     def randomValuation(self, *args, **kwargs):
         """
@@ -115,14 +123,11 @@ class simYW(agentBase):
         vmin = kwargs.get('vmin',self.vmin)
         vmax = kwargs.get('vmax',self.vmax)
         m    = kwargs.get('m',self.m)
+        l    = kwargs.get('l')
         
-        v = numpy.random.random_integers(low = vmin, high = vmax, size = m)
-        v.sort()
-        v = v[::-1]
+        self.v, self.l = simYW.randomValueVector(vmin, vmax, m, l)
         
-        self.v = v  
-        self.l = kwargs.get('l',numpy.random.random_integers(low = 1, high = m))  
-    
+            
     def acq(self, **kwargs):
         """
         Calculate the optimal bundle for this class instance.
