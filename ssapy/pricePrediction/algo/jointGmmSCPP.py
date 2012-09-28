@@ -67,7 +67,6 @@ def jointGaussSCPP(**kwargs):
         print 'maxItr      = {0}'.format(maxItr)
         print 'tol         = {0}'.format(tol)
         print 'klSamples   = {0}'.format(klSamples)
-        print 'pltSurf     = {0}'.format(pltSurf)
         print 'parallel    = {0}'.format(parallel)
         print 'nProc       = {0}'.format(nProc)
         print 'aicCompMin  = {0}'.format(aicCompMin)
