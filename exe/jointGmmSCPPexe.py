@@ -8,7 +8,7 @@ import multiprocessing
 import os
 
 def main():
-    desc = 'Given Price Prediction strategy, search to a joint self confirming price distribution of closing pices'
+    desc = 'Given Price Prediction strategy, search to a joint self confirming price distribution of closing prices'
     parser = argparse.ArgumentParser(description=desc)
     
     parser.add_argument('--oDir', action = 'store', dest = 'oDir', required = True,
