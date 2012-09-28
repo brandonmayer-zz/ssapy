@@ -68,7 +68,7 @@ def main():
     parser.add_argument('--pltSurf', action = 'store', dest = 'pltSurf', default = False, type = bool,
                         help = "Make surface plot of joint probability distribution every iteration. Only works if m = 2.")
     
-    parser.add_argument('--pltMarg', action = 'store', dest = 'pltMarg', default = True, type = bool,
+    parser.add_argument('--pltMarg', action = 'store', dest = 'pltMarg', default = False, type = bool,
                         help = "Plot the marginal distributions of each good from the corresponding joint distribution at each iteration.")
     
     args = parser.parse_args().__dict__
