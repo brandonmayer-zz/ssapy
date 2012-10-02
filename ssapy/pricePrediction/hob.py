@@ -6,7 +6,7 @@ import numpy
 
 import multiprocessing
 
-def hobAuction(**kwargs):
+def hobSim(**kwargs):
     """
     Function to simulate an auction and record other highest agent bids.
     
@@ -52,7 +52,7 @@ def hobAuction(**kwargs):
     vmin = kwargs.get('vmin',0)
     vmax = kwargs.get('vmax',50)
     
-    highestOtherBids = numpy.zeros(nGames,m)
+    highestOtherBids = numpy.zeros((nGames,m))
     
     if parallel:
         pass
@@ -64,7 +64,7 @@ def hobAuction(**kwargs):
     
         otherAgents = numpy.delete(numpy.arange(n),selfIdx,0)
     
-        bids = numpy.zeros(n,m)
+        bids = numpy.zeros((n,m))
         
         for itr in xrange(nGames):
             
@@ -79,12 +79,42 @@ def hobAuction(**kwargs):
                     agent.randomValuation()
                     bids[idx] = agent.bid(pricePrediction = pricePrediction)
                 
-                
-            highestOtherBids = numpy.max(bids[otherAgents],0)
+            
+            highestOtherBids[itr,:] = numpy.max(bids[otherAgents],0)
             
     return highestOtherBids
 
 if __name__ == "__main__":
+    
+    minPrice = 0
+    maxPrice = 50
+    
+    agentTypeList = ["straightMU8"]*8
+    selfIdx = 0
+    nGames = 20
+    parallel = False
+    m=5
+    
+    tempDist = []
+    p = float(1)/round(maxPrice - minPrice)
+    a = [p]*(maxPrice - minPrice)
+#    binEdges = [bin for bin in xrange( int(minPrice - maxPrice)+1 ) ]
+    binEdges = numpy.arange(minPrice,maxPrice+1,1)
+    for i in xrange(m):
+        tempDist.append((numpy.atleast_1d(a),numpy.atleast_1d(binEdges)))
+        
+    pricePrediction = margDistSCPP(tempDist)
+    
+    print hobSim(pricePrediction = pricePrediction,
+                 agentTypeList = agentTypeList,
+                 selfIdx = selfIdx,
+                 nGames = nGames,
+                 parallel = parallel,
+                 m=m)
+    
+    
+    
+    
     
             
     
