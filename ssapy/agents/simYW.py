@@ -252,6 +252,12 @@ class simYW(agentBase):
             "nGoods = {0} is not a positive integer".format(nGoods)
         return numpy.atleast_2d([bin for bin in itertools.product([False,True],repeat=nGoods)]).astype(bool)
     
+#    @staticmethod
+#    def bundleGenerator(nGoods = 5):
+#        for bin in itertools.product([False,True],repeat = nGoods):
+#            yield bin
+        
+    
     
     @staticmethod
     def valuation(bundles = None, v = None, l= None):
@@ -387,6 +393,8 @@ class simYW(agentBase):
         idx = 0
         for i in xrange(bundle.shape[0]):
             idx = (2**((bundle.shape[0]-1)-i))*bundle[i]
+            
+        return idx
     
     @staticmethod
     def acqYW(**kwargs):
