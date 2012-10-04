@@ -15,7 +15,7 @@ import numpy
 class localBid(margDistPredictionAgent):
     @staticmethod
     def type():
-        return "localbid"
+        return "localBid"
     
     @staticmethod
     def SS(**kwargs):
@@ -63,7 +63,7 @@ class localBid(margDistPredictionAgent):
     
         bundleValueDict = dict([(tuple(b),v) for b, v in zip(bundles,valuation)])
         
-        del bundles, valuation
+        del valuation
         
         
         for itr in xrange(n_itr):
@@ -71,9 +71,6 @@ class localBid(margDistPredictionAgent):
                 print "itr = {0}, bid = {1}".format(itr,bids)
             for bidIdx, bid in enumerate(bids):
                 
-                #there will be 2**(m) ones added to quadrants
-                #there will be 2**(m)/2 = 2**(m-1) counts added to the winning / loosing quadrants of bidIdx
-                # nSamples + 2**(m) is now the new total of countswinNormConst
                 
                 goodsWon = samples <= bids
                 
@@ -86,21 +83,11 @@ class localBid(margDistPredictionAgent):
                     v0 = bundleValueDict[tuple(bundle)]
                     v1 = bundleValueDict[tuple(bundleCopy)]
                     
-#                    pwin = ( numpy.float(numpy.count_nonzero(numpy.all(goodsWon == bundle,1))) + 1 )/ (nSamples + 2**(m))
 
-                    p = numpy.float(numpy.count_nonzero(numpy.all(goodsWon == bundle,1)) + 1 +  numpy.count_nonzero(numpy.all(goodsWon==bundleCopy)) + 1 ) / (nSamples + 2**(m))
+
+                    p = numpy.float(numpy.count_nonzero(numpy.all(goodsWon == bundle,1)) +  numpy.count_nonzero(numpy.all(goodsWon==bundleCopy))) / (nSamples)
                                         
                     bids[bidIdx] = (v1 - v0)*p
-                    
-#                    if bundle[bidIdx] == 0:
-##                        newBid += valuation[bundleIdx]*(pwin/winNormConst)
-#                        newBid += valuation[bundleIdx]*p
-#                    else:
-##                        newBid -= valuation[bundleIdx]*(pwin/loseNormConst)
-#                        newBid -= valuation[bundleIdx]*p
-#                        
-#                    bids[bidIdx] = newBid if newBid > 0.0 else 0.0
-                
                 
         return bids
         
@@ -111,7 +98,12 @@ if __name__ == "__main__":
     from ssapy.pricePrediction.jointGMM import jointGMM
     m=2
     
+    
+    
     v, l = simYW.randomValueVector(0, 50, m)
+    
+    print "v = {0}".format(v)
+    print "l = {0}".format(l)
     
     bundles = simYW.allBundles(nGoods=m)
     
@@ -127,7 +119,8 @@ if __name__ == "__main__":
                        valuation = valuation,
                        pricePrediction=pricePrediction,
                        l = l,
-                       verbose = True)
+                       verbose = True,
+                       nSamples = 100000)
     
     print bids
     
