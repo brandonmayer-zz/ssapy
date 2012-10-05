@@ -75,17 +75,16 @@ class localBid(margDistPredictionAgent):
                 goodsWon = samples <= bids
                 
                 newBid = 0.0
-                for bundleIdx, bundle in enumerate(bundles[bundles[bidIdx] == 0]):
+                for bundleIdx, bundle in enumerate(bundles[bundles[:,bidIdx] == True]):
                     
                     bundleCopy = bundle.copy()
-                    bundleCopy[bidIdx] = ~bundleCopy[bidIdx]
+                    bundleCopy[bidIdx] = False
                     
-                    v0 = bundleValueDict[tuple(bundle)]
-                    v1 = bundleValueDict[tuple(bundleCopy)]
+                    v1 = bundleValueDict[tuple(bundle)]
+                    v0 = bundleValueDict[tuple(bundleCopy)]
                     
-
-
-                    p = numpy.float(numpy.count_nonzero(numpy.all(goodsWon == bundle,1)) +  numpy.count_nonzero(numpy.all(goodsWon==bundleCopy))) / (nSamples)
+                    p = numpy.float(numpy.count_nonzero(numpy.all(goodsWon == bundle,1)) + \
+                                    numpy.count_nonzero(numpy.all(goodsWon==bundleCopy,1))) / (nSamples)
                                         
                     bids[bidIdx] = (v1 - v0)*p
                 
@@ -120,7 +119,7 @@ if __name__ == "__main__":
                        pricePrediction=pricePrediction,
                        l = l,
                        verbose = True,
-                       nSamples = 100000)
+                       nSamples = 10000)
     
     print bids
     
