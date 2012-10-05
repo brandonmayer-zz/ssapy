@@ -11,6 +11,7 @@ from agentFactory import agentFactory
 #from averageMU import averageMU8, averageMU64, averageMU256
 
 import numpy
+import matplotlib.pyplot as plt
 
 class localBid(margDistPredictionAgent):
     @staticmethod
@@ -35,6 +36,9 @@ class localBid(margDistPredictionAgent):
         
         samples = kwargs.get('samples')
         
+        plot2d = kwargs.get('plot2d',False)
+
+        
         if samples is None:
             
             pricePrediction = kwargs.get('pricePrediction')
@@ -44,21 +48,22 @@ class localBid(margDistPredictionAgent):
         
             nSamples = kwargs.get('nSamples', 10000)
             
-            n_itr    = kwargs.get('n_itr', 100)
-            
-            initialBidderType = kwargs.get('initialBidder','straightMU8')
-            
-            initialBidder = agentFactory(agentType = initialBidderType,m = bundles.shape[1])
-            
-            bids = initialBidder.SS(pricePrediction = pricePrediction,
-                                    bundles = bundles,
-                                    valuation = valuation,
-                                    l = l)
-            
-            del initialBidder
-            
             samples = pricePrediction.sample(n_samples = nSamples)
+                       
+        n_itr = kwargs.get('n_itr', 100)
             
+        initialBidderType = kwargs.get('initialBidder','straightMU8')
+            
+        initialBidder = agentFactory(agentType = initialBidderType,m = bundles.shape[1])
+            
+        bids = initialBidder.SS(pricePrediction = pricePrediction,
+                                bundles = bundles,
+                                valuation = valuation,
+                                l = l)
+            
+        del initialBidder
+            
+          
         verbose = kwargs.get('verbose',False)
     
         bundleValueDict = dict([(tuple(b),v) for b, v in zip(bundles,valuation)])
@@ -67,28 +72,53 @@ class localBid(margDistPredictionAgent):
         
         
         for itr in xrange(n_itr):
+            
             if verbose:
                 print "itr = {0}, bid = {1}".format(itr,bids)
-            for bidIdx, bid in enumerate(bids):
                 
+            if plot2d:
+                plt.figure()
+                plt.plot(samples[:,0],samples[:,1],'go', markersize =  10)
+                plt.plot(bids[0],bids[1],'ro', markersize = 10)
+                plt.axvline(x = bids[0], ymin=0, ymax = bids[1], color = 'b')
+                plt.axvline(x = bids[0], ymin = bids[1], color = 'r')
+                plt.axhline(y = bids[1], xmin = 0, xmax = bids[0], color = 'b')
+                plt.axhline(y = bids[1], xmin = bids[0], color = 'r')
+                
+                plt.show()
+                
+            for bidIdx in xrange(bids.shape[0]):
                 
                 goodsWon = samples <= bids
-                
+            
                 newBid = 0.0
-                for bundleIdx, bundle in enumerate(bundles[bundles[:,bidIdx] == True]):
+                for bundle in bundles[bundles[:,bidIdx] == True]:
                     
                     bundleCopy = bundle.copy()
                     bundleCopy[bidIdx] = False
                     
                     v1 = bundleValueDict[tuple(bundle)]
                     v0 = bundleValueDict[tuple(bundleCopy)]
+
+                    p = numpy.float( numpy.count_nonzero( numpy.delete(goodsWon,bidIdx,1) == numpy.delete(bundle,bidIdx) ) ) / nSamples                    
+
+#                    bids[bidIdx] = (v1 - v0)*p
+                    newBid += (v1 - v0)*p
                     
-                    p = numpy.float(numpy.count_nonzero(numpy.all(goodsWon == bundle,1)) + \
-                                    numpy.count_nonzero(numpy.all(goodsWon==bundleCopy,1))) / (nSamples)
-                                        
-                    bids[bidIdx] = (v1 - v0)*p
-                
+                    if verbose:
+                        print ''
+                        print "bid index = {0}".format(bidIdx)
+                        print "bundle    = {0}".format(bundle)
+                        print "v1        = {0}".format(v1)
+                        print "v0        = {0}".format(v0)
+                        print "p         = {0}".format(p)    
+                        print "new Bid   = {0}".format(newBid)
+                    
+                bids[bidIdx] = newBid
+                      
         return bids
+    
+
         
 if __name__ == "__main__":
     from simYW import simYW
@@ -97,7 +127,11 @@ if __name__ == "__main__":
     from ssapy.pricePrediction.jointGMM import jointGMM
     m=2
     
-    
+#    p1 = numpy.random.random(50)
+#    p1 /= sum(p1)
+#    
+#    p2 = numpy.random.random(50)
+#    p2 /= sum(p2)
     
     v, l = simYW.randomValueVector(0, 50, m)
     
@@ -111,6 +145,8 @@ if __name__ == "__main__":
     pricePrediction = jointGMM(n_components=3)
     
     x,y = make_blobs(n_samples=1000,centers = [[5,5],[15,20],[20,30]], n_features = 2)
+
+#    x,y = make_blobs(n_samples=1000, centers = [5,5], n_features = 2)
     
     pricePrediction.fit(x)
     
@@ -119,7 +155,8 @@ if __name__ == "__main__":
                        pricePrediction=pricePrediction,
                        l = l,
                        verbose = True,
-                       nSamples = 10000)
+                       nSamples = 1000,
+                       plot2d = True)
     
     print bids
     
