@@ -3,6 +3,9 @@
 from ssapy.pricePrediction.algo.jointGmmSCPP import jointGaussSCPP
 import numpy
 
+import matplotlib
+matplotlib.use('Agg')
+
 import argparse
 import multiprocessing
 import os
@@ -77,6 +80,8 @@ def main():
     args['maxPrice'] = numpy.float(args.get('maxPriceString'))
     args['aicMinCovar'] = numpy.float(args.get('aicMinCovar'))
     args['tol'] = numpy.float(args.get('tol'))
+    args['pltSurf'] = bool(args.get('pltSurf'))
+    args['pltMarg'] = bool(args.get('pltSurf'))
     
     jointGaussSCPP(**args)
     
