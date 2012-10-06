@@ -4,6 +4,7 @@ An agent to bid local conditional marginal revenue given a joint distribution
 
 from margDistPredictionAgent import margDistPredictionAgent
 from agentFactory import agentFactory
+import matplotlib.pyplot as plt
 
 import numpy
 
@@ -58,20 +59,43 @@ class condLocalBid(margDistPredictionAgent):
         
         del valuation
         
+        viz = kwargs.get('viz',False)
+        if viz and samples.shape[1] == 3:
+            from mpl_toolkits.mplot3d import axes3d
+            
+        m = bundles.shape[1]
+        
         for itr in xrange(n_itr):
             
             if verbose:
                 print "itr = {0}, bids = {1}".format(itr,bids)
                 
+            if viz:
+                if samples.shape[1] == 2:
+                    plt.figure()
+                    plt.plot(samples[:,0],samples[:,1],'go', markersize =  10)
+                    plt.plot(bids[0],bids[1],'ro', markersize = 10)
+                    plt.axvline(x = bids[0], ymin=0, ymax = bids[1], color = 'b')
+                    plt.axvline(x = bids[0], ymin = bids[1], color = 'r')
+                    plt.axhline(y = bids[1], xmin = 0, xmax = bids[0], color = 'b')
+                    plt.axhline(y = bids[1], xmin = bids[0], color = 'r')
+                    
+                    plt.show()
+                elif samples.shape[1] == 3:
+                    fig = plt.figure()
+                    ax = fig.gca(projection='3d')
+                    ax.plot(samples[:,0],samples[:,1],samples[:,2],'go')
+                    ax.plot([bids[0]], [bids[1]], [bids[2]],'bo')
+                    
+                    
+                    plt.show()
+                
             for bidIdx, bid in enumerate(bids):
                 
                 goodsWon = samples <= bids
                 
-                targetWon  = samples[goodsWon[:,bidIdx]==True,:]
-                normWon = targetWon.shape[0] + 1
-                
-                targetLost = samples[goodsWon[:,bidIdx] == False,:]
-                normLost = targetLost.shape[0] + 1
+                normWon = numpy.count_nonzero(goodsWon[:,bidIdx] == True)
+                normLost = numpy.count_nonzero(goodsWon[:,bidIdx] == False)
                 
                 newBid = 0.0
                 
@@ -79,32 +103,46 @@ class condLocalBid(margDistPredictionAgent):
                     negBundle = posBundle.copy()
                     negBundle[bidIdx] = False
                     
-                    newBid += (numpy.float( bundleValueDict[tuple(posBundle)] * (numpy.count_nonzero( targetWon == posBundle ) + 1) )/ normWon) -\
-                              (numpy.float( bundleValueDict[tuple(negBundle)] * (numpy.count_nonzero( targetLost == negBundle) + 1) )/ normLost) 
+                    p1 = numpy.count_nonzero( numpy.all(goodsWon == posBundle, 1) ) + (numpy.float(1)/2**(m-1))
+                    p1 = numpy.float(p1) / (normWon + 1)
+                    
+                    if p1 > 1.0:
+                        raise ValueError ("p1 = {0} > 1.0".format(p1))
+                    
+                    if p1 < 0.0:
+                        raise ValueError("p1 = {0} < 0.0".format(p1))
+                    
+                    p0 = numpy.count_nonzero( numpy.all(goodsWon == negBundle, 1) ) + (numpy.float(1)/2**(m-1))
+                    p0 = numpy.float(p0) / ( normLost +  1 )
+                    
+                    if p0 > 1.0:
+                        raise ValueError ("p0 = {0} > 1.0".format(p1))
+                    
+                    if p0 < 0.0:
+                        raise ValueError("p0 = {0} < 0.0".format(p1))
+                    
+                    newBid += (bundleValueDict[tuple(posBundle)] * p1) - (bundleValueDict[tuple(negBundle)] * p0) 
+                    
+                    
+                     
                               
-                bids[bidIdx] = newBid
+                    if verbose:
+                        print ''
+                        print "bid index = {0}".format(bidIdx)
+                        print "bundle    = {0}".format(posBundle)
+                        print "v1        = {0}".format(bundleValueDict[tuple(posBundle)])
+                        print "v0        = {0}".format(bundleValueDict[tuple(negBundle)])
+                        print "p1        = {0}".format( p0 )
+                        print "p0        = {0}".format( p1 )    
+                        print "new Bid   = {0}".format(newBid)
+                              
+                if newBid >= 0.0:
+                    bids[bidIdx] = newBid
+                else:
+                    bids[bidIdx] = 0.0
                 
         return bids
-                
-                # number of goods that won with the b_j
-                # to avoid divide by zero pad with 1 count in each half (win / lose b_j) 
-                # then re-normalize by adding 2 to the number of samples.
-                # equivalent to uniform dirichlet prior
-#                norm1 = numpy.float( numpy.count_nonzero(goodsWon[bidIdx]) + 1 ) / (samples.shape[0] + 2)
-#                
-#                # number of goods that lost w.r.t to b_j
-#                norm0 = numpy.float(1.0) - norm1
-#                
-#                for bundleIdx, bundle in enumerate(bundles[bundles[bidIdx] == 1]):
-#                    
-#                    bundleCopy = bundle.copy()
-#                    bundleCopy = ~bundleCopy[bidIdx]
-#                    
-#                    v1 = bundleValueDict[tuple(bundle)]
-#                    v0 = bundleValueDict[tuple(bundleCopy)]
-#                    
-#                    p1 = numpy.count_nonzero(numpy.all(goodsWon == bundle,1))/ numpy.float( numpy.count_nonzero(goodsWon[bidIdx]) + 1 )
-                    
+                                    
 if __name__ == "__main__":
     from simYW import simYW
     from sklearn.datasets import make_blobs
@@ -133,7 +171,8 @@ if __name__ == "__main__":
                        pricePrediction=pricePrediction,
                        l = l,
                        verbose = True,
-                       nSamples = 10)
+                       nSamples = 1000,
+                       viz = True)
     
     print bids                 
                     
