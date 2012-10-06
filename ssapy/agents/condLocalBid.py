@@ -171,8 +171,9 @@ if __name__ == "__main__":
                        pricePrediction=pricePrediction,
                        l = l,
                        verbose = True,
-                       nSamples = 1000,
+                       nSamples = 10000,
                        viz = True)
+                       
     
     print bids                 
                     
