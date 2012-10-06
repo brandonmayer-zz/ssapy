@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
-from ssapy.pricePrediction.algo.jointGmmSCPP import jointGaussSCPP
-import numpy
-
 import matplotlib
 matplotlib.use('Agg')
+
+from ssapy.pricePrediction.algo.jointGmmSCPP import jointGaussSCPP
+import numpy
 
 import argparse
 import multiprocessing

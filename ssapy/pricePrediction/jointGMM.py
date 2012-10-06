@@ -130,7 +130,7 @@ class jointGMM(sklearn.mixture.GMM):
         
         X = numpy.linspace(minPrice, maxPrice, nPts)
         
-        fig = plt.figure()
+        fig = plt.figure(dpi=100)
         ax  = plt.subplot(111)
         for goodIdx in xrange(nGoods):
             margDist = numpy.zeros(X.shape[0])
@@ -165,7 +165,7 @@ class jointGMM(sklearn.mixture.GMM):
                 print 'plotting joint distribution'
         
             
-            f = plt.figure()
+            f = plt.figure(dpi=100)
             ax = f.add_subplot(111,projection='3d')
             ax.view_init(26,-142)
             
