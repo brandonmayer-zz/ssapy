@@ -36,7 +36,7 @@ class localBid(margDistPredictionAgent):
         
         samples = kwargs.get('samples')
         
-        plot2d = kwargs.get('plot2d',False)
+        viz = kwargs.get('viz',False)
 
         
         if samples is None:
@@ -65,28 +65,39 @@ class localBid(margDistPredictionAgent):
             
           
         verbose = kwargs.get('verbose',False)
+        
+        if viz and samples.shape[1] == 3:
+            from mpl_toolkits.mplot3d import axes3d
     
         bundleValueDict = dict([(tuple(b),v) for b, v in zip(bundles,valuation)])
         
         del valuation
-        
         
         for itr in xrange(n_itr):
             
             if verbose:
                 print "itr = {0}, bid = {1}".format(itr,bids)
                 
-            if plot2d:
-                plt.figure()
-                plt.plot(samples[:,0],samples[:,1],'go', markersize =  10)
-                plt.plot(bids[0],bids[1],'ro', markersize = 10)
-                plt.axvline(x = bids[0], ymin=0, ymax = bids[1], color = 'b')
-                plt.axvline(x = bids[0], ymin = bids[1], color = 'r')
-                plt.axhline(y = bids[1], xmin = 0, xmax = bids[0], color = 'b')
-                plt.axhline(y = bids[1], xmin = bids[0], color = 'r')
-                
-                plt.show()
-                
+            if viz:
+                if samples.shape[1] == 2:
+                    plt.figure()
+                    plt.plot(samples[:,0],samples[:,1],'go', markersize =  10)
+                    plt.plot(bids[0],bids[1],'ro', markersize = 10)
+                    plt.axvline(x = bids[0], ymin=0, ymax = bids[1], color = 'b')
+                    plt.axvline(x = bids[0], ymin = bids[1], color = 'r')
+                    plt.axhline(y = bids[1], xmin = 0, xmax = bids[0], color = 'b')
+                    plt.axhline(y = bids[1], xmin = bids[0], color = 'r')
+                    
+                    plt.show()
+                elif samples.shape[1] == 3:
+                    fig = plt.figure()
+                    ax = fig.gca(projection='3d')
+                    ax.plot(samples[:,0],samples[:,1],samples[:,2],'go')
+                    ax.plot([bids[0]], [bids[1]], [bids[2]],'bo')
+                    
+                    
+                    plt.show()
+                    
             for bidIdx in xrange(bids.shape[0]):
                 
                 goodsWon = samples <= bids
@@ -100,8 +111,12 @@ class localBid(margDistPredictionAgent):
                     v1 = bundleValueDict[tuple(bundle)]
                     v0 = bundleValueDict[tuple(bundleCopy)]
 
-                    p = numpy.float( numpy.count_nonzero( numpy.delete(goodsWon,bidIdx,1) == numpy.delete(bundle,bidIdx) ) ) / nSamples                    
+                    p = numpy.float( numpy.count_nonzero( numpy.all(numpy.delete(goodsWon,bidIdx,1) == numpy.delete(bundle,bidIdx),1) ) ) / nSamples                    
 
+                    if p > 1.0:
+                        raise ValueError("p > 1.0")
+                    elif p < 0.0:
+                        raise ValueError("p < 0.0")
 #                    bids[bidIdx] = (v1 - v0)*p
                     newBid += (v1 - v0)*p
                     
@@ -125,7 +140,7 @@ if __name__ == "__main__":
     from sklearn.datasets import make_blobs
     import sklearn
     from ssapy.pricePrediction.jointGMM import jointGMM
-    m=2
+    m=3
     
 #    p1 = numpy.random.random(50)
 #    p1 /= sum(p1)
@@ -133,20 +148,22 @@ if __name__ == "__main__":
 #    p2 = numpy.random.random(50)
 #    p2 /= sum(p2)
     
-    v, l = simYW.randomValueVector(0, 50, m)
+    v, l = simYW.randomValueVector(0, 50, m, l = 1)
     
     print "v = {0}".format(v)
     print "l = {0}".format(l)
     
     bundles = simYW.allBundles(nGoods=m)
     
-    valuation = simYW.valuation(bundles, v, l)
+    valuation = simYW.valuation(bundles, v,l)
     
     pricePrediction = jointGMM(n_components=3)
     
-    x,y = make_blobs(n_samples=1000,centers = [[5,5],[15,20],[20,30]], n_features = 2)
+#    x,y = make_blobs(n_samples=1000,centers = [[5,5],[15,20],[20,30]], n_features = 2)
 
 #    x,y = make_blobs(n_samples=1000, centers = [5,5], n_features = 2)
+    
+    x,y = make_blobs(n_samples=1000, centers = [5,5,5], n_features = 3)
     
     pricePrediction.fit(x)
     
@@ -156,7 +173,7 @@ if __name__ == "__main__":
                        l = l,
                        verbose = True,
                        nSamples = 1000,
-                       plot2d = True)
+                       viz = True)
     
     print bids
     
