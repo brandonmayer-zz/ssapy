@@ -75,6 +75,8 @@ def main():
     
     args['minPrice'] = numpy.float(args.get('minPriceString'))
     args['maxPrice'] = numpy.float(args.get('maxPriceString'))
+    args['aicMinCovar'] = numpy.float(args.get('aicMinCovar'))
+    args['tol'] = numpy.float(args.get('tol'))
     
     jointGaussSCPP(**args)
     
