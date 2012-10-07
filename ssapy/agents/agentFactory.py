@@ -1,5 +1,5 @@
 from ssapy.agents.straightMU import straightMV, straightMU, straightMU8, straightMU64, straightMU256
-from ssapy.agents.targetMU import targetMV, targetMU, targetMU8
+from ssapy.agents.targetMU import targetMV, targetMU, targetMU8, targetMU64, targetMU256
 from ssapy.agents.targetMUS import targetMVS, targetMUS, targetMUS8, targetMUS64, targetMUS256
 from ssapy.agents.targetPrice import targetPrice
 from ssapy.agents.targetPriceDist import targetPriceDist, targetPrice8, targetPrice64, targetPrice256
@@ -30,6 +30,10 @@ def agentFactory(**kwargs):
         agent = targetMU(m = m, vmin = vmin, vmax = vmax)
     elif agentType == "targetMU8":
         agent = targetMU8(m = m, vmin = vmin, vmax = vmax)
+    elif agentType == "targetMU64":
+        agent = targetMU64(m = m, vmin = vmin, vmax = vmax)
+    elif agentType == "targetMU256":
+        agent = targetMU256(m = m, vmin = vmin, vmax = vmax)
     elif agentType == "targetMVS":
         agent = targetMVS(m = m, vmin = vmin, vmax = vmax)
     elif agentType == "targetMUS":
@@ -69,6 +73,3 @@ def agentFactory(**kwargs):
         raise ValueError("{0} not defined in agentFactory".format(agentType))
         
     return agent
-    
-    
-
