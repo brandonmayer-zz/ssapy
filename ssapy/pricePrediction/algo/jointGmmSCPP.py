@@ -83,7 +83,7 @@ def jointGaussSCPP(**kwargs):
             [os.remove(f) for f in glob.glob(os.path.join(pklDir,'*.pkl'))]
             
     if pltSurf:
-        pltDir = os.path.join(oDir,'gmmPlts')
+        pltDir = os.path.join(oDir,'pltSurf')
         if not os.path.exists(pltDir):
             os.makedirs(pltDir)
         else:
@@ -161,7 +161,7 @@ def jointGaussSCPP(**kwargs):
                        covariance_type = covarType, min_covar = aicMinCovar)
         
         if savePkl:
-            pklFile = os.path.join(pklDir,'gmm_{0}.pkl'.format(itr))
+            pklFile = os.path.join(pklDir,'jointGmmScpp_{0}_m{1}_n{2}_{3:05d}.pkl'.format(agentType,m,nAgents,itr))
             with open(pklFile,'wb') as f:
                 pickle.dump(clfCurr, f)
         
@@ -172,7 +172,7 @@ def jointGaussSCPP(**kwargs):
                 print '|kl| = {0}'.format(numpy.abs(kl)) 
             
         if pltSurf:
-            of = os.path.join(pltDir, 'jointGmmSCPP_joint_{0}.png'.format(itr))
+            of = os.path.join(pltDir, 'jointGmmScppSurf_{0}_m{1}_n{2}_{3:05d}.png'.format(agentType,m,nAgents,itr))
             if verbose:
                 print 'plotting joint distribution surface.'
                 
@@ -180,7 +180,7 @@ def jointGaussSCPP(**kwargs):
                 
         if pltMarg:
             
-            of = os.path.join(margDir,'jointGmmSCPP_marg_{0}.png'.format(itr))
+            of = os.path.join(margDir,'jointGmmScppMarg_{0}_m{1}_n{2}_{3:05d}.png'.format(agentType,m,nAgents,itr))
             
             if verbose:
                 print 'plotting marginal distribution'
