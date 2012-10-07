@@ -42,6 +42,12 @@ class averageMU(margDistPredictionAgent):
                 
         elif isinstance(pricePrediction, jointGMM):
             samples = pricePrediction.sample(n_samples = n_samples)
+            
+        #if you have an expected price vector just return the marginal utility of the single
+        #expected goods
+        elif isinstance(pricePrediction, list) or isinstance(pricePrediction,numpy.ndarray):
+            samples = numpy.atleast_2d(pricePrediction)
+            
         else:
             raise ValueError("Unknown Price Prediction Type.")
         
