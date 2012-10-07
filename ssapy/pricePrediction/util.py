@@ -229,15 +229,13 @@ def simulateAuctionJointGMM(**kwargs):
         if gmm is None:
             #choose randomly from the range of the valuation
             samples = ((maxValuation - minValuation) * numpy.random.rand(nAgents,nSamples,m)) + minValuation
-            expectedPrices = numpy.mean(samples,1)
             
             bids = numpy.zeros((nAgents,m))
-            for idx, agent in agentList:
+            for idx, agent in enumerate(agentList):
                 if isinstance(agent,averageMU):
                     bids[idx,:] = agent.bid(pricePrediction = samples[idx,:,:])
                 else:
-                    bids[idx,:] = agent.bid(pricePrediction = expectedPrices[idx,:])
-#            bids = numpy.atleast_2d([agent.bid(pricePrediction = expectedPrices[i,:]) for idx, agent in enumerate(agentList)])
+                    bids[idx,:] = agent.bid(pricePrediction = numpy.mean(samples[idx,:,:],0)
                     
         elif isinstance(gmm, mixture.GMM):
             
