@@ -209,7 +209,7 @@ def simulateAuctionMargGMM( **kwargs ):
 
 def simulateAuctionJointGMM(**kwargs):
     agentType  = kwargs.get('agentType')
-    nAgents    = kwargs.get('njointGMMAgents',8)
+    nAgents    = kwargs.get('nAgents',8)
     gmm        = kwargs.get('jointGMM')
     nSamples   = kwargs.get('nSampeles',8)
     nGames     = kwargs.get('nGames')
@@ -230,7 +230,14 @@ def simulateAuctionJointGMM(**kwargs):
             #choose randomly from the range of the valuation
             samples = ((maxValuation - minValuation) * numpy.random.rand(nAgents,nSamples,m)) + minValuation
             expectedPrices = numpy.mean(samples,1)
-            bids = numpy.atleast_2d([agent.bid(pricePrediction = expectedPrices[i,:]) for idx, agent in enumerate(agentList)])
+            
+            bids = numpy.zeros((nAgents,m))
+            for idx, agent in agentList:
+                if isinstance(agent,averageMU):
+                    bids[idx,:] = agent.bid(pricePrediction = samples[idx,:,:])
+                else:
+                    bids[idx,:] = agent.bid(pricePrediction = expectedPrices[idx,:])
+#            bids = numpy.atleast_2d([agent.bid(pricePrediction = expectedPrices[i,:]) for idx, agent in enumerate(agentList)])
                     
         elif isinstance(gmm, mixture.GMM):
             
