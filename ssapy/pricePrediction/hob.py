@@ -46,6 +46,7 @@ def hobSim(**kwargs):
     selfIdx         = kwargs.get('selfIdx')
     nGames          = kwargs.get('nGames')
     parallel        = kwargs.get('parallel',True)
+    nProc           = kwargs.get('nProc', multiprocessing.cpu_count())
     pricePrediction = kwargs.get('pricePrediction')
     
     m    = kwargs.get('m',5)
@@ -55,7 +56,9 @@ def hobSim(**kwargs):
     highestOtherBids = numpy.zeros((nGames,m))
     
     if parallel:
-        pass
+        pool = multiprocessing.Pool(nProc)
+        
+#        winning
     
     else:
         n = len(agentTypeList)
