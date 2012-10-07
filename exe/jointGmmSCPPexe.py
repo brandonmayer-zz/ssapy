@@ -81,7 +81,7 @@ def main():
     args['aicMinCovar'] = numpy.float(args.get('aicMinCovar'))
     args['tol'] = numpy.float(args.get('tol'))
     args['pltSurf'] = bool(args.get('pltSurf'))
-    args['pltMarg'] = bool(args.get('pltSurf'))
+    args['pltMarg'] = bool(args.get('pltMarg'))
     
     jointGaussSCPP(**args)
     
