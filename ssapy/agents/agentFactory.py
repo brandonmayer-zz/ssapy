@@ -38,6 +38,8 @@ def agentFactory(**kwargs):
         agent = targetMUS8(m = m, vmin = minPrice, vmax = maxPrice)
     elif agentType == "targetMUS64":
         agent = targetMUS64(m = m, vmin = minPrice, vmax = maxPrice)
+    elif agentType == "targetMUS256":
+        agent = targetMUS256(m = m, vmin = minPrice, vmax = maxPrice)
     elif agentType == "targetPrice":
         agent = targetPrice(m = m, vmin = minPrice, vmax = maxPrice)
     elif agentType == "targetPriceDist":
