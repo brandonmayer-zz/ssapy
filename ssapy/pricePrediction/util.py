@@ -235,7 +235,7 @@ def simulateAuctionJointGMM(**kwargs):
                 if isinstance(agent,averageMU):
                     bids[idx,:] = agent.bid(pricePrediction = samples[idx,:,:])
                 else:
-                    bids[idx,:] = agent.bid(pricePrediction = numpy.mean(samples[idx,:,:],0)
+                    bids[idx,:] = agent.bid(pricePrediction = numpy.mean(samples[idx,:,:],0))
                     
         elif isinstance(gmm, mixture.GMM):
             
