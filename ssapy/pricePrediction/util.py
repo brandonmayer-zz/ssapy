@@ -208,16 +208,16 @@ def simulateAuctionMargGMM( **kwargs ):
     return winningBids
 
 def simulateAuctionJointGMM(**kwargs):
-    agentType  = kwargs.get('agentType')
-    nAgents    = kwargs.get('nAgents',8)
-    gmm        = kwargs.get('jointGMM')
-    nSamples   = kwargs.get('nSampeles',8)
-    nGames     = kwargs.get('nGames')
-    minPrice   = kwargs.get('minPrice',0)
-    maxPrice   = kwargs.get('maxPrice',50)
+    agentType    = kwargs.get('agentType')
+    nAgents      = kwargs.get('nAgents',8)
+    gmm          = kwargs.get('jointGMM')
+    nSamples     = kwargs.get('nSamples',8)
+    nGames       = kwargs.get('nGames')
+    minPrice     = kwargs.get('minPrice',0)
+    maxPrice     = kwargs.get('maxPrice',50)
     minValuation = kwargs.get('minValuation',0)
     maxValuation = kwargs.get('maxValuation',50)
-    m          = kwargs.get('m',5)
+    m            = kwargs.get('m',5)
     
     
     winningBids = numpy.zeros((nGames,m))
