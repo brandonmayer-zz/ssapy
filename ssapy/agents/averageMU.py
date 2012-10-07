@@ -8,6 +8,8 @@ Specialized agent class to replicate averageMU from Yoon and Wellman 2011.
 """
 
 from margDistPredictionAgent import *
+from ssapy.pricePrediction.jointGMM import jointGMM
+from ssapy.agents.straightMV import straightMV
 
 class averageMU(margDistPredictionAgent):
     @staticmethod       
@@ -52,7 +54,8 @@ class averageMU(margDistPredictionAgent):
                                                    l                    = l)
             
         avgMu = numpy.mean(smu_of_samples,0)
-        return numpy.mean(avgMu)
+#        return numpy.mean(avgMu)
+        return avgMu
             
 class averageMU8(averageMU):
     @staticmethod
