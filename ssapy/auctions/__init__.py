@@ -126,12 +126,11 @@ def simulateAuction(**kwargs):
         results = []
         
         for p in xrange(nProc):
-            print 'p = {0}'.format(p)
-            
             subArgs = {}
             subArgs.update(kwargs)
             subArgs['parallel'] = False
             subArgs['nGames'] = nGameList[p]
+            subArgs['verbose'] = False
             
                             
             results.append(pool.apply_async(simulateAuction, kwds = subArgs))
