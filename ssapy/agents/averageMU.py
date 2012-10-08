@@ -60,7 +60,7 @@ class averageMU(margDistPredictionAgent):
                                                    l                    = l)
             
         avgMu = numpy.mean(smu_of_samples,0)
-#        return numpy.mean(avgMu)
+
         return avgMu
             
 class averageMU8(averageMU):
