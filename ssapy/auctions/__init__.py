@@ -169,43 +169,43 @@ def simulateAuction(**kwargs):
                 
                 for agentIdx, agent, pp in zip(numpy.arange(nAgents),agents,pricePrediction):
                     agent.randomValuation()
-                    if verbose:
-                        print "agent[{0}].l        = {1}".format(agentIdx,agent.l)
-                        print "agent[{0}].v        = {1}".format(agentIdx,agent.v)
+#                    if verbose:
+#                        print "agent[{0}].l        = {1}".format(agentIdx,agent.l)
+#                        print "agent[{0}].v        = {1}".format(agentIdx,agent.v)
                     
                     if retType == 'bids':
                         ret[itr, agentIdx, :] = agent.bid(pricePrediction = pricePrediction)
                         
-                        if verbose:
-                            print "agent[{0}].bid   = {1}".format(agentIdx,ret[itr,agentIdx,:])
+#                        if verbose:
+#                            print "agent[{0}].bid   = {1}".format(agentIdx,ret[itr,agentIdx,:])
 
                     elif retType == 'firstPrice' or retType == 'secondPrice' or retType == 'hob':
                         gameBids[agentIdx,:] = agent.bid(pricePrediction = pricePrediction)
                         
-                        if verbose:
-                            print "agent[{0}].bid   = {1}".format(agentIdx, gameBids[agentIdx,:])
+#                        if verbose:
+#                            print "agent[{0}].bid   = {1}".format(agentIdx, gameBids[agentIdx,:])
                                             
             else:
                     
                 for agentIdx, agent in enumerate(agents):
                     agent.randomValuation()
                     
-                    if verbose:
-                        print "agent[{0}].l     = {1}".format(agentIdx,agent.l)
-                        print "agent[{0}].v     = {1}".format(agentIdx,agent.v)
+#                    if verbose:
+#                        print "agent[{0}].l     = {1}".format(agentIdx,agent.l)
+#                        print "agent[{0}].v     = {1}".format(agentIdx,agent.v)
                     
                     if retType == 'bids':
                         
                         ret[itr, agentIdx, :] = agent.bid(pricePrediction = pricePrediction)
                         
-                        if verbose:
-                            print "agent[{0}].bid   = {1}".format(agentIdx,ret[itr,agentIdx,:])
+#                        if verbose:
+#                            print "agent[{0}].bid   = {1}".format(agentIdx,ret[itr,agentIdx,:])
                     
                     elif retType == 'firstPrice' or retType == 'secondPrice' or retType == 'hob':
                         gameBids[agentIdx,:] = agent.bid(pricePrediction = pricePrediction)
                         
-                        if verbose:
-                            print "agent[{0}].bid   = {1}".format(agentIdx,gameBids[agentIdx,:])
+#                        if verbose:
+#                            print "agent[{0}].bid   = {1}".format(agentIdx,gameBids[agentIdx,:])
                         
             #for this game iteration collect stats
             if retType == 'firstPrice':
