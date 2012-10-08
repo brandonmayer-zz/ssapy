@@ -157,6 +157,9 @@ class jointGMM(sklearn.mixture.GMM):
         minPrice = kwargs.get('minPrice',0)
         maxPrice = kwargs.get('maxPrice',50)
         oFile   = kwargs.get('oFile')
+        xlabel  = kwargs.get('xlable',r'$q_1$')
+        ylabel  = kwargs.get('ylable',r'$q_2$')
+        zlabel  = kwargs.get('zlabel',r'$p(q_1,q_2)$')
         
         verbose = kwargs.get('verbose',True)
         

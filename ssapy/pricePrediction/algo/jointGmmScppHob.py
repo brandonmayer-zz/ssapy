@@ -161,11 +161,11 @@ def jointGaussScppHob(**kwargs):
                     print 'plotting marginal distribution'
                 
                 if itr > 0:
-                    title = "Marginal Distribution of Joint {0},\n itr = {1}, |kld| = {2}".format(agentType,itr,numpy.abs(kl))
+                    title = "Marginal Distribution of Joint {0}\n itr = {1}, |kld| = {2}".format(agentType,itr,numpy.abs(kl))
                 else:
-                    title = "Marginal Distribution of Joint {0},\n itr = {1}".format(agentType,itr)
+                    title = "Marginal Distribution of Joint {0}\n itr = {1}".format(agentType,itr)
                 
-                clfCurr.pltMargDist(oFile = of, title = title)
+                clfCurr.pltMargDist(oFile = of, title = title, ylabel = r'$p(q)$', ylabel = r'$q$')
                                        
             if klList:
                 if numpy.abs(klList[-1]) < tol:
