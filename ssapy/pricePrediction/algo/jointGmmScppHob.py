@@ -18,7 +18,7 @@ def jointGaussScppHob(**kwargs):
     agentType    = kwargs.get('agentType',"straightMV")
     selfIdx      = kwargs.get('selfIdx',0)
     nAgents      = kwargs.get('nAgents',8)
-    nGames       = kwargs.get('nGames',10)
+    nGames       = kwargs.get('nGames',100)
     m            = kwargs.get('m',5)
     minPrice     = kwargs.get('minPrice',0.0)
     maxPrice     = kwargs.get('maxPrice',numpy.float('inf'))
@@ -33,7 +33,7 @@ def jointGaussScppHob(**kwargs):
     covarType    = kwargs.get('covarType','full')
     aicCompMin   = kwargs.get('aicCompMin',1)
     aicCompMax   = kwargs.get('aicCompMax',10)
-    aicMinCovar  = kwargs.get('aicMinCovar',9)
+    aicMinCovar  = kwargs.get('aicMinCovar',1.0)
     
     maxItr       = kwargs.get('maxItr', 100)
     tol          = kwargs.get('tol', 0.01)
@@ -125,10 +125,14 @@ def jointGaussScppHob(**kwargs):
                                    minValuation    = minValuation,
                                    maxValuation    = maxValuation,
                                    retType         = 'hob',
-                                   selfIdx         = selfIdx )
+                                   selfIdx         = selfIdx,
+                                   verbose         = verbose )
             
-            clfCurr.aicFit(X = hob, compRange = range(aicCompMin, aicCompMax),
-                           covariance_type = covarType, min_covar = aicMinCovar)
+            clfCurr.aicFit(X = hob, 
+                           compRange = range(aicCompMin, aicCompMax),
+                           covariance_type = covarType, 
+                           min_covar = aicMinCovar, 
+                           verbose = verbose)
             
             if savePkl:
                 pklFile = os.path.join(pklDir,'jointGmmScppHob_{0}_m{1}_n{2}_{3:05d}.pkl'.format(agentType,m,nAgents,itr))
