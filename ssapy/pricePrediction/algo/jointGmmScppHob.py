@@ -148,10 +148,12 @@ def jointGaussScppHob(**kwargs):
                     
             if pltSurf:
                 of = os.path.join(pltDir, 'jointGmmScppHobSurf_{0}_m{1}_n{2}_{3:05d}.png'.format(agentType,m,nAgents,itr))
+                
                 if verbose:
                     print 'plotting joint distribution surface.'
                 
-                clfCurr.plt(oFile = of)  
+                title = 'Joint Gmm SCPP {0}\n Iteration: {1}'.format(agentType, itr)
+                clfCurr.plt(oFile = of, title = title)  
                 
             if pltMarg:
             
@@ -168,6 +170,7 @@ def jointGaussScppHob(**kwargs):
                 clfCurr.pltMargDist(oFile = of, title = title, ylabel = r'$p(q)$', xlabel = r'$q$')
                                        
             if klList:
+                print klList
                 if numpy.abs(klList[-1]) < tol:
                     break
                 
@@ -175,8 +178,7 @@ def jointGaussScppHob(**kwargs):
             
         if klList:
             klFile = os.path.join(oDir,'kld.txt')
-            klList = numpy.ndarray(klList)
-            numpy.savetxt(klFile, klList)
+            numpy.savetxt(klFile, numpy.asarray(klList))
             
             if verbose:
                 

@@ -157,6 +157,7 @@ class jointGMM(sklearn.mixture.GMM):
         minPrice = kwargs.get('minPrice',0)
         maxPrice = kwargs.get('maxPrice',50)
         oFile   = kwargs.get('oFile')
+        title   = kwargs.get('title', 'Joint Gmm Distribution')
         xlabel  = kwargs.get('xlabel',r'$q_1$')
         ylabel  = kwargs.get('ylabel',r'$q_2$')
         zlabel  = kwargs.get('zlabel',r'$p(q_1,q_2)$')
@@ -182,14 +183,14 @@ class jointGMM(sklearn.mixture.GMM):
             surf = ax.plot_surface(xx, yy, Z, rstride=1, cstride=1, cmap=cm.jet,
                                    linewidth=0, antialiased=True)
             
+            ax.set_title(title)
             ax.set_xlabel(xlabel)
             ax.set_ylabel(ylabel)
             ax.set_zlabel(zlabel)
                         
 #                f.colorbar(surf,shrink=0.5,aspect=5)
             
-            nComp = self.means_.shape[0]
-            ax.set_title("nComp = {0}".format(nComp))
+            
             
             if not oFile:
                 plt.show()
