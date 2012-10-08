@@ -6,6 +6,7 @@ matplotlib.use('Agg')
 from ssapy.pricePrediction.algo.jointGmmScppHob import jointGaussScppHob
 
 import numpy
+import multiprocessing
 
 import argparse
 
