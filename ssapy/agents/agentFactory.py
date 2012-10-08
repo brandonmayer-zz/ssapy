@@ -5,6 +5,8 @@ from ssapy.agents.targetPrice import targetPrice
 from ssapy.agents.targetPriceDist import targetPriceDist, targetPrice8, targetPrice64, targetPrice256
 from ssapy.agents.riskAware import riskEvaluator8, riskEvaluator64, riskAwareTMUS256
 from ssapy.agents.averageMU import averageMU, averageMU8, averageMU64, averageMU256
+from ssapy.agents.localBid import localBid
+from ssapy.agents.condLocalBid import condLocalBid
 
 def agentFactory(**kwargs):
     agentType = kwargs.get('agentType')
@@ -12,7 +14,8 @@ def agentFactory(**kwargs):
     vmin  = kwargs.get('vmin',0)
     vmax  = kwargs.get('vmax',50)
 
-    agent = None
+    if agentType == None:
+        raise ValueError("Must specify Agent Type")
     
     if agentType == "straightMV":
         agent = straightMV(m = m, vmin = vmin, vmax = vmax)
@@ -68,8 +71,13 @@ def agentFactory(**kwargs):
         agent = averageMU64(m = m, vmin = vmin, vmax = vmax)
     elif agentType == "averageMU256":
         agent = averageMU256(m = m, vmin = vmin, vmax = vmax)
-        
-    if agent == None:
+    elif agentType == "localBid":
+        agent = localBid(m = m, vmin = vmin, vmax = vmax)
+    elif agentType == "condLocalBid":
+        agent = condLocalBid(m = m, vmin = vmin, vmax = vmax)
+    else:
         raise ValueError("{0} not defined in agentFactory".format(agentType))
+        
+    
         
     return agent
