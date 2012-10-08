@@ -63,32 +63,37 @@ class condLocalBid(margDistPredictionAgent):
         if viz and samples.shape[1] == 3:
             from mpl_toolkits.mplot3d import axes3d
             
+        if viz:
+            if samples.shape[1] == 2:
+                if verbose:
+                    print 'plotting initial samples and bid'
+                plt.figure()
+                plt.title('condLocalBid Initial Bid')
+                plt.plot(samples[:,0],samples[:,1],'go', markersize =  10)
+                plt.plot(bids[0],bids[1],'ro', markersize = 10)
+                plt.axvline(x = bids[0], ymin=0, ymax = bids[1], color = 'b')
+                plt.axvline(x = bids[0], ymin = bids[1], color = 'r')
+                plt.axhline(y = bids[1], xmin = 0, xmax = bids[0], color = 'b')
+                plt.axhline(y = bids[1], xmin = bids[0], color = 'r')
+                
+                plt.show()
+            elif samples.shape[1] == 3:
+                fig = plt.figure()
+                ax = fig.gca(projection='3d')
+                ax.plot(samples[:,0],samples[:,1],samples[:,2],'go')
+                ax.plot([bids[0]], [bids[1]], [bids[2]],'bo')
+                
+                
+                plt.show()   
+            
         m = bundles.shape[1]
         
         for itr in xrange(n_itr):
             
+            prevBid = bids.copy()
+            
             if verbose:
                 print "itr = {0}, bids = {1}".format(itr,bids)
-                
-            if viz:
-                if samples.shape[1] == 2:
-                    plt.figure()
-                    plt.plot(samples[:,0],samples[:,1],'go', markersize =  10)
-                    plt.plot(bids[0],bids[1],'ro', markersize = 10)
-                    plt.axvline(x = bids[0], ymin=0, ymax = bids[1], color = 'b')
-                    plt.axvline(x = bids[0], ymin = bids[1], color = 'r')
-                    plt.axhline(y = bids[1], xmin = 0, xmax = bids[0], color = 'b')
-                    plt.axhline(y = bids[1], xmin = bids[0], color = 'r')
-                    
-                    plt.show()
-                elif samples.shape[1] == 3:
-                    fig = plt.figure()
-                    ax = fig.gca(projection='3d')
-                    ax.plot(samples[:,0],samples[:,1],samples[:,2],'go')
-                    ax.plot([bids[0]], [bids[1]], [bids[2]],'bo')
-                    
-                    
-                    plt.show()
                 
             for bidIdx, bid in enumerate(bids):
                 
@@ -140,6 +145,43 @@ class condLocalBid(margDistPredictionAgent):
                     bids[bidIdx] = newBid
                 else:
                     bids[bidIdx] = 0.0
+                    
+            if verbose:
+                print ''
+                print 'Iteration = {0}'.format(itr)
+                print 'prevBid   = {0}'.format(prevBid)
+                print 'newBid    = {0}'.format(bids)
+                    
+            if viz:
+                if samples.shape[1] == 2:
+                    plt.figure()
+                    plt.plot(samples[:,0],samples[:,1],'go', markersize =  10)
+                    plt.plot(bids[0],bids[1],'ro', markersize = 10)
+                    plt.title('condLocalBid Iteration {0}'.format(itr))
+                    plt.axvline(x = bids[0], ymin=0, ymax = bids[1], color = 'b')
+                    plt.axvline(x = bids[0], ymin = bids[1], color = 'r')
+                    plt.axhline(y = bids[1], xmin = 0, xmax = bids[0], color = 'b')
+                    plt.axhline(y = bids[1], xmin = bids[0], color = 'r')
+                    
+                    plt.show()
+                elif samples.shape[1] == 3:
+                    fig = plt.figure()
+                    ax = fig.gca(projection='3d')
+                    ax.plot(samples[:,0],samples[:,1],samples[:,2],'go')
+                    ax.plot([bids[0]], [bids[1]], [bids[2]],'bo')
+                    
+                    
+                    plt.show()
+                    
+            if numpy.dot(prevBid - bids, prevBid - bids) <= 1e-8:
+                if verbose:
+                    print ''
+                    print 'condlocalBid terminated.'
+                    print 'Iteration = {0}'.format(itr)
+                    print 'prevBid   = {0}'.format(prevBid)
+                    print 'bids      = {0}'.format(bids)
+                    print 'sse       = {0}'.format(numpy.dot(prevBid - bids,prevBid - bids))
+                break
                 
         return bids
                                     
