@@ -44,6 +44,8 @@ def jointGaussScppHob(**kwargs):
     pltSurf      = kwargs.get('pltSurf',False)
     pltMarg      = kwargs.get('pltMarg',False)
     
+    saveComp     = kwargs.get('saveComp',True)
+    
     if oDir is None:
         raise ValueError("Must provide output Directory")
     oDir = os.path.realpath(oDir)
@@ -95,6 +97,11 @@ def jointGaussScppHob(**kwargs):
             os.makedirs(margDir)
         else:
             [os.remove(f) for f in glob.glob(os.path.join(margDir,'*.png'))]
+            
+        if saveComp:
+            compFile = os.path.join(oDir,'n_comp.txt')
+            if os.path.exists(compFile):
+                os.remove(compFile)
     
         clfCurr = jointGMM(minPrice = minPrice, maxPrice = maxPrice)
         clfPrev = None
@@ -135,6 +142,14 @@ def jointGaussScppHob(**kwargs):
                            min_covar = aicMinCovar, 
                            verbose = verbose)
             
+            if saveComp:
+                if verbose:
+                    print ''
+                    print 'Writing Number of Components to {0}'.format(compFile)
+                with open(compFile,'a') as f:
+                    f.write("{0}\n".format(clfCurr.means_.shape[0]))
+
+            
             if savePkl:
                 pklFile = os.path.join(pklDir,'jointGmmScppHob_{0}_m{1}_n{2}_{3:05d}.pkl'.format(agentType,m,nAgents,itr))
                 with open(pklFile,'wb') as f:
@@ -152,7 +167,7 @@ def jointGaussScppHob(**kwargs):
                 if verbose:
                     print 'plotting joint distribution surface.'
                 
-                title = 'Joint Gmm SCPP {0}\n Iteration: {1}'.format(agentType, itr)
+                title = 'Joint Gmm SCPP {0}'.format(agentType, itr)
                 clfCurr.plt(oFile = of, title = title)  
                 
             if pltMarg:
@@ -163,9 +178,9 @@ def jointGaussScppHob(**kwargs):
                     print 'plotting marginal distribution'
                 
                 if itr > 0:
-                    title = "Marginal Distribution of Joint {0}".format(agentType,itr,numpy.abs(kl))
+                    title = "Marginal Distribution of Joint SCPP {0}".format(agentType,itr,numpy.abs(kl))
                 else:
-                    title = "Marginal Distribution of Joint {0}".format(agentType,itr)
+                    title = "Marginal Distribution of Joint SCPP {0}".format(agentType,itr)
                 
                 clfCurr.pltMargDist(oFile = of, title = title, ylabel = r'$p(q)$', xlabel = r'$q$')
                                        
