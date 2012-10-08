@@ -77,7 +77,5 @@ def agentFactory(**kwargs):
         agent = condLocalBid(m = m, vmin = vmin, vmax = vmax)
     else:
         raise ValueError("{0} not defined in agentFactory".format(agentType))
-        
-    
-        
+
     return agent
