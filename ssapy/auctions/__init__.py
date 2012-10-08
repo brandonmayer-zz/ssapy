@@ -91,6 +91,9 @@ def simulateAuction(**kwargs):
     
     if retType == 'hob':
         selfIdx  = kwargs.get('selfIdx')
+        if selfIdx == None:
+            raise ValueError("ERROR - simulateAuction(...):\n" + \
+                             "\t Must specify selfIdx when retType == 'hob'")
     
     
     
@@ -160,7 +163,7 @@ def simulateAuction(**kwargs):
             if verbose:
                 print 'running serial game {0}'.format(itr)
                 
-            if retType is 'firstPrice' or retType is 'hob':
+            if retType == 'firstPrice' or retType == 'secondPrice' or retType == 'hob':
                 gameBids = numpy.zeros((nAgents,m))   
             
             if isinstance(pricePrediction,list):
