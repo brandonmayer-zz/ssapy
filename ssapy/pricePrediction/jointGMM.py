@@ -181,6 +181,10 @@ class jointGMM(sklearn.mixture.GMM):
             
             surf = ax.plot_surface(xx, yy, Z, rstride=1, cstride=1, cmap=cm.jet,
                                    linewidth=0, antialiased=True)
+            
+            ax.set_xlabel(xlabel)
+            ax.set_ylabel(ylabel)
+            ax.set_zlabel(zlabel)
                         
 #                f.colorbar(surf,shrink=0.5,aspect=5)
             
