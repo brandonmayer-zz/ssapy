@@ -60,14 +60,14 @@ class jointGMM(sklearn.mixture.GMM):
         
         #accept new mixture model params as arguments
         #and store on instance
-        covariance_type = kwargs.get('covariance_type', self.covariance_type)
-        random_state    = kwargs.get('random_state',self.random_state)
-        thresh          = kwargs.get('thresh',self.thresh)
-        min_covar       = kwargs.get('min_covar', self.min_covar)
-        n_iter          = kwargs.get('n_itr',self.n_iter)
-        n_init          = kwargs.get('n_init',self.n_init)
-        params          = kwargs.get('params',self.params)
-        init_params     = kwargs.get('init_params',self.init_params)
+        self.covariance_type = kwargs.get('covariance_type', self.covariance_type)
+        self.random_state    = kwargs.get('random_state',self.random_state)
+        self.thresh          = kwargs.get('thresh',self.thresh)
+        self.min_covar       = kwargs.get('min_covar', self.min_covar)
+        self.n_iter          = kwargs.get('n_itr',self.n_iter)
+        self.n_init          = kwargs.get('n_init',self.n_init)
+        self.params          = kwargs.get('params',self.params)
+        self.init_params     = kwargs.get('init_params',self.init_params)
     
         verbose         = kwargs.get('verbose',True)
         
@@ -78,14 +78,14 @@ class jointGMM(sklearn.mixture.GMM):
             start = time.time()
             
         clfList = [sklearn.mixture.GMM(n_components    = c, 
-                                       covariance_type = covariance_type,
-                                       random_state    = random_state,
-                                       min_covar       = min_covar,
-                                       thresh          = thresh,
-                                       n_iter          = n_iter,
-                                       n_init          = n_init,
-                                       params          = params,
-                                       init_params     = init_params)\
+                                       covariance_type = self.covariance_type,
+                                       random_state    = self.random_state,
+                                       min_covar       = self.min_covar,
+                                       thresh          = self.thresh,
+                                       n_iter          = self.n_iter,
+                                       n_init          = self.n_init,
+                                       params          = self.params,
+                                       init_params     = self.init_params)\
                                        for c in compRange] 
                                        
         
