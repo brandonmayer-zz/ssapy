@@ -121,6 +121,7 @@ def jointGaussScppHob(**kwargs):
                                    nAgents         = nAgents,
                                    nGames          = nGames,
                                    parallel        = parallel,
+                                   nProc           = nProc,
                                    m               = m,
                                    minValuation    = minValuation,
                                    maxValuation    = maxValuation,
