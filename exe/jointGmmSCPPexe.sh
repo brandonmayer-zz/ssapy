@@ -1,3 +1,3 @@
 #!/bin/bash
 
-jointGmmSCPPexe.py "$@"
+./jointGmmSCPPexe.py "$@"
