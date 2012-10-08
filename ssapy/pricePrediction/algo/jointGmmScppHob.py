@@ -79,24 +79,24 @@ def jointGaussScppHob(**kwargs):
         
         if savePkl:
             pklDir = os.path.join(oDir, 'gmmPkl')
-        if not os.path.exists(pklDir):
-            os.makedirs(pklDir)
-        else:
-            [os.remove(f) for f in glob.glob(os.path.join(pklDir,'*.pkl'))]
+            if not os.path.exists(pklDir):
+                os.makedirs(pklDir)
+            else:
+                [os.remove(f) for f in glob.glob(os.path.join(pklDir,'*.pkl'))]
             
         if pltSurf:
             pltDir = os.path.join(oDir,'pltSurf')
-        if not os.path.exists(pltDir):
-            os.makedirs(pltDir)
-        else:
-            [os.remove(f) for f in glob.glob(os.path.join(pltDir,'*.png'))]
+            if not os.path.exists(pltDir):
+                os.makedirs(pltDir)
+            else:
+                [os.remove(f) for f in glob.glob(os.path.join(pltDir,'*.png'))]
             
         if pltMarg:
             margDir = os.path.join(oDir,'pltMarg')
-        if not os.path.exists(margDir):
-            os.makedirs(margDir)
-        else:
-            [os.remove(f) for f in glob.glob(os.path.join(margDir,'*.png'))]
+            if not os.path.exists(margDir):
+                os.makedirs(margDir)
+            else:
+                [os.remove(f) for f in glob.glob(os.path.join(margDir,'*.png'))]
             
         if saveComp:
             compFile = os.path.join(oDir,'n_comp.txt')
