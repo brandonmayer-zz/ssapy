@@ -29,7 +29,7 @@ def jointGaussSCPP(**kwargs):
     
     oDir         = kwargs.get('oDir')
     agentType    = kwargs.get('agentType',"straightMV")
-    nAgents      = kwargs.get('nAgnets',8)
+    nAgents      = kwargs.get('nAgents',8)
     nGames       = kwargs.get('nGames',10)
     nSamples     = kwargs.get('nSamples',8)
     m            = kwargs.get('m',5)
@@ -57,7 +57,7 @@ def jointGaussSCPP(**kwargs):
     oDir = os.path.realpath(oDir)
     
     if verbose:
-        print 'oDir         = {0}'.format(oDir)
+        print 'oDir        = {0}'.format(oDir)
         print 'agentType   = {0}'.format(agentType)
         print 'nAgents     = {0}'.format(nAgents)
         print 'nGames      = {0}'.format(nGames)
