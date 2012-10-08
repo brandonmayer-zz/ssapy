@@ -165,7 +165,7 @@ def jointGaussScppHob(**kwargs):
                 else:
                     title = "Marginal Distribution of Joint {0}\n itr = {1}".format(agentType,itr)
                 
-                clfCurr.pltMargDist(oFile = of, title = title, ylabel = r'$p(q)$', ylabel = r'$q$')
+                clfCurr.pltMargDist(oFile = of, title = title, ylabel = r'$p(q)$', xlabel = r'$q$')
                                        
             if klList:
                 if numpy.abs(klList[-1]) < tol:
