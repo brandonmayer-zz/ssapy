@@ -5,13 +5,65 @@ from ssapy.agents.agentFactory import agentFactory
 import multiprocessing
 import numpy
 
-def highestBids(bids):
-    return numpy.max(bids,1)
-
-def highestOtherBids(bids,selfIdx):
-    return numpy.max( numpy.delete(bids,selfIdx,0), 1 )
-
 def simulateAuction(**kwargs):
+    """
+    Function to run an auction with specified participants, randomizing over valuation.
+    
+    Parameters
+    ----------
+    
+    agentType: string or list of strings, required
+        A string or list of strings specifying participating strategies.
+        
+    nAgents: int, optional
+        If agentType is a string then this specifies the number of replicant
+        agents that will participate. Each will draw their own valuation instance.
+    
+    m: int, optional - default = 5
+        Number of goods up for auction.
+        
+    minValuation: float, optional - default = 0
+        Minimum allowable valuation for the scheduling game
+        
+    maxValuation: float, optional - default = 50
+        Maximum allowable valuation for the scheduling game       
+        
+    nGames: int, required
+        The number of auctions to run
+        
+    parallel: bool, optional - default = True
+        To run auction simulations in parallel or not.
+        
+    nProc: int, optional - default = multiprocessing.cpu_count()
+        Number of cores to use if parallel flag is set to true.
+        
+    pricePrediction: (point, margDist, jointGmm) or list thereof, required
+        Price prediction or list of price predictions 
+        ( 1 for each agent ) used in the simulation
+        
+    verbose: bool, optional - default = False
+        Flag to output debug information to std out.
+        
+        
+    retType: string, optional - default = 'bids'
+        A string specifying output of simulation.
+        
+        'bids' -> output all bids from all agents for all games
+            return ndarray.shape (nGames,nAgents,m)
+        'firstPrice' -> output highest bids for each good for each game
+            return ndarray.shape = (nGames,m)
+        'secondPrice' -> output second highest bids for each good in each game
+            return ndarray.shape = (nGames,m)
+            
+        'hob' -> output highest other agent bid in each game.
+            This option requires the specification of selfIdx
+            return ndarray.shape = (nGames,m)
+            
+    selfIdx: int, required if retType == 'hob'
+        Index of agent considered to be self. Excluded from max bid calculation.
+        
+    
+    """
 
     agentType = kwargs.get('agentType')
         
@@ -32,20 +84,15 @@ def simulateAuction(**kwargs):
     m            = kwargs.get('m',5)
     minValuation = kwargs.get('minValuation',0)
     maxValuation = kwargs.get('maxValuation',50)
-    minPrice     = kwargs.get('minPrice',0)
-    maxPrice     = kwargs.get('maxPrice',numpy.float('inf'))
     
     verbose      = kwargs.get('verbose', False)
-    
-    # What to return
-    # 'firstPrice' -> return highest bids
-    # 'bids' return raw bids
-    # 'hob' return highest other bids, 
-    #       must specify exclusion index (the agent you consider yourself).
+
     retType      = kwargs.get('retType','bids')
     
     if retType == 'hob':
         selfIdx  = kwargs.get('selfIdx')
+    
+    
     
     if verbose:
         print 'In simulateAuction(...)'
@@ -57,17 +104,9 @@ def simulateAuction(**kwargs):
         print 'm            = {0}'.format(m)
         print 'minValuation = {0}'.format(minValuation)
         print 'maxValuation = {0}'.format(maxValuation)
-        print 'minPrice     = {0}'.format(minPrice)
-        print 'maxPrice     = {0}'.format(maxPrice)
         print 'retType      = {0}'.format(retType)
-    
-    if retType == 'bids':
-        ret = numpy.zeros((nGames*nAgents,m))
-    elif retType == 'firstPrice' or retType == 'hob':
-        ret = numpy.zeros((nGames,m))
-    else:
-        raise ValueError("simulateAuction - Unknown return type")
         
+    
     
     if parallel:
         pool = multiprocessing.Pool(nProc)
@@ -85,33 +124,36 @@ def simulateAuction(**kwargs):
         
         for p in xrange(nProc):
             print 'p = {0}'.format(p)
-            results.append(pool.apply_async(simulateAuction, kwds = {'agentType':agentType,
-                                                                    'parallel':False,
-                                                                    'pricePrediction':pricePrediction,
-                                                                    'minPrice': minPrice,
-                                                                    'maxPrice': maxPrice,
-                                                                    'minValuation':minValuation,
-                                                                    'maxValuation':maxValuation,
-                                                                    'm':m,
-                                                                    'nGames':nGameList[p],
-                                                                    'verbose':verbose,
-                                                                    'retType': retType,
-                                                                    'selfIdx':selfIdx}))
+            
+            subArgs = {}
+            subArgs.update(kwargs)
+            subArgs['parallel'] = False
+            subArgs['nGames'] = nGameList[p]
+            
+                            
+            results.append(pool.apply_async(simulateAuction, kwds = subArgs))
 
         pool.close()
         pool.join()
             
-        start_row = 0
-        end_row = 0
+
         for idx, r in enumerate(results):
-            end_row += nGameList[idx]*nAgents
-            ret[start_row:end_row,:] = r.get()
-            results[idx]._value = []
-            start_row = end_row
+            if idx == 0:
+                ret = r.get()
+            else:                
+                ret = numpy.concatenate((ret,r.get()))
+            r._value = []
+
         
     else:
         agents = [agentFactory(agentType = atype, m = m, vmin = minValuation, vmax = maxValuation) for atype in agentType]
         
+        if retType == 'bids':
+            ret = numpy.zeros((nGames,nAgents,m))
+        elif retType == 'firstPrice' or retType == 'hob':
+            ret = numpy.zeros((nGames,m))
+        else:
+            raise ValueError("simulateAuction - Unknown return type")
         
         for itr in xrange(nGames):
             
@@ -119,44 +161,63 @@ def simulateAuction(**kwargs):
                 print 'running serial game {0}'.format(itr)
                 
             if retType is 'firstPrice' or retType is 'hob':
-                gameBids = numpy.zeros(nAgents,m)   
+                gameBids = numpy.zeros((nAgents,m))   
             
             if isinstance(pricePrediction,list):
                 
-                for idx, agent, pp in zip(numpy.arange(nAgents),agents,pricePrediction):
+                for agentIdx, agent, pp in zip(numpy.arange(nAgents),agents,pricePrediction):
                     agent.randomValuation()
                     if verbose:
-                        print "agent[{0}].l        = {1}".format(idx,agent.l)
-                        print "agent[{0}].v        = {1}".format(idx,agent.v)
+                        print "agent[{0}].l        = {1}".format(agentIdx,agent.l)
+                        print "agent[{0}].v        = {1}".format(agentIdx,agent.v)
                     
-                    if retType is 'bids':
-                        ret[itr*nAgents + idx,:] = agent.bid(pricePrediction = pricePrediction)
+                    if retType == 'bids':
+                        ret[itr, agentIdx, :] = agent.bid(pricePrediction = pricePrediction)
                         
-                    if retType is 'firstPrice' or retType is 'hob':
-                        gameBids[idx,:] = agent.bid(pricePrediction = pricePrediction)
+                        if verbose:
+                            print "agent[{0}].bid   = {1}".format(agentIdx,ret[itr,agentIdx,:])
+
+                    elif retType == 'firstPrice' or retType == 'secondPrice' or retType == 'hob':
+                        gameBids[agentIdx,:] = agent.bid(pricePrediction = pricePrediction)
+                        
+                        if verbose:
+                            print "agent[{0}].bid   = {1}".format(agentIdx, gameBids[agentIdx,:])
                                             
             else:
                     
-                for idx, agent in enumerate(agents):
+                for agentIdx, agent in enumerate(agents):
                     agent.randomValuation()
+                    
                     if verbose:
-                        print "agent[{0}].l     = {1}".format(idx,agent.l)
-                        print "agent[{0}].v     = {1}".format(idx,agent.v)
+                        print "agent[{0}].l     = {1}".format(agentIdx,agent.l)
+                        print "agent[{0}].v     = {1}".format(agentIdx,agent.v)
                     
-                    if retType is 'bids':
-                        ret[itr*nAgents + idx,:] = agent.bid(pricePrediction = pricePrediction)
+                    if retType == 'bids':
+                        
+                        ret[itr, agentIdx, :] = agent.bid(pricePrediction = pricePrediction)
+                        
                         if verbose:
-                            print "agent[{0}].bid   = {1}".format(idx,ret[itr*nAgents + idx,:])
+                            print "agent[{0}].bid   = {1}".format(agentIdx,ret[itr,agentIdx,:])
                     
-                    elif retType is 'firstPrice' or retType is 'hob':
-                        gameBids[idx,:] = agent.bid(pricePrediction = pricePrediction)
+                    elif retType == 'firstPrice' or retType == 'secondPrice' or retType == 'hob':
+                        gameBids[agentIdx,:] = agent.bid(pricePrediction = pricePrediction)
+                        
                         if verbose:
-                            print "agent[{0}].bid   = {1}".format(idx,gameBids[idx,:])
+                            print "agent[{0}].bid   = {1}".format(agentIdx,gameBids[agentIdx,:])
                         
             #for this game iteration collect stats
-            if retType is 'firstPrice':
-                ret[idx,:] = highestBids(gameBids)
-            elif retType is 'hob':
-                ret[idx,:] = highestOtherBids(gameBids,selfIdx)
+            if retType == 'firstPrice':
+                ret[itr,:] = numpy.max(gameBids,0)
+                
+            elif retType == 'hob':
+                
+                ret[itr,:] = numpy.max( numpy.delete(gameBids,selfIdx,0), 0 )
+                
+            elif retType == 'secondPrice':
+                for goodIdx in xrange(gameBids.shape[1]):
+                    goodBids = gameBids[:,m]
+                    goodArgMax = numpy.argmax(goodBids)
+                    ret[itr,goodIdx] = numpy.max(numpy.delete(goodBids,goodArgMax))
+                
                     
     return ret
