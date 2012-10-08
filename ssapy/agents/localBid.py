@@ -2,18 +2,20 @@
 An agent to bid local marginal revenue given a joint distribution
 """
 
-from margDistPredictionAgent import margDistPredictionAgent
-from agentFactory import agentFactory
-
-#from straightMU import straightMU8,straightMU64, straightMU256
-#from targetMU import targetMU8, targetMU64, targetMU256
-#from targetMUS import targetMUS8, targetMUS64, targetMUS256
-#from averageMU import averageMU8, averageMU64, averageMU256
+from ssapy.agents.margDistPredictionAgent import margDistPredictionAgent
+import ssapy.agents.agentFactory
 
 import numpy
 import matplotlib.pyplot as plt
 
 class localBid(margDistPredictionAgent):
+    def __init__(self,**kwargs):
+        #put import in init to avoid circlular imports when
+        #agentFactory imports localbid
+        from ssapy.agents.agentFactory import agentFactory
+        
+        super(localBid, self).__init__(**kwargs)
+        
     @staticmethod
     def type():
         return "localBid"
@@ -24,15 +26,15 @@ class localBid(margDistPredictionAgent):
         
         bundles = kwargs.get('bundles')
         if bundles == None:
-            raise KeyError("targetMU.SS(...) - must specify bundles")
+            raise KeyError("localBid.SS(...) - must specify bundles")
                 
         valuation = kwargs.get('valuation')
         if valuation == None:
-            raise KeyError("targetMU - must specify valuation")
+            raise KeyError("localBid.SS(...) - must specify valuation")
         
         l = kwargs.get('l')
         if l == None:
-            raise KeyError("targetMU - must specify l (target number of time slots)")
+            raise KeyError("localBid.SS(...) - must specify l (target number of time slots)")
         
         samples = kwargs.get('samples')
         
@@ -44,7 +46,7 @@ class localBid(margDistPredictionAgent):
             pricePrediction = kwargs.get('pricePrediction')
         
             if pricePrediction == None:
-                raise KeyError("targetMU.SS(...) - must specify pricePrediction")
+                raise KeyError("localBid.SS(...) - must specify pricePrediction")
         
             nSamples = kwargs.get('nSamples', 10000)
             
@@ -53,8 +55,11 @@ class localBid(margDistPredictionAgent):
         n_itr = kwargs.get('n_itr', 100)
             
         initialBidderType = kwargs.get('initialBidder','straightMU8')
-            
-        initialBidder = agentFactory(agentType = initialBidderType,m = bundles.shape[1])
+        
+        
+        #to avoid circular import (NameError exception)
+        initialBidder = ssapy.agents.agentFactory.agentFactory(agentType = initialBidderType,
+                                                               m = bundles.shape[1])
             
         bids = initialBidder.SS(pricePrediction = pricePrediction,
                                 bundles = bundles,

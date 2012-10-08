@@ -1,9 +1,9 @@
 """
 An agent to bid local conditional marginal revenue given a joint distribution
 """
-
+import ssapy.agents.agentFactory
 from margDistPredictionAgent import margDistPredictionAgent
-from agentFactory import agentFactory
+
 import matplotlib.pyplot as plt
 
 import numpy
@@ -17,15 +17,15 @@ class condLocalBid(margDistPredictionAgent):
     def SS(**kwargs):
         bundles = kwargs.get('bundles')
         if bundles == None:
-            raise KeyError("targetMU.SS(...) - must specify bundles")
+            raise KeyError("condLocalBid.SS(...) - must specify bundles")
                 
         valuation = kwargs.get('valuation')
         if valuation == None:
-            raise KeyError("targetMU - must specify valuation")
+            raise KeyError("condLocalBid.SS(...) - must specify valuation")
         
         l = kwargs.get('l')
         if l == None:
-            raise KeyError("targetMU - must specify l (target number of time slots)")
+            raise KeyError("condLocalBid.SS(...) - must specify l (target number of time slots)")
         
         samples = kwargs.get('samples')
         
@@ -34,7 +34,7 @@ class condLocalBid(margDistPredictionAgent):
             pricePrediction = kwargs.get('pricePrediction')
         
             if pricePrediction == None:
-                raise KeyError("targetMU.SS(...) - must specify pricePrediction")
+                raise KeyError("condLocalBid.SS(...) - must specify pricePrediction")
         
             nSamples = kwargs.get('nSamples', 10000)
             
@@ -42,7 +42,7 @@ class condLocalBid(margDistPredictionAgent):
             
             initialBidderType = kwargs.get('initialBidder','straightMU8')
             
-            initialBidder = agentFactory(agentType = initialBidderType,m = bundles.shape[1])
+            initialBidder = ssapy.agents.agentFactory.agentFactory(agentType = initialBidderType,m = bundles.shape[1])
             
             bids = initialBidder.SS(pricePrediction = pricePrediction,
                                     bundles = bundles,
