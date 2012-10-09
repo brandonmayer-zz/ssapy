@@ -50,6 +50,11 @@ def jointGaussScppHob(**kwargs):
         raise ValueError("Must provide output Directory")
     oDir = os.path.realpath(oDir)
     
+    # we will append file hence remove if exists.
+    kldFile = os.path.join(oDir,'kld.txt')
+    if os.path.exists(kldFile):
+        os.remove(kldFile)
+    
     if verbose:
         print 'oDir         = {0}'.format(oDir)
         print 'agentType    = {0}'.format(agentType)
@@ -185,17 +190,20 @@ def jointGaussScppHob(**kwargs):
                 clfCurr.pltMargDist(oFile = of, title = title, ylabel = r'$p(q)$', xlabel = r'$q$')
                                        
             if klList:
-                print klList
+                if verbose:
+                    print 'Appending kl.txt with {0}'.format(klList[-1])
+                with open(kldFile,'a') as f:
+                    f.write("{0}\n".format(klList[-1]))
+                    
                 if numpy.abs(klList[-1]) < tol:
                     break
                 
             clfPrev = copy.deepcopy(clfCurr)
             
-        if klList:
-            klFile = os.path.join(oDir,'kld.txt')
-            numpy.savetxt(klFile, numpy.asarray(klList))
+#        if klList:
+#            klFile = os.path.join(oDir,'kld.txt')
+#            numpy.savetxt(klFile, numpy.asarray(klList))
             
-            if verbose:
-                
-                print '|kld| = {0} < tol = {1}'.format(numpy.abs(klList[-1]),tol)
-                print 'DONE - Iteration = {0}'.format(itr)
+        if verbose:
+            print '|kld| = {0} < tol = {1}'.format(numpy.abs(klList[-1]),tol)
+            print 'DONE - Iteration = {0}'.format(itr)
