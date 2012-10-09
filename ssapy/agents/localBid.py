@@ -176,7 +176,7 @@ class localBid(margDistPredictionAgent):
                     
                     plt.show()
             
-            if numpy.dot(prevBid - bids,prevBid - bids) <= 1e-8:
+            if numpy.dot(prevBid - bids,prevBid - bids) <= tol:
                 if verbose:
                     print ''
                     print 'localBid terminated.'
