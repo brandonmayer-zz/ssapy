@@ -20,11 +20,11 @@ class jointGMM(sklearn.mixture.GMM):
         
 #        self.gmm             = None
 
-        super(jointGMM,self).__init__(n_components = kwargs.get('n_components',1),
+        super(jointGMM,self).__init__(n_components    = kwargs.get('n_components',1),
                                       covariance_type = kwargs.get('covariance_type','full'),
                                       random_state    = kwargs.get('random_state',None),
                                       min_covar       = kwargs.get('min_covar',1e-3),
-                                      n_iter           = kwargs.get('n_iter',100),
+                                      n_iter          = kwargs.get('n_iter',100),
                                       n_init          = kwargs.get('n_init',1),
                                       params          = kwargs.get('params','wmc'),
                                       init_params     = kwargs.get('init_params','wmc') )
@@ -61,13 +61,13 @@ class jointGMM(sklearn.mixture.GMM):
         #accept new mixture model params as arguments
         #and store on instance
         covariance_type = kwargs.get('covariance_type', 'full')
-        random_state    = kwargs.get('random_state',self.random_state)
-        thresh          = kwargs.get('thresh',self.thresh)
-        min_covar       = kwargs.get('min_covar', self.min_covar)
-        n_iter          = kwargs.get('n_itr',self.n_iter)
-        n_init          = kwargs.get('n_init',self.n_init)
-        params          = kwargs.get('params',self.params)
-        init_params     = kwargs.get('init_params',self.init_params)
+        random_state    = kwargs.get('random_state' ,None)
+        thresh          = kwargs.get('thresh',1e-2)
+        min_covar       = kwargs.get('min_covar', 1e-3)
+        n_iter          = kwargs.get('n_itr',100)
+        n_init          = kwargs.get('n_init',1)
+        params          = kwargs.get('params','wmc')
+        init_params     = kwargs.get('init_params','wmc')
     
         verbose         = kwargs.get('verbose',True)
         
