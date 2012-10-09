@@ -217,30 +217,39 @@ class jointGMM(sklearn.mixture.GMM):
         
         return (w,m,v)
     
-    def margCdf(self,**kwargs):
-        x = kwargs.get('x')
-        if x == None:
-            raise ValueError("In jointGmm.margCdf(...)\n" +\
-                             "Must specify data to compute marg cdf.")
+    def margCdf(self, x, margIdx):
+        
+        if isinstance(margIdx,int):
             
-        margIdx = kwargs.get('margIdx')
-        if margIdx == None:
-            raise ValueError("In jointGmm.margParams(...)\n" +\
-                              "Must specify margIdx")
+            if margIdx > self.means_.shape[0]:
+                raise ValueError("In jointGmm.margParams(...)\n" +\
+                                 "margIdx = {0} > self.means_.shape[1] = {1}".format(margIdx,self.means_.shape[1]))
+            cdf = numpy.float(0.0)
+            for (w,mean,cov) in zip(self.weights_, self.means_, self.covars_):
+                cdf += w*norm.cdf(x, loc = mean[margIdx], scale = numpy.sqrt(cov[margIdx, margIdx]))
+                
+            if cdf > 1.0:
+                raise ValueError("In jointGmm.margCdf(...)\n" +\
+                                 "cdf = {0} > 1.0".format(cdf))
+            elif cdf < 0.0:
+                raise ValueError("In jointGmm.margCdf(...)\n" +\
+                                 "cdf ={0} < 0.0".format(cdf))
+        elif isinstance(margIdx,list):
             
-        if margIdx > self.means_.shape[0]:
-            raise ValueError("In jointGmm.margParams(...)\n" +\
-                             "margIdx = {0} > self.means_.shape[1] = {2}".format(margIdx,self.means_.shape[1]))
-        cdf = numpy.float(0.0)
-        for (w,mean,cov) in zip(self.weights_, self.means_, self.covars_):
-            cdf += w*norm.cdf(x, loc = mean[margIdx], scale = numpy.sqrt(cov[margIdx, margIdx]))
+            cdf = numpy.zeros(len(margIdx))
             
-        if cdf > 1.0:
-            raise ValueError("In jointGmm.margCdf(...)\n" +\
-                             "cdf > 1.0")
-        elif cdf < 0.0:
-            raise ValueError("In jointGmm.margCdf(...)\n" +\
-                             "cdf < 0.0")
+            for (w,mean,cov) in zip(self.weights_, self.means_, self.covars_):
+                for idx in margIdx:
+                    cdf[idx] += w*norm.cdf(x, loc = mean[margIdx], scale = numpy.sqrt(cov[margIdx,margIdx]))
+                
             
+            if numpy.any(cdf > 1.0):
+                raise ValueError("In jointGmm.margCdf(...)\n" +\
+                                 "cdf = {0} > 1.0".format(cdf))
+                
+            elif numpy.any(cdf < 0.0):
+                raise ValueError("In jointGmm.margCdf(...)\n" +\
+                                 "cdf ={0} < 0.0".format(cdf))
+                
         return cdf
         

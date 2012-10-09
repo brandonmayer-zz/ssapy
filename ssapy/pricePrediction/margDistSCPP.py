@@ -383,6 +383,45 @@ class margDistSCPP(pointSCPP):
             cdfBid[i] = f(bids[i])
             
         return cdfBid
+    
+    def margCdf(self, x, good):
+        
+        if isinstance(good,int):
+            hist,binEdges = self.data[good]
+            
+            p = hist / numpy.float(numpy.dot(hist, numpy.diff(binEdges)))
+            
+            cdf = numpy.cumsum(p*numpy.diff(binEdges), dtype=numpy.float)
+            
+            if cdf > 1.0:
+                raise ValueError("margDistScpp.margCdf\n" +\
+                                 "cdf = {0} > 1.0".format(cdf))
+            elif cdf < 0.0:
+                raise ValueError("margDistScpp.margCdf\n" +\
+                                 "cdf = {0} < 0.0".format(cdf))
+                
+        elif isinstance(good,list):
+            cdf = numpy.zeros(len(good))
+            
+            for i, g in enumerate(good):
+                
+                hist, binEdges = self.data[g]
+                
+                p = hist / numpy.float(numpy.dot(hist, numpy.diff(binEdges)))
+            
+                cdf[i] = numpy.cumsum(p*numpy.diff(binEdges), dtype=numpy.float)
+                
+                if cdf[i] > 1.0:
+                    raise ValueError("margDistScpp.margCdf\n" +\
+                                     "cdf = {0} > 1.0".format(cdf[i]))
+                elif cdf[i] < 0.0:
+                    raise ValueError("margDistScpp.margCdf\n" +\
+                                     "cdf = {0} < 0.0".format(cdf[i]))
+                    
+                
+            
+        
+        return cdf
             
     def iTsample(self, **kwargs):
         """

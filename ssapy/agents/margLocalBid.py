@@ -1,6 +1,9 @@
 from ssapy.agents.margDistPredictionAgent import margDistPredictionAgent
 from ssapy.pricePrediction.jointGMM import jointGMM
+from ssapy.pricePrediction.margDistSCPP import margDistSCPP
 import ssapy.agents.agentFactory
+
+from scipy.stats import norm
 
 import numpy
 import matplotlib.pyplot as plt
@@ -65,6 +68,15 @@ class margLocalBid(margDistPredictionAgent):
         
         if viz:
             bidList.append(bids)
+            
+        #precompute cdfs
+        cdf = []
+        if isinstance(pricePrediction,margDistSCPP):
+            for hist,binEdges in pricePrediction.data:
+                p = hist / numpy.float(numpy.dot(hist, numpy.diff(binEdges)))
+            
+                cdf.append((numpy.cumsum(p*numpy.diff(binEdges), dtype=numpy.float),binEdges))
+                
         
         for itr in xrange(n_itr):
             if verbose:
@@ -75,53 +87,57 @@ class margLocalBid(margDistPredictionAgent):
             for bidIdx in xrange(bids.shape[0]):
                 
                 newBid = 0.0
+                posTarget = bundles[bundles[:,bidIdx] == True]
+                negTarget = posTarget
+                negTarget[:,bidIdx] = False
+                otherGoods = numpy.delete(numpy.arange(bids.shape[0]),bidIdx)
                 
-                for posBundle in bundles[bundles[:,bidIdx] == True]:
-                    negBundle = posBundle.copy()
-                    negBundle[bidIdx] = False
+                for posBundle,negBundle in zip(posTarget,negTarget):
+
                     
                     v1 = bundleValueDict[tuple(posBundle)]
                     v0 = bundleValueDict[tuple(negBundle)]
                     
-                    otherGoods = numpy.delete(numpy.arange(bids.shape[0]),bidIdx)
-                    
-                    p = 1.0
-                    for og in otherGoods:
-                        
-                        if isinstance(pricePrediction, jointGMM):
+                    if isinstance(pricePrediction, jointGMM):
+                        p = 1.0
+                        for og in otherGoods:
                             if posBundle[og] == True:
                                 p *= pricePrediction.margCdf(x = bids[og], margIdx = og)
                             else:
                                 p *= (1- pricePrediction.margCdf(x = bids[og], margIdx = og))
-                                
+                                    
+                    elif isinstance(pricePrediction, margDistSCPP):
+                        cdf = pricePrediction.bidCdf(bids,interp='zero')
+                        p = numpy.prod(cdf[otherGoods])
+                                    
                     newBid += (v1 - v0)*p
                     
                 bids[bidIdx] = newBid
                 
+            if verbose:
+                print ''
+                print 'Iteration = {0}'.format(itr)
+                print 'prevBid   = {0}'.format(prevBid)
+                print 'newBid    = {0}'.format(bids)
+            
+            if viz:
+                bidList.append(bids)
+                plt.plot(bidList[:-1],'bo',markerfacecolor=None)
+                plt.plot(bidList[-1],'ro')
+                plt.show()
+                    
+            if numpy.dot(prevBid - bids,prevBid - bids) <= tol:
                 if verbose:
                     print ''
-                    print 'Iteration = {0}'.format(itr)
-                    print 'prevBid   = {0}'.format(prevBid)
-                    print 'newBid    = {0}'.format(bids)
-                
-                if viz:
-                    bidList.append(bids)
-                    plt.plot(bidList[:-1],'bo',markerfacecolor=None)
-                    plt.plot(bidList[-1],'ro')
-                    plt.show()
-                    
-                if numpy.dot(prevBid - bids,prevBid - bids) <= tol:
-                    if verbose:
-                        print ''
-                        print 'localBid terminated.'
-                        print 'prevBid = {0}'.format(prevBid)
-                        print 'bids    = {0}'.format(bids)
-                        print 'sse     = {0}'.format(numpy.dot(prevBid - bids,prevBid - bids))
-                    break
+                    print 'localBid terminated.'
+                    print 'prevBid = {0}'.format(prevBid)
+                    print 'bids    = {0}'.format(bids)
+                    print 'sse     = {0}'.format(numpy.dot(prevBid - bids,prevBid - bids))
+                break
                 
                 
                 
-            return bids
+        return bids
                 
             
                      
