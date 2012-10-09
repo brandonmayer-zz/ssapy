@@ -6,6 +6,8 @@ from ssapy.pricePrediction.util import apprxJointGmmKL
 
 
 import numpy
+import matplotlib.pyplot as plt
+from matplotlib.ticker import FormatStrFormatter, MultipleLocator
 
 import os
 import multiprocessing
@@ -43,6 +45,8 @@ def jointGaussScppHob(**kwargs):
     
     pltSurf      = kwargs.get('pltSurf',False)
     pltMarg      = kwargs.get('pltMarg',False)
+    
+    pltKld       = kwargs.get('pltKld',True)
     
     saveComp     = kwargs.get('saveComp',True)
     
@@ -188,6 +192,23 @@ def jointGaussScppHob(**kwargs):
                     title = "Marginal Distribution of Joint SCPP {0}".format(agentType,itr)
                 
                 clfCurr.pltMargDist(oFile = of, title = title, ylabel = r'$p(q)$', xlabel = r'$q$')
+                
+            if pltKld:
+                of = os.path.join(oDir,'kld.png')
+                
+                if verbose:
+                    print 'plotting K-L Divergence'
+                    
+                plt.figure()
+                ax = plt.subplot(111)
+                ax.plot(range(len(klList)),numpy.abs(klList),'r-')
+                ax.set_xlabel('Iteration')
+                ax.set_ylabel('K-L Divergence')
+                ax.set_title('Joint GMM SCPP {0}'.format(agentType))
+                ax.xaxis.set_major_locator(MultipleLocator(1.0))
+                ax.xaxis.set_major_formatter(FormatStrFormatter('%i'))
+
+                plt.savefig(of)
                                        
             if klList:
                 if verbose:
