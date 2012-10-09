@@ -55,6 +55,8 @@ def jointGaussScppHob(**kwargs):
     if oDir is None:
         raise ValueError("Must provide output Directory")
     oDir = os.path.realpath(oDir)
+    if not os.path.exists(oDir):
+        os.makedirs(oDir)
     
     # we will append file hence remove if exists.
     kldFile = os.path.join(oDir,'kld.txt')
