@@ -29,6 +29,10 @@ class condLocalBid(margDistPredictionAgent):
         
         samples = kwargs.get('samples')
         
+        n_itr    = kwargs.get('n_itr', 100)
+        
+        tol = kwargs.get('tol',1e-8)
+        
         if samples is None:
             
             pricePrediction = kwargs.get('pricePrediction')
@@ -37,8 +41,6 @@ class condLocalBid(margDistPredictionAgent):
                 raise KeyError("condLocalBid.SS(...) - must specify pricePrediction")
         
             nSamples = kwargs.get('nSamples', 10000)
-            
-            n_itr    = kwargs.get('n_itr', 100)
             
             initialBidderType = kwargs.get('initialBidder','straightMU8')
             
@@ -173,7 +175,7 @@ class condLocalBid(margDistPredictionAgent):
                     
                     plt.show()
                     
-            if numpy.dot(prevBid - bids, prevBid - bids) <= 1e-8:
+            if numpy.dot(prevBid - bids, prevBid - bids) <= tol:
                 if verbose:
                     print ''
                     print 'condlocalBid terminated.'
