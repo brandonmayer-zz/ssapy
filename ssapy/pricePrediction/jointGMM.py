@@ -23,7 +23,7 @@ class jointGMM(sklearn.mixture.GMM):
         super(jointGMM,self).__init__(n_components    = kwargs.get('n_components',1),
                                       covariance_type = kwargs.get('covariance_type','full'),
                                       random_state    = kwargs.get('random_state',None),
-                                      thesh           = kwargs.get('thresh', 1e-2),
+                                      thresh           = kwargs.get('thresh', 1e-2),
                                       min_covar       = kwargs.get('min_covar',1e-3),
                                       n_iter          = kwargs.get('n_iter',100),
                                       n_init          = kwargs.get('n_init',1),
