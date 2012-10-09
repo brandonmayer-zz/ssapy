@@ -200,10 +200,6 @@ def jointGaussScppHob(**kwargs):
                 
             clfPrev = copy.deepcopy(clfCurr)
             
-#        if klList:
-#            klFile = os.path.join(oDir,'kld.txt')
-#            numpy.savetxt(klFile, numpy.asarray(klList))
-            
         if verbose:
             print '|kld| = {0} < tol = {1}'.format(numpy.abs(klList[-1]),tol)
             print 'DONE - Iteration = {0}'.format(itr)
