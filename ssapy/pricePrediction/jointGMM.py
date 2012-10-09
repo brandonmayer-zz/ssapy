@@ -201,5 +201,46 @@ class jointGMM(sklearn.mixture.GMM):
             print 'Cannot plot joint distribution surface with dimension greater than 2.'
             
 
+    def margParams(self,**kwargs):
+        margIdx = kwargs.get('margIdx')
+        if margIdx == None:
+            raise ValueError("In jointGmm.margParams(...)\n" +\
+                              "Must specify margIdx")
+            
+        if margIdx > self.means_.shape[0]:
+            raise ValueError("In jointGmm.margParams(...)\n" +\
+                             "margIdx = {0} > self.means_.shape[1] = {2}".format(margIdx,self.means_.shape[1]))
         
+        w = self.weights_
+        m = [mean[margIdx] for mean in self.means_]
+        v = [var[margIdx,margIdx] for var in self.covars_]
+        
+        return (w,m,v)
+    
+    def margCdf(self,**kwargs):
+        x = kwargs.get('x')
+        if x == None:
+            raise ValueError("In jointGmm.margCdf(...)\n" +\
+                             "Must specify data to compute marg cdf.")
+            
+        margIdx = kwargs.get('margIdx')
+        if margIdx == None:
+            raise ValueError("In jointGmm.margParams(...)\n" +\
+                              "Must specify margIdx")
+            
+        if margIdx > self.means_.shape[0]:
+            raise ValueError("In jointGmm.margParams(...)\n" +\
+                             "margIdx = {0} > self.means_.shape[1] = {2}".format(margIdx,self.means_.shape[1]))
+        cdf = numpy.float(0.0)
+        for (w,mean,cov) in zip(self.weights_, self.means_, self.covars_):
+            cdf += w*norm.cdf(x, loc = mean[margIdx], scale = numpy.sqrt(cov[margIdx, margIdx]))
+            
+        if cdf > 1.0:
+            raise ValueError("In jointGmm.margCdf(...)\n" +\
+                             "cdf > 1.0")
+        elif cdf < 0.0:
+            raise ValueError("In jointGmm.margCdf(...)\n" +\
+                             "cdf < 0.0")
+            
+        return cdf
         
