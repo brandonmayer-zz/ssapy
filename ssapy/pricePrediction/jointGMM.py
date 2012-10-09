@@ -60,7 +60,7 @@ class jointGMM(sklearn.mixture.GMM):
         
         #accept new mixture model params as arguments
         #and store on instance
-        self.covariance_type = kwargs.get('covariance_type', self.covariance_type)
+        covariance_type = kwargs.get('covariance_type', 'full')
         self.random_state    = kwargs.get('random_state',self.random_state)
         self.thresh          = kwargs.get('thresh',self.thresh)
         self.min_covar       = kwargs.get('min_covar', self.min_covar)
@@ -78,7 +78,7 @@ class jointGMM(sklearn.mixture.GMM):
             start = time.time()
             
         clfList = [sklearn.mixture.GMM(n_components    = c, 
-                                       covariance_type = self.covariance_type,
+                                       covariance_type = covariance_type,
                                        random_state    = self.random_state,
                                        min_covar       = self.min_covar,
                                        thresh          = self.thresh,
