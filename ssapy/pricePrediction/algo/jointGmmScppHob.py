@@ -14,6 +14,7 @@ import multiprocessing
 import pickle
 import glob
 import copy
+import time
 
 def jointGaussScppHob(**kwargs):
     oDir         = kwargs.get('oDir')
@@ -49,6 +50,7 @@ def jointGaussScppHob(**kwargs):
     pltKld       = kwargs.get('pltKld',True)
     
     saveComp     = kwargs.get('saveComp',True)
+    saveTime     = kwargs.get('saveTime',True)
     
     if oDir is None:
         raise ValueError("Must provide output Directory")
@@ -111,6 +113,11 @@ def jointGaussScppHob(**kwargs):
             compFile = os.path.join(oDir,'n_comp.txt')
             if os.path.exists(compFile):
                 os.remove(compFile)
+                
+        if saveTime:
+            timeFile = os.path.join(oDir,'time.txt')
+            if os.path.exists(timeFile):
+                os.remove(timeFile)
     
         clfCurr = jointGMM(minPrice = minPrice, maxPrice = maxPrice)
         clfPrev = None
@@ -132,6 +139,9 @@ def jointGaussScppHob(**kwargs):
             else:
                 pricePrediction = clfCurr
             
+            if verbose or saveTime:
+                start = time.time()
+                
             hob = simulateAuction( agentType       = agentType,
                                    pricePrediction = pricePrediction,
                                    nAgents         = nAgents,
@@ -144,6 +154,16 @@ def jointGaussScppHob(**kwargs):
                                    retType         = 'hob',
                                    selfIdx         = selfIdx,
                                    verbose         = verbose )
+            
+            if verbose or saveTime:
+                end = time.time()
+                
+            if verbose:
+                print 'Simulated {0} auctions in {1} seconds.'.format(nGames, end-start)
+                
+            if saveTime:
+                with open(timeFile,'a') as f:
+                    f.write("{0}\n".format(end-start))
             
             clfCurr.aicFit(X = hob, 
                            compRange = range(aicCompMin, aicCompMax),
