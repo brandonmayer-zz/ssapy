@@ -7,6 +7,7 @@ from ssapy.agents.riskAware import riskEvaluator8, riskEvaluator64, riskAwareTMU
 from ssapy.agents.averageMU import averageMU, averageMU8, averageMU64, averageMU256
 from ssapy.agents.localBid import localBid
 from ssapy.agents.condLocalBid import condLocalBid
+from ssapy.agents.margLocalBid import margLocalBid
 
 def agentFactory(**kwargs):
     agentType = kwargs.get('agentType')
@@ -75,6 +76,8 @@ def agentFactory(**kwargs):
         agent = localBid(m = m, vmin = vmin, vmax = vmax)
     elif agentType == "condLocalBid":
         agent = condLocalBid(m = m, vmin = vmin, vmax = vmax)
+    elif agentType == "margLocalBid":
+        agent = margLocalBid(m = m,vmin = vmin, vmax = vmax)
     else:
         raise ValueError("{0} not defined in agentFactory".format(agentType))
 
