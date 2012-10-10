@@ -114,7 +114,11 @@ class margLocalBid(margDistPredictionAgent):
 
                         p = 1.0
                         for og in otherGoods:
-                            if posBundle[og] == True:
+                            if bids[bidIdx] > pricePrediction.data[bidIdx][1][-1]:
+                                pass
+                            elif bids[bidIdx] < pricePrediction.data[bidIdx][1][-1]:
+                                p *= 1e-5
+                            elif posBundle[og] == True:
                                 p*=cdf[og](bids[bidIdx])
                             else:
                                 p*=1-cdf[og](bids[bidIdx])
