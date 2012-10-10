@@ -197,7 +197,15 @@ def yw2Hob(**kwargs):
             newDist.graphPdfToFile(fname = of, title = title, xlabel = xlabel, ylabel = ylabel)
                 
         if klList[-1] < tol or t == (maxItr - 1):
+            
+            if verbose:
+                print 'kld = {0} < tol = {1}'.format(klList[-1],tol)
+                
             if pltKld:
+                
+                if verbose:
+                    print 'Plotting K-L Divergence vs. Iteration.'
+                    
                 klPdf = os.path.join(oDir,'kld.pdf')
                 plt.figure()
                 plt.plot(range(len(klList)), klList)
@@ -209,6 +217,10 @@ def yw2Hob(**kwargs):
                 plt.close()
             
             if pltKs:
+                
+                if verbose:
+                    print 'Plotting K-S Stat vs. Iteration'
+                
                 ksPdf = os.path.join(oDir,'ks.pdf')
                 plt.figure()
                 plt.plot(range(len(ksList)), ksList)
@@ -218,6 +230,11 @@ def yw2Hob(**kwargs):
                 plt.title('Marginal SCPP {0}'.format(agentType))
                 plt.savefig(ksPdf)
                 plt.close()
+                
+            
+            if verbose:
+                print 'DONE!!!!!'
+            
             break
         else:
             if verbose:
