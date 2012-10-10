@@ -84,7 +84,12 @@ def main():
         
     args['tol'] = numpy.float(args.get('tol'))
     
-    args['pltMarg'] = bool(args.get('pltMarg'))
+    args['parallel'] = bool(args.get('parallel'))
+    args['dampen']   = bool(args.get('dampen'))
+    args['pltMarg']  = bool(args.get('pltMarg'))
+    args['pltKld']   = bool(args.get('pltKld'))
+    args['pltKs']    = bool(args.get('pltKs'))
+    args['verbose']  = bool(args.get('verbose'))
     
     yw2Hob(**args)
 
