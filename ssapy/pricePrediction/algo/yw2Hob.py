@@ -45,6 +45,7 @@ def yw2Hob(**kwargs):
     saveTime     = kwargs.get('saveTime',True)
     pltMarg      = kwargs.get('pltMarg',False)    
     pltKld       = kwargs.get('pltKld',True)
+    pltKs        = kwargs.get('pltKs',True)
     verbose      = kwargs.get('verbose',True)
     
     if verbose:
@@ -69,6 +70,7 @@ def yw2Hob(**kwargs):
         print 'saveTime     = {0}'.format(saveTime)
         print 'pltMarg      = {0}'.format(pltMarg)
         print 'pltKld       = {0}'.format(pltKld)
+        print 'pltKs        = {0}'.format(pltKs)
     
     if savePkl:
         pklDir = os.path.join(oDir, 'gmmPkl')
@@ -195,22 +197,27 @@ def yw2Hob(**kwargs):
             newDist.graphPdfToFile(fname = of, title = title, xlabel = xlabel, ylabel = ylabel)
                 
         if klList[-1] < tol or t == (maxItr - 1):
-            klPdf = os.path.join(oDir,'kld.pdf')
-            plt.figure()
-            plt.plot(range(len(klList)), klList)
-            plt.xlim((0,maxItr))
-            plt.ylabel('K-L Divergence')
-            plt.xlabel('Iteration')
-            plt.title('Marginal SCPP {0}'.format(agentType))
-            plt.close()
+            if pltKld:
+                klPdf = os.path.join(oDir,'kld.pdf')
+                plt.figure()
+                plt.plot(range(len(klList)), klList)
+                plt.xlim((0,maxItr))
+                plt.ylabel('K-L Divergence')
+                plt.xlabel('Iteration')
+                plt.title('Marginal SCPP {0}'.format(agentType))
+                plt.savefig(klPdf)
+                plt.close()
             
-            plt.figure()
-            plt.plot(range(len(ksList)), ksList)
-            plt.xlim((0,maxItr))
-            plt.ylabel('K-S Statistic')
-            plt.xlabel('Iteration')
-            plt.title('Marginal SCPP {0}'.format(agentType))
-            plt.close()
+            if pltKs:
+                ksPdf = os.path.join(oDir,'ks.pdf')
+                plt.figure()
+                plt.plot(range(len(ksList)), ksList)
+                plt.xlim((0,maxItr))
+                plt.ylabel('K-S Statistic')
+                plt.xlabel('Iteration')
+                plt.title('Marginal SCPP {0}'.format(agentType))
+                plt.savefig(ksPdf)
+                plt.close()
             break
         else:
             if verbose:
