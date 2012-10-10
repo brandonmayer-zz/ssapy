@@ -536,7 +536,7 @@ class margDistSCPP(pointSCPP):
         ax = fig.add_subplot(111)
         
         for i in xrange(len(self.data)):
-            ax.plot(.5*(self.data[i][1][:-1]+self.data[i][1][1:]),self.data[i][0],c=colorStyles[i],label='Slot {0}'.format(i))
+            ax.plot(.5*(self.data[i][1][:-1]+self.data[i][1][1:]),self.data[i][0],c=colorStyles[i],label='Good {0}'.format(i))
             
         if 'xlabel' in kwargs:
             plt.xlabel(kwargs['xlabel'])

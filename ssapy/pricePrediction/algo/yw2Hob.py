@@ -184,7 +184,7 @@ def yw2Hob(**kwargs):
             title = 'Marginal SCPP {0}'.format(agentType)
             xlabel = r'$q$'
             ylabel = r'$p(q)$'
-            newDist.graphPdfToFile(fname = of)
+            newDist.graphPdfToFile(fname = of, title = title, xlable = xlabel, ylabel = ylabel)
                 
         if klList[-1] < tol or t == (maxItr - 1):
             klPdf = os.path.join(oDir,'kld.pdf')
