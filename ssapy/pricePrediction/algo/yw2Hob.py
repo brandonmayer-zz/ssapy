@@ -166,10 +166,18 @@ def yw2Hob(**kwargs):
         newDist = margDistSCPP(histData)
         
         klList.append( klDiv(currentDist, newDist) )
+        
+        if verbose:
+            print 'kld = {0}'.format(klList[-1])
+            
         with open(klFile,'a') as f:
             f.write("{0}\n".format(klList[-1]))
         
         ksList.append( ksStat(currentDist,newDist) )
+        
+        if verbose:
+            print 'kls = {0}'.format(ksList[-1])
+            
         with open(ksFile,'a') as f:
             f.write("{0}\n".format(ksList[-1]))
         
