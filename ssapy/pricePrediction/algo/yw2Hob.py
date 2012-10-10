@@ -199,7 +199,12 @@ def yw2Hob(**kwargs):
         if klList[-1] < tol or t == (maxItr - 1):
             
             if verbose:
-                print 'kld = {0} < tol = {1}'.format(klList[-1],tol)
+                print 'TERMINATED:'
+                if klList[-1] < tol:
+                    print '\tkld = {0} < tol = {1}'.format(klList[-1],tol)
+                else:
+                     
+                    print '\tt = {0}, maxItr = {1}'.format(t,maxItr)
                 
             if pltKld:
                 
