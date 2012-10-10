@@ -4,6 +4,7 @@ from ssapy.pricePrediction.margDistSCPP import margDistSCPP
 import ssapy.agents.agentFactory
 
 from scipy.stats import norm
+from scipy.interpolate import interp1d
 
 import numpy
 import matplotlib.pyplot as plt
@@ -69,13 +70,14 @@ class margLocalBid(margDistPredictionAgent):
         if viz:
             bidList.append(bids)
             
-        #precompute cdfs
+        #precompute cdfs for speed
         cdf = []
         if isinstance(pricePrediction,margDistSCPP):
             for hist,binEdges in pricePrediction.data:
                 p = hist / numpy.float(numpy.dot(hist, numpy.diff(binEdges)))
-            
-                cdf.append((numpy.cumsum(p*numpy.diff(binEdges), dtype=numpy.float),binEdges))
+                c = numpy.cumsum(p*numpy.diff(binEdges),dtype=numpy.float)
+                f = interp1d(binEdges[:-1],c,'linear')
+                cdf.append(f)
                 
         
         for itr in xrange(n_itr):
@@ -87,13 +89,15 @@ class margLocalBid(margDistPredictionAgent):
             for bidIdx in xrange(bids.shape[0]):
                 
                 newBid = 0.0
-                posTarget = bundles[bundles[:,bidIdx] == True]
-                negTarget = posTarget
-                negTarget[:,bidIdx] = False
+#                posTarget = bundles[bundles[:,bidIdx] == True]
+#                negTarget = posTarget
+#                negTarget[:,bidIdx] = False
                 otherGoods = numpy.delete(numpy.arange(bids.shape[0]),bidIdx)
                 
-                for posBundle,negBundle in zip(posTarget,negTarget):
-
+#                for posBundle,negBundle in zip(posTarget,negTarget):
+                for posBundle in bundles[bundles[:,bidIdx] == True]:
+                    negBundle = posBundle.copy()
+                    negBundle[bidIdx] = False
                     
                     v1 = bundleValueDict[tuple(posBundle)]
                     v0 = bundleValueDict[tuple(negBundle)]
@@ -107,8 +111,13 @@ class margLocalBid(margDistPredictionAgent):
                                 p *= (1- pricePrediction.margCdf(x = bids[og], margIdx = og))
                                     
                     elif isinstance(pricePrediction, margDistSCPP):
-                        cdf = pricePrediction.bidCdf(bids,interp='zero')
-                        p = numpy.prod(cdf[otherGoods])
+
+                        p = 1.0
+                        for og in otherGoods:
+                            if posBundle[og] == True:
+                                p*=cdf[og](bids[bidIdx])
+                            else:
+                                p*=1-cdf[og](bids[bidIdx])
                                     
                     newBid += (v1 - v0)*p
                     
