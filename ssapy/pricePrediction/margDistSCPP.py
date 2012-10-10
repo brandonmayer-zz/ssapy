@@ -375,23 +375,34 @@ class margDistSCPP(pointSCPP):
         
         cdfBid = numpy.zeros(self.m)
         for i, margData in enumerate(self.data):
-            hist, binEdges = margData
-            cdf = numpy.cumsum( hist*numpy.diff(binEdges),
-                                dtype=numpy.float )
             
-            f = interp1d(binEdges[:-1], cdf, kind)
-            cdfBid[i] = f(bids[i])
+            hist, binEdges = margData
+            if bids[i] > binEdges[-1]:
+                cdfBid[i] = 1.0
+            elif bids[i] < binEdges[0]:
+                cdfBid[i] = 0.0
+            else:
+                cdf = numpy.cumsum( hist*numpy.diff(binEdges),
+                                    dtype=numpy.float )
+                
+                f = interp1d(binEdges[:-1], cdf, kind)
+                cdfBid[i] = f(bids[i])
             
         return cdfBid
     
-    def margCdf(self, x, good):
+    def margCdf(self, x, good, kind = 'linear'):
         
         if isinstance(good,int):
-            hist,binEdges = self.data[good]
             
+            hist,binEdges = self.data[good]
+                        
             p = hist / numpy.float(numpy.dot(hist, numpy.diff(binEdges)))
             
             cdf = numpy.cumsum(p*numpy.diff(binEdges), dtype=numpy.float)
+            
+            f = interp1d(binEdges[:-1], cdf, kind)
+            
+            cdf = f(x)
             
             if cdf > 1.0:
                 raise ValueError("margDistScpp.margCdf\n" +\
