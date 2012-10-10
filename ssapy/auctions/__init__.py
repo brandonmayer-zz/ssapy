@@ -5,6 +5,99 @@ from ssapy.agents.agentFactory import agentFactory
 import multiprocessing
 import numpy
 
+def simAuctionHelper(**kwargs):
+    agentType = kwargs.get('agentType')
+        
+    if isinstance(agentType,list):
+        nAgents = len(agentType)
+        
+    elif isinstance(agentType,str):
+        nAgents   = kwargs.get('nAgents',8)
+        agentType = [agentType]*nAgents
+    
+    nGames          = kwargs.get('nGames')
+        
+    pricePrediction = kwargs.get('pricePrediction')
+        
+    m            = kwargs.get('m',5)
+    minValuation = kwargs.get('minValuation',0)
+    maxValuation = kwargs.get('maxValuation',50)
+    
+    verbose      = kwargs.get('verbose', False)
+
+    retType      = kwargs.get('retType','bids')
+    
+    if retType == 'hob':
+        selfIdx  = kwargs.get('selfIdx')
+        if selfIdx == None:
+            raise ValueError("ERROR - simulateAuction(...):\n" + \
+                             "\t Must specify selfIdx when retType == 'hob'")
+            
+    if verbose:
+        print 'In simulateAuction(...)'
+        print 'agentType    = {0}'.format(agentType)
+        print 'nGames       = {0}'.format(nGames)
+        print 'm            = {0}'.format(m)
+        print 'minValuation = {0}'.format(minValuation)
+        print 'maxValuation = {0}'.format(maxValuation)
+        print 'retType      = {0}'.format(retType)
+        
+    if retType == 'bids':
+        ret = numpy.zeros((nGames,nAgents,m))
+    elif retType == 'firstPrice' or retType == 'hob':
+        ret = numpy.zeros((nGames,m))
+    else:
+        raise ValueError("simulateAuction - Unknown return type")
+    
+    agents = [agentFactory(agentType = atype, m = m, vmin = minValuation, vmax = maxValuation) for atype in agentType]
+    
+    for itr in xrange(nGames):
+        if verbose:
+            print 'running serial game {0}'.format(itr)
+                
+        if retType == 'firstPrice' or retType == 'secondPrice' or retType == 'hob':
+            gameBids = numpy.zeros((nAgents,m))   
+        
+        if isinstance(pricePrediction,list):  
+             
+            for agentIdx, agent, pp in zip(numpy.arange(nAgents),agents,pricePrediction):
+                
+                agent.randomValuation()     
+                    
+                if retType == 'bids':
+                    ret[itr, agentIdx, :] = agent.bid(pricePrediction = pp)
+                            
+                elif retType == 'firstPrice' or retType == 'secondPrice' or retType == 'hob':
+                    gameBids[agentIdx,:] = agent.bid(pricePrediction = pp)
+                    
+        else:
+            for agentIdx, agent in enumerate(agents):
+                
+                agent.randomValuation()
+                
+                if retType == 'bids':
+                    ret[itr, agentIdx, :] = agent.bid(pricePrediction = pricePrediction)
+                    
+                elif retType == 'firstPrice' or retType == 'secondPrice' or retType == 'hob':
+                        gameBids[agentIdx,:] = agent.bid(pricePrediction = pricePrediction)
+            
+        if retType == 'firstPrice':
+            ret[itr,:] = numpy.max(gameBids,0)
+            
+        elif retType == 'hob':
+            
+            ret[itr,:] = numpy.max( numpy.delete(gameBids,selfIdx,0), 0 )
+            
+        elif retType == 'secondPrice':
+            for goodIdx in xrange(gameBids.shape[1]):
+                goodBids = gameBids[:,m]
+                goodArgMax = numpy.argmax(goodBids)
+                ret[itr,goodIdx] = numpy.max(numpy.delete(goodBids,goodArgMax))
+            
+    return ret
+        
+        
+
 def simulateAuction(**kwargs):
     """
     Function to run an auction with specified participants, randomizing over valuation.
@@ -95,8 +188,6 @@ def simulateAuction(**kwargs):
             raise ValueError("ERROR - simulateAuction(...):\n" + \
                              "\t Must specify selfIdx when retType == 'hob'")
     
-    
-    
     if verbose:
         print 'In simulateAuction(...)'
         print 'agentType    = {0}'.format(agentType)
@@ -110,7 +201,7 @@ def simulateAuction(**kwargs):
         print 'retType      = {0}'.format(retType)
         
     
-    
+    ret = []
     if parallel:
         pool = multiprocessing.Pool(nProc)
         
@@ -131,9 +222,8 @@ def simulateAuction(**kwargs):
             subArgs['parallel'] = False
             subArgs['nGames'] = nGameList[p]
             subArgs['verbose'] = False
-            
-                            
-            results.append(pool.apply_async(simulateAuction, kwds = subArgs))
+                 
+            results.append(pool.apply_async(simAuctionHelper, kwds = subArgs))
 
         pool.close()
         pool.join()
@@ -145,81 +235,11 @@ def simulateAuction(**kwargs):
             else:                
                 ret = numpy.concatenate((ret,r.get()))
             r._value = []
+            
 
-        
+            
     else:
-        agents = [agentFactory(agentType = atype, m = m, vmin = minValuation, vmax = maxValuation) for atype in agentType]
+        ret = simAuctionHelper(**kwargs)
         
-        if retType == 'bids':
-            ret = numpy.zeros((nGames,nAgents,m))
-        elif retType == 'firstPrice' or retType == 'hob':
-            ret = numpy.zeros((nGames,m))
-        else:
-            raise ValueError("simulateAuction - Unknown return type")
-        
-        for itr in xrange(nGames):
+    return ret       
             
-            if verbose:
-                print 'running serial game {0}'.format(itr)
-                
-            if retType == 'firstPrice' or retType == 'secondPrice' or retType == 'hob':
-                gameBids = numpy.zeros((nAgents,m))   
-            
-            if isinstance(pricePrediction,list):
-                
-                for agentIdx, agent, pp in zip(numpy.arange(nAgents),agents,pricePrediction):
-                    agent.randomValuation()
-#                    if verbose:
-#                        print "agent[{0}].l        = {1}".format(agentIdx,agent.l)
-#                        print "agent[{0}].v        = {1}".format(agentIdx,agent.v)
-                    
-                    if retType == 'bids':
-                        ret[itr, agentIdx, :] = agent.bid(pricePrediction = pricePrediction)
-                        
-#                        if verbose:
-#                            print "agent[{0}].bid   = {1}".format(agentIdx,ret[itr,agentIdx,:])
-
-                    elif retType == 'firstPrice' or retType == 'secondPrice' or retType == 'hob':
-                        gameBids[agentIdx,:] = agent.bid(pricePrediction = pricePrediction)
-                        
-#                        if verbose:
-#                            print "agent[{0}].bid   = {1}".format(agentIdx, gameBids[agentIdx,:])
-                                            
-            else:
-                    
-                for agentIdx, agent in enumerate(agents):
-                    agent.randomValuation()
-                    
-#                    if verbose:
-#                        print "agent[{0}].l     = {1}".format(agentIdx,agent.l)
-#                        print "agent[{0}].v     = {1}".format(agentIdx,agent.v)
-                    
-                    if retType == 'bids':
-                        
-                        ret[itr, agentIdx, :] = agent.bid(pricePrediction = pricePrediction)
-                        
-#                        if verbose:
-#                            print "agent[{0}].bid   = {1}".format(agentIdx,ret[itr,agentIdx,:])
-                    
-                    elif retType == 'firstPrice' or retType == 'secondPrice' or retType == 'hob':
-                        gameBids[agentIdx,:] = agent.bid(pricePrediction = pricePrediction)
-                        
-#                        if verbose:
-#                            print "agent[{0}].bid   = {1}".format(agentIdx,gameBids[agentIdx,:])
-                        
-            #for this game iteration collect stats
-            if retType == 'firstPrice':
-                ret[itr,:] = numpy.max(gameBids,0)
-                
-            elif retType == 'hob':
-                
-                ret[itr,:] = numpy.max( numpy.delete(gameBids,selfIdx,0), 0 )
-                
-            elif retType == 'secondPrice':
-                for goodIdx in xrange(gameBids.shape[1]):
-                    goodBids = gameBids[:,m]
-                    goodArgMax = numpy.argmax(goodBids)
-                    ret[itr,goodIdx] = numpy.max(numpy.delete(goodBids,goodArgMax))
-                
-                    
-    return ret
