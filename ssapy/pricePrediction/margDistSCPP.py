@@ -523,7 +523,7 @@ class margDistSCPP(pointSCPP):
         plt.show()
                  
     def graphPdfToFile(self,**kwargs):
-        filename = kwargs.get('fname','./margDistSCPPplot.png')
+        filename = kwargs.get('fname')
         if 'colorStyles' in kwargs:
             numpy.testing.assert_(len(kwargs['colorStyles']), len(self.data))
             colorStyles = kwargs['colorStyles']
@@ -556,7 +556,12 @@ class margDistSCPP(pointSCPP):
         leg = ax.legend(loc='best',fancybox=True)
         leg.get_frame().set_alpha(0.5)
         
-        plt.savefig(filename)
+        if filename is None:
+            plt.show()
+        else:
+            plt.savefig(filename)
+            
+        plt.close()
         
     def savetxt(self,filename):
         with open(filename,'w') as f:
