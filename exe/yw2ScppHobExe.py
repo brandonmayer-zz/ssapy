@@ -53,7 +53,7 @@ def main():
     parser.add_argument('--dampen', action = 'store', dest = 'dampen', default = True, type = bool,
                         help = "Use Y-W dampening schedule.")
     
-    parser.add_argument('--parallel', action = 'store', dest = 'parallel', default = False, type = bool,
+    parser.add_argument('--parallel', action = 'store', dest = 'parallel', default = True, type = bool,
                         help = "Run the simulations in serial or parallel")
     
     parser.add_argument('--nProc', action = 'store', dest = 'nProc', default = multiprocessing.cpu_count(), type = int,
