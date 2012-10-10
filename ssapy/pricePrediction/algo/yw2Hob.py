@@ -43,7 +43,7 @@ def yw2Hob(**kwargs):
 
     savePkl      = kwargs.get('savePkl',True)
     saveTime     = kwargs.get('saveTime',True)
-    pltMarg      = kwargs.get('pltMarg',False)    
+    pltMarg      = kwargs.get('pltMarg',True)    
     pltKld       = kwargs.get('pltKld',True)
     pltKs        = kwargs.get('pltKs',True)
     verbose      = kwargs.get('verbose',True)
