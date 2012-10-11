@@ -58,6 +58,10 @@ def comp2Agents(**kwargs):
             print 'Simulating {0} out of {1} auctions'.format(itr,nGames)
         [agent.randomValuation() for agent in auction.agentList]
         
+        if verbose:
+            for idx, agent in enumerate(auction.agentList):
+                print 'agent[{0}] = {1} ; l = {2}, v = {3}'.format(idx, agent.type(), agent.l, agent.v)
+        
         auction.runAuction()
         
         auction.notifyAgents()
