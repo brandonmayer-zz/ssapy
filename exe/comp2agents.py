@@ -1,7 +1,110 @@
+#!/usr/bin/env python
+
+import matplotlib
+matplotlib.use('Agg')
+
+import matplotlib.pyplot as plt
+import numpy
+
 from ssapy.auctions.compAgents import comp2Agents
+
+import argparse
+import os 
+import pickle
     
 def main():
-    pass
+    desc = 'Executable to compare two agents'
+    parser = argparse.ArgumentParser(description=desc)
+    
+    parser.add_argument('--oDir', action = 'store', dest = 'oDir', required = True,
+                        help = "Must provide output directory.")
+    
+    parser.add_argument('--agentType1', action = 'store', dest = 'agentType1', required = True,
+                        help="Must provide agent type (strategy).")
+    
+    parser.add_argument('--pp1', action = 'store', dest = 'pp1', required = True,
+                        help="Price prediction file 1.")
+    
+    parser.add_argument('--n1', action = 'store', dest = 'n1', default = 4, type = int,
+                        help="Numer of agents of Type 1")
+        
+    parser.add_argument('--agentType2', action = 'store', dest = 'agentType', required = True,
+                        help="Must provide agent type (strategy).")
+    
+    parser.add_argument('--n2', action = 'store', dest = 'n2', default = 4, type = int,
+                        help="Numer of agents of Type 2")
+    
+    parser.add_argument('--pp2', action = 'store', dest = 'pp1', required = True,
+                        help="Price prediction file 2.")
+    
+    parser.add_argument('--nGames', action = 'store', dest = 'nGames', default = 10000, type = int,
+                        help = "Number of auction simulations per iteration.")
+    
+    args = parser.parse_args().__dict__
+    
+    oDir = os.path.realpath(oDir)
+    if not os.path.exists(oDir):
+        os.makedirs(oDir)
+    
+    with open(pp1,'f') as f:
+        p1 = pickle.load(f)
+    
+    with open(pp2,'f') as f:
+        p2 = pickle.load(f)
+        
+    paramFile = os.path.join(oDir,'params.txt')
+    
+    with open(paramFile,'w') as f:
+        f.write("{0}\n".format(agentType1))
+        f.write("{0}\n".format(n1))
+        f.write("{0}\n".format(ppFile1))
+        
+        f.write("{0}\n".format(agentType2))
+        f.write("{0}\n".format(n2))
+        f.write("{0}\n".format(ppFile2))
+        
+        f.write("{0}\n".format(nGames))
+        
+        
+    surplus = comp2Agents( oDir       = oDir,
+                           pp1        = pp1,
+                           pp2        = pp2,
+                           n1         = n1,
+                           n2         = n2,
+                           agentType1 = agentType1,
+                           agentType2 = agentType2,
+                           nGames     = nGames,
+                           verbose    = True)
+    
+    
+        
+    s1 = surplus[:,:n1].flatten()
+    b1Min = int(s1.min()-1)
+    b1Max = int(s1.max()+1)
+    bins1 = numpy.arange(b1Min,b1Max)
+    
+    s2 = surplus[:,n1:].flatten()
+    b2Min = int(s2.min()-1)
+    b2Max = int(s2.max()+1)
+    bins2 = numpy.arange(b2Min,b2Max)
+    
+    h1, b1 = numpy.histogram(surplus[:,:n1].flatten(), bins=bins1, density=True)
+    h2, b2 = numpy.histogram(surplus[:,n1:].flatten(), bins=bins2, density=True)
+    
+    f = plt.figure()
+    ax = f.add_subplot(111)
+    plt.plot(b1[:-1],h1, label = "Joint GMM SCPP")
+    plt.plot(b2[:-1],h2, label = "Marginal SCPP")
+    ax.set_title("{0} vs. {1} {2} auctions".format(agentType1, agentType1, nGames))
+    ax.set_ylabel("surplus")
+    ax.set_ylabel(r"$p(surplus)$")
+    leg = ax.legend(loc = 'best', fancybox = True)
+    leg.get_frame().set_alpha(0.5)
+    
+    pltFile = os.path.join(oDir,"{0}_{1}_{2}_{3}_{4}.pdf".format(agentType1, agentType2, n1, n2, nGames))
+    plt.savefig(pltFile)
+    
+    
 
 if __name__ == "__main__":
     main()
