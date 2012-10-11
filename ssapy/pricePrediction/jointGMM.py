@@ -207,7 +207,7 @@ class jointGMM(sklearn.mixture.GMM):
             raise ValueError("In jointGmm.margParams(...)\n" +\
                               "Must specify margIdx")
             
-        if margIdx > self.means_.shape[0]:
+        if margIdx > self.means_.shape[1]:
             raise ValueError("In jointGmm.margParams(...)\n" +\
                              "margIdx = {0} > self.means_.shape[1] = {2}".format(margIdx,self.means_.shape[1]))
         
