@@ -28,13 +28,13 @@ def main():
     parser.add_argument('--n1', action = 'store', dest = 'n1', default = 4, type = int,
                         help="Numer of agents of Type 1")
         
-    parser.add_argument('--agentType2', action = 'store', dest = 'agentType', required = True,
+    parser.add_argument('--agentType2', action = 'store', dest = 'agentType2', required = True,
                         help="Must provide agent type (strategy).")
     
     parser.add_argument('--n2', action = 'store', dest = 'n2', default = 4, type = int,
                         help="Numer of agents of Type 2")
     
-    parser.add_argument('--pp2', action = 'store', dest = 'pp1', required = True,
+    parser.add_argument('--pp2', action = 'store', dest = 'pp2', required = True,
                         help="Price prediction file 2.")
     
     parser.add_argument('--nGames', action = 'store', dest = 'nGames', default = 10000, type = int,
