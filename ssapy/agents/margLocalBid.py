@@ -40,7 +40,7 @@ class margLocalBid(margDistPredictionAgent):
         if viz:
             bidList = []
         
-        n_itr = kwargs.get('n_itr', 100)
+        n_itr = kwargs.get('n_itr', 10)
         
         tol = kwargs.get('tol',1e-2)
         
@@ -69,7 +69,7 @@ class margLocalBid(margDistPredictionAgent):
         
         if viz:
             bidList.append(bids)
-            
+        
         #precompute cdfs for speed
         cdf = []
         if isinstance(pricePrediction,margDistSCPP):
@@ -127,11 +127,13 @@ class margLocalBid(margDistPredictionAgent):
                     
                 bids[bidIdx] = newBid
                 
+            sse = numpy.dot(prevBid - bids,prevBid - bids)
             if verbose:
                 print ''
                 print 'Iteration = {0}'.format(itr)
                 print 'prevBid   = {0}'.format(prevBid)
                 print 'newBid    = {0}'.format(bids)
+                print 'sse       = {0}'.format(sse)
             
             if viz:
                 bidList.append(bids)
@@ -139,7 +141,7 @@ class margLocalBid(margDistPredictionAgent):
                 plt.plot(bidList[-1],'ro')
                 plt.show()
                     
-            if numpy.dot(prevBid - bids,prevBid - bids) <= tol:
+            if sse <= tol:
                 if verbose:
                     print ''
                     print 'localBid terminated.'
