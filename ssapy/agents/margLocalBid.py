@@ -42,7 +42,7 @@ class margLocalBid(margDistPredictionAgent):
         
         n_itr = kwargs.get('n_itr', 100)
         
-        tol = kwargs.get('tol',1e-8)
+        tol = kwargs.get('tol',1e-2)
         
         initialBidderType = kwargs.get('initialBidder','straightMU8')
         
@@ -75,11 +75,10 @@ class margLocalBid(margDistPredictionAgent):
         if isinstance(pricePrediction,margDistSCPP):
             for hist,binEdges in pricePrediction.data:
                 p = hist / numpy.float(numpy.dot(hist, numpy.diff(binEdges)))
-                c = numpy.cumsum(p*numpy.diff(binEdges),dtype=numpy.float)
-                f = interp1d(binEdges[:-1],c,'linear')
+                c = numpy.hstack((0,numpy.cumsum(p*numpy.diff(binEdges),dtype=numpy.float)))
+                f = interp1d(binEdges,c,'linear')
                 cdf.append(f)
-                
-        
+                       
         for itr in xrange(n_itr):
             if verbose:
                 print "itr = {0}, bid = {1}".format(itr,bids)
@@ -116,13 +115,14 @@ class margLocalBid(margDistPredictionAgent):
                         for og in otherGoods:
                             if bids[bidIdx] > pricePrediction.data[bidIdx][1][-1]:
                                 pass
-                            elif bids[bidIdx] < pricePrediction.data[bidIdx][1][-1]:
+                            elif bids[bidIdx] < pricePrediction.data[bidIdx][1][0]:
                                 p *= 1e-5
                             elif posBundle[og] == True:
                                 p*=cdf[og](bids[bidIdx])
-                            else:
+                            else:    
                                 p*=1-cdf[og](bids[bidIdx])
-                                    
+                                
+                                
                     newBid += (v1 - v0)*p
                     
                 bids[bidIdx] = newBid
