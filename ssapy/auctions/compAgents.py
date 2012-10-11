@@ -26,17 +26,18 @@ def comp2Agents(**kwargs):
     verbose      = kwargs.get('verbose', True)
     
     if verbose:
+        print ''
         print 'In comp2Agents(...)'
-        print 'oDir = {0}'.format(oDir)
+        print 'oDir         = {0}'.format(oDir)
         
-        print 'agentType1 = {0}'.format(agentType1)
-        print 'n1         = {0}'.format(n1)
+        print 'agentType1   = {0}'.format(agentType1)
+        print 'n1           = {0}'.format(n1)
         
-        print 'agentType2 = {0}'.format(agentType2)
-        print 'n2         = {0}'.format(n2)
+        print 'agentType2   = {0}'.format(agentType2)
+        print 'n2           = {0}'.format(n2)
         
-        print 'm          = {0}'.format(m)
-        print 'nGames     = {0}'.fomat(nGames)
+        print 'm            = {0}'.format(m)
+        print 'nGames       = {0}'.format(nGames)
         print 'minValuation = {0}'.format(minValuation)
         print 'maxValuation = {0}'.format(maxValuation)
         
