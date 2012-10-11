@@ -237,7 +237,7 @@ class jointGMM(sklearn.mixture.GMM):
                                  "cdf ={0} < 0.0".format(cdf))
                 
         else:
-            if margIdx > self.means_.shape[0]:
+            if margIdx > self.means_.shape[1]:
                 raise ValueError("In jointGmm.margParams(...)\n" +\
                                  "margIdx = {0} > self.means_.shape[1] = {1}".format(margIdx,self.means_.shape[1]))
             cdf = numpy.float(0.0)
