@@ -243,8 +243,8 @@ class jointGMM(sklearn.mixture.GMM):
             cdf = numpy.float(0.0)
             for (w,mean,cov) in zip(self.weights_, self.means_, self.covars_):
                 cdf += w*norm.cdf(x, loc = mean[margIdx], scale = numpy.sqrt(cov[margIdx, margIdx]))
-                
-            if cdf > 1.0:
+            
+            if cdf > 1.001:
                 raise ValueError("In jointGmm.margCdf(...)\n" +\
                                  "cdf = {0} > 1.0".format(cdf))
             elif cdf < 0.0:
