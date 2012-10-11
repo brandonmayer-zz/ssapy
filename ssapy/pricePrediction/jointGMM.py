@@ -20,6 +20,7 @@ class jointGMM(sklearn.mixture.GMM):
         
 #        self.gmm             = None
 
+        self.covariance_type = kwargs.get('covariance_type','full')
         super(jointGMM,self).__init__(n_components    = kwargs.get('n_components',1),
                                       covariance_type = kwargs.get('covariance_type','full'),
                                       random_state    = kwargs.get('random_state',None),
@@ -99,6 +100,9 @@ class jointGMM(sklearn.mixture.GMM):
         # set the data of this class associated with the 
         # derived class to match the fitted distribution
         self.__dict__.update(clfList[argMinAic].__dict__)
+        
+        #not all versions of python store this so explicitly set it
+        self.covariance_type = covariance_type
         
         if verbose:
             print 'Finished aicFit(...) in {0} seconds'.format(time.time()-start)
