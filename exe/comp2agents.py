@@ -40,6 +40,9 @@ def main():
     parser.add_argument('--nGames', action = 'store', dest = 'nGames', default = 10000, type = int,
                         help = "Number of auction simulations per iteration.")
     
+    parser.add_argument('--verbose', action = 'store', dest = 'verbose', default = True, type = bool,
+                        help = "Output run info to std out.")
+    
     args = parser.parse_args().__dict__
     
     oDir       = args.get('oDir')
@@ -50,17 +53,30 @@ def main():
     agentType2 = args.get('agentType2')
     ppFile2    = args.get('pp2')
     n2         = args.get('n2')
-    
+
     nGames     = args.get('nGames')
+    
+    verbose    = args.get('verbose')
+    
+    if verbose:
+        print 'In ssapy/exe/comp2agents.py'
+        print 'oDir       = {0}'.format(oDir)
+        print 'agentType1 = {0}'.format(agentType1)
+        print 'ppFile1    = {0}'.format(ppFile1)
+        print 'n1         = {0}'.format(n1)
+        print 'agentType2 = {0}'.format(agentType2)
+        print 'ppFile2    = {0}'.format(ppFile2)
+        print 'n2         = {0}'.format(n2)
+        print 'nGames     = {0}'.format(nGames)
     
     oDir = os.path.realpath(oDir)
     if not os.path.exists(oDir):
         os.makedirs(oDir)
     
-    with open(ppFile1,'f') as f:
+    with open(ppFile1,'r') as f:
         pp1 = pickle.load(f)
     
-    with open(ppFile2,'f') as f:
+    with open(ppFile2,'r') as f:
         pp2 = pickle.load(f)
         
     paramFile = os.path.join(oDir,'params.txt')
