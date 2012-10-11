@@ -41,7 +41,7 @@ def comp2Agents(**kwargs):
         print 'minValuation = {0}'.format(minValuation)
         print 'maxValuation = {0}'.format(maxValuation)
         
-        print  
+        print ''  
     
     
     auction = simultaneousAuction( m       = m,
