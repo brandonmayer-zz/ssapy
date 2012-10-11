@@ -25,6 +25,23 @@ def comp2Agents(**kwargs):
     nProc        = kwargs.get('nProc', multiprocessing.cpu_count() - 1)
     verbose      = kwargs.get('verbose', True)
     
+    if verbose:
+        print 'In comp2Agents(...)'
+        print 'oDir = {0}'.format(oDir)
+        
+        print 'agentType1 = {0}'.format(agentType1)
+        print 'n1         = {0}'.format(n1)
+        
+        print 'agentType2 = {0}'.format(agentType2)
+        print 'n2         = {0}'.format(n2)
+        
+        print 'm          = {0}'.format(m)
+        print 'nGames     = {0}'.fomat(nGames)
+        print 'minValuation = {0}'.format(minValuation)
+        print 'maxValuation = {0}'.format(maxValuation)
+        
+        print  
+    
     
     auction = simultaneousAuction( m       = m,
                                    nPrice  = 2,
