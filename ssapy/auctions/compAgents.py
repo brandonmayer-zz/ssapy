@@ -66,6 +66,9 @@ def comp2Agents(**kwargs):
         
         agentSurplus[itr,:] = surplus
         
+        if verbose:
+            print 'Agent Surplus = {0}'.format(surplus)
+        
     if oDir:
         oDir = os.path.realpath(oDir)
         if not os.path.exists(oDir):
