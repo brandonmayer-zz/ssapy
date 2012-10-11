@@ -40,7 +40,7 @@ class margLocalBid(margDistPredictionAgent):
         if viz:
             bidList = []
         
-        n_itr = kwargs.get('n_itr', 10)
+        n_itr = kwargs.get('n_itr', 50)
         
         tol = kwargs.get('tol',1e-2)
         
