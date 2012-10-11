@@ -42,7 +42,7 @@ def comp2Agents(**kwargs):
         auction.attachAgents(agent)
                              
     for i in xrange(n2):
-        agent = agentFactory(agentType = agentType1, 
+        agent = agentFactory(agentType = agentType2, 
                              m         = m, 
                              vmin      = minValuation, 
                              vmax      = maxValuation  )
