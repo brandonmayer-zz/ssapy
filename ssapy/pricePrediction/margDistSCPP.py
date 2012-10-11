@@ -385,12 +385,14 @@ class margDistSCPP(pointSCPP):
                 cdf = numpy.cumsum( hist*numpy.diff(binEdges),
                                     dtype=numpy.float )
                 
-                f = interp1d(binEdges[:-1], cdf, kind)
+                f = interp1d(binEdges, numpy.hstack((0,cdf)), kind)
                 cdfBid[i] = f(bids[i])
             
         return cdfBid
     
     def margCdf(self, x, good, kind = 'linear'):
+        
+        cdf = None
         
         if isinstance(good,int):
             
@@ -398,9 +400,9 @@ class margDistSCPP(pointSCPP):
                         
             p = hist / numpy.float(numpy.dot(hist, numpy.diff(binEdges)))
             
-            cdf = numpy.cumsum(p*numpy.diff(binEdges), dtype=numpy.float)
+            c = numpy.cumsum(p*numpy.diff(binEdges), dtype=numpy.float)
             
-            f = interp1d(binEdges[:-1], cdf, kind)
+            f = interp1d(binEdges, numpy.hstack((0,c)), kind)
             
             cdf = f(x)
             
@@ -429,9 +431,6 @@ class margDistSCPP(pointSCPP):
                     raise ValueError("margDistScpp.margCdf\n" +\
                                      "cdf = {0} < 0.0".format(cdf[i]))
                     
-                
-            
-        
         return cdf
             
     def iTsample(self, **kwargs):
