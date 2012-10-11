@@ -5,7 +5,7 @@ Date:      12/2/2011
 
 A class implementing a simultaneous auction.
 """
-from ssapy.agents import agentBase
+from ssapy.agents.agentBase import agentBase
 from ssapy.auctions.auctionBase import *
 
 
@@ -60,7 +60,7 @@ class simultaneousAuction(auctionBase):
                 numpy.testing.assert_(isinstance(agent,agentBase))
                 self.agentList.append(agent)
         elif isinstance(agentList,agentBase):
-            self.agentList.append(agentBase)
+            self.agentList.append(agentList)
         else:
             print 'Must specify a list of agents of subtype agentBase or a single such agent.'
             raise AssertionError

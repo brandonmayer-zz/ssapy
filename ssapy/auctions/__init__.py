@@ -241,5 +241,4 @@ def simulateAuction(**kwargs):
     else:
         ret = simAuctionHelper(**kwargs)
         
-    return ret       
-            
+    return ret               
