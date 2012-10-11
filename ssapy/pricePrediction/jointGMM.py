@@ -217,24 +217,9 @@ class jointGMM(sklearn.mixture.GMM):
         
         return (w,m,v)
     
-    def margCdf(self, x, margIdx):
-        
-        if isinstance(margIdx,int):
-            
-            if margIdx > self.means_.shape[0]:
-                raise ValueError("In jointGmm.margParams(...)\n" +\
-                                 "margIdx = {0} > self.means_.shape[1] = {1}".format(margIdx,self.means_.shape[1]))
-            cdf = numpy.float(0.0)
-            for (w,mean,cov) in zip(self.weights_, self.means_, self.covars_):
-                cdf += w*norm.cdf(x, loc = mean[margIdx], scale = numpy.sqrt(cov[margIdx, margIdx]))
+    def margCdf(self, x, margIdx):    
                 
-            if cdf > 1.0:
-                raise ValueError("In jointGmm.margCdf(...)\n" +\
-                                 "cdf = {0} > 1.0".format(cdf))
-            elif cdf < 0.0:
-                raise ValueError("In jointGmm.margCdf(...)\n" +\
-                                 "cdf ={0} < 0.0".format(cdf))
-        elif isinstance(margIdx,list):
+        if isinstance(margIdx,list) or isinstance(margIdx, numpy.ndarray):
             
             cdf = numpy.zeros(len(margIdx))
             
@@ -250,6 +235,21 @@ class jointGMM(sklearn.mixture.GMM):
             elif numpy.any(cdf < 0.0):
                 raise ValueError("In jointGmm.margCdf(...)\n" +\
                                  "cdf ={0} < 0.0".format(cdf))
+                
+        else:
+            if margIdx > self.means_.shape[0]:
+                raise ValueError("In jointGmm.margParams(...)\n" +\
+                                 "margIdx = {0} > self.means_.shape[1] = {1}".format(margIdx,self.means_.shape[1]))
+            cdf = numpy.float(0.0)
+            for (w,mean,cov) in zip(self.weights_, self.means_, self.covars_):
+                cdf += w*norm.cdf(x, loc = mean[margIdx], scale = numpy.sqrt(cov[margIdx, margIdx]))
+                
+            if cdf > 1.0:
+                raise ValueError("In jointGmm.margCdf(...)\n" +\
+                                 "cdf = {0} > 1.0".format(cdf))
+            elif cdf < 0.0:
+                raise ValueError("In jointGmm.margCdf(...)\n" +\
+                                 "cdf ={0} < 0.0".format(cdf))    
                 
         return cdf
         
