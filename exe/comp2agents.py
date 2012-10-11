@@ -42,15 +42,26 @@ def main():
     
     args = parser.parse_args().__dict__
     
+    oDir       = args.get('oDir')
+    agentType1 = args.get('agentType1')
+    ppFile1    = args.get('pp1')
+    n1         = args.get('n1')
+    
+    agentType2 = args.get('agentType2')
+    ppFile2    = args.get('pp2')
+    n2         = args.get('n2')
+    
+    nGames     = args.get('nGames')
+    
     oDir = os.path.realpath(oDir)
     if not os.path.exists(oDir):
         os.makedirs(oDir)
     
-    with open(pp1,'f') as f:
-        p1 = pickle.load(f)
+    with open(ppFile1,'f') as f:
+        pp1 = pickle.load(f)
     
-    with open(pp2,'f') as f:
-        p2 = pickle.load(f)
+    with open(ppFile2,'f') as f:
+        pp2 = pickle.load(f)
         
     paramFile = os.path.join(oDir,'params.txt')
     
