@@ -256,4 +256,27 @@ class jointGMM(sklearn.mixture.GMM):
                                  "cdf ={0} < 0.0".format(cdf))    
                 
         return cdf
+    
+    def margPdf(self, x, margIdx):
+        if margIdx > self.means_.shape[1]:
+                raise ValueError("In jointGmm.margPdf(...)\n" +\
+                                 "margIdx = {0} > self.means_.shape[1] = {1}".format(margIdx,self.means_.shape[1]))
+                
+        p = 0.0
+        for (w,mean,cov) in zip(self.weights_, self.means_, self.covars_):
+            p += w*norm.pdf(x, loc = mean[margIdx], scale = numpy.sqrt(cov[margIdx,margIdx]))
+            
+            if p > 1 + 1.003:
+                raise ValueError("In jointGmm.margCdf(...)\n" +\
+                                 "p = {0} > 1.0".format(p))
+            
+            if p < 0.0:
+                raise ValueError("In jointGmm.margCdf(...)\n" +\
+                                 "p = {0} < 0.0".format(p))
+                
+        return p
+                
+                
+            
+        
         
