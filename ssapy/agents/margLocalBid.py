@@ -19,7 +19,7 @@ class margLocalBid(margDistPredictionAgent):
         
     @staticmethod
     def type():
-        return "localBid"
+        return "margLocalBid"
         
     @staticmethod
     def SS(**kwargs):
