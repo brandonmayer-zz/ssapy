@@ -5,7 +5,7 @@ from ssapy.agents.targetPrice import targetPrice
 from ssapy.agents.targetPriceDist import targetPriceDist, targetPrice8, targetPrice64, targetPrice256
 from ssapy.agents.riskAware import riskEvaluator8, riskEvaluator64, riskAwareTMUS256
 from ssapy.agents.averageMU import averageMU, averageMU8, averageMU64, averageMU256
-from ssapy.agents.localBid import localBid
+from ssapy.agents.localBid import localBid, localBid1e3
 from ssapy.agents.condLocalBid import condLocalBid
 from ssapy.agents.margLocalBid import margLocalBid
 
@@ -74,6 +74,8 @@ def agentFactory(**kwargs):
         agent = averageMU256(m = m, vmin = vmin, vmax = vmax)
     elif agentType == "localBid":
         agent = localBid(m = m, vmin = vmin, vmax = vmax)
+    elif agentType == "localBid1e3":
+        agent = localBid1e3(m = m, vmin = vmin, vmax = vmax)
     elif agentType == "condLocalBid":
         agent = condLocalBid(m = m, vmin = vmin, vmax = vmax)
     elif agentType == "margLocalBid":
