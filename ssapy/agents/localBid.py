@@ -48,9 +48,9 @@ class localBid(margDistPredictionAgent):
         
         verbose = kwargs.get('verbose',False)
         
+        retStats = kwargs.get('retStats',False)
         
 
-        
         if samples is None:
             
             pricePrediction = kwargs.get('pricePrediction')
@@ -183,10 +183,37 @@ class localBid(margDistPredictionAgent):
                     print 'prevBid = {0}'.format(prevBid)
                     print 'bids    = {0}'.format(bids)
                     print 'sse     = {0}'.format(numpy.dot(prevBid - bids,prevBid - bids))
+                if retStats:
+                    converged = 1
+                    sse = numpy.dot(prevBid - bids,prevBid - bids)
+                    converged = True
+                    return bids, converged, itr, sse
                 break
+            
                       
-        return bids
+        if retStats:
+            converged = False
+            sse = numpy.dot(prevBid - bids,prevBid - bids)
+            return bids, converged, itr, sse
+        else:
+            return bids
     
+class localBid1e3(margDistPredictionAgent):
+    def __init__(self,**kwargs):
+        #put import in init to avoid circlular imports when
+        #agentFactory imports localbid
+    
+        super(localBid1e3, self).__init__(**kwargs)
+        
+    @staticmethod
+    def type():
+        return "localBid1000"
+    
+    @staticmethod
+    def SS(**kwargs):
+        subArgs = kwargs.copy()
+        subArgs['nSamples'] = 1000
+        return localBid.SS(**subArgs)
 
         
 if __name__ == "__main__":
@@ -230,6 +257,8 @@ if __name__ == "__main__":
                        viz = True)
     
     print bids
+    
+
     
     
     
