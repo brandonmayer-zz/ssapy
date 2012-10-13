@@ -115,8 +115,8 @@ def main():
     b2Max = int(s2.max()+1)
     bins2 = numpy.arange(b2Min,b2Max)
     
-    h1, b1 = numpy.histogram(surplus[:,:n1].flatten(), bins=bins1, density=True)
-    h2, b2 = numpy.histogram(surplus[:,n1:].flatten(), bins=bins2, density=True)
+    h1, b1 = numpy.histogram(s1, bins=bins1, density=True)
+    h2, b2 = numpy.histogram(s2, bins=bins2, density=True)
     
     f = plt.figure()
     ax = f.add_subplot(111)
