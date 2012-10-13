@@ -105,12 +105,12 @@ def main():
     
     
         
-    s1 = surplus[:,:n1].flatten()
+    s1 = numpy.mean(surplus[:,:n1],1)
     b1Min = int(s1.min()-1)
     b1Max = int(s1.max()+1)
     bins1 = numpy.arange(b1Min,b1Max)
     
-    s2 = surplus[:,n1:].flatten()
+    s2 = numpy.mean(surplus[:,n1:],1)
     b2Min = int(s2.min()-1)
     b2Max = int(s2.max()+1)
     bins2 = numpy.arange(b2Min,b2Max)
@@ -123,8 +123,8 @@ def main():
     plt.plot(b1[:-1],h1, label = "{0}".format(agentType1))
     plt.plot(b2[:-1],h2, label = "{0}".format(agentType2))
     ax.set_title("{0} vs. {1} {2} auctions".format(agentType1, agentType2, nGames))
-    ax.set_xlabel("surplus")
-    ax.set_ylabel(r"$p(surplus)$")
+    ax.set_xlabel("Average Game Surplus")
+    ax.set_ylabel(r"$p(\bar{\sigma})$")
     leg = ax.legend(loc = 'best', fancybox = True)
     leg.get_frame().set_alpha(0.5)
     
