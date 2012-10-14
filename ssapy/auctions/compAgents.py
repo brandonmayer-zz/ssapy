@@ -8,6 +8,7 @@ import numpy
 import multiprocessing
 import pickle
 import os
+import copy
 
 def comp2Agents(**kwargs):
     oDir         = kwargs.get('oDir')
@@ -43,53 +44,88 @@ def comp2Agents(**kwargs):
         
         print ''  
     
-    
-    auction = simultaneousAuction( m       = m,
-                                   nPrice  = 2,
-                                   reserve = 0)
-    
-    for i in xrange(n1):
-        agent = agentFactory(agentType = agentType1, 
-                             m         = m, 
-                             vmin      = minValuation, 
-                             vmax      = maxValuation  )
+    if parallel:
+        pool = multiprocessing.Pool(nProc)
         
-        agent.pricePrediction = pp1
-        
-        
-        auction.attachAgents(agent)
-                             
-    for i in xrange(n2):
-        agent = agentFactory(agentType = agentType2, 
-                             m         = m, 
-                             vmin      = minValuation, 
-                             vmax      = maxValuation  )
-        
-        agent.pricePrediction = pp2
-        
-        auction.attachAgents(agent)
-    
-    agentSurplus = numpy.zeros((nGames,n1+n2))
-    
-    for itr in xrange(nGames):
-        if verbose:
-            print 'Simulating {0} out of {1} auctions'.format(itr,nGames)
-        [agent.randomValuation() for agent in auction.agentList]
+        nGameList = [nGames//nProc]*nProc
+        nGameList[-1] += (nGames % nProc)
         
         if verbose:
-            for idx, agent in enumerate(auction.agentList):
-                print 'agent[{0}] = {1} ; l = {2}, v = {3}'.format(idx, agent.type(), agent.l, agent.v)
+            print 'Running parallel simulation.'
+            print 'Number of cores = {0}'.format(nProc)
+            print 'Number of simulations per core = {0}'.format(nGameList)
+            print 'Total Number of simulations = {0}'.format((sum(nGameList)))
+            
+        results = []
         
-        auction.runAuction()
+        for p in xrange(nProc):
+            subArgs = copy.deepcopy(kwargs)
+            subArgs.update(kwargs)
+            subArgs['parallel'] = False
+            subArgs['nGames'] = nGameList[p]
+            subArgs['verbose'] = False
+            subArgs['oDir'] = None
+                 
+            results.append(pool.apply_async(comp2Agents, kwds = subArgs))
+
+        pool.close()
+        pool.join()
         
-        auction.notifyAgents()
+        for idx, r in enumerate(results):
+            if idx == 0:
+                agentSurplus = r.get()
+            else:                
+                agentSurplus = numpy.concatenate((agentSurplus,r.get()))
+            r._value = []
         
-        surplus = auction.agentSurplus()
+    else:
         
-        agentSurplus[itr,:] = surplus
+        auction = simultaneousAuction( m       = m,
+                                       nPrice  = 2,
+                                       reserve = 0)
         
-        if verbose:
-            print 'Agent Surplus = {0}'.format(surplus)
+        for i in xrange(n1):
+            agent = agentFactory(agentType = agentType1, 
+                                 m         = m, 
+                                 vmin      = minValuation, 
+                                 vmax      = maxValuation  )
+            
+            agent.pricePrediction = pp1
+            
+            
+            auction.attachAgents(agent)
+                                 
+        for i in xrange(n2):
+            agent = agentFactory(agentType = agentType2, 
+                                 m         = m, 
+                                 vmin      = minValuation, 
+                                 vmax      = maxValuation  )
+            
+            agent.pricePrediction = pp2
+            
+            auction.attachAgents(agent)
+        
+        agentSurplus = numpy.zeros((nGames,n1+n2))
+        
+        for itr in xrange(nGames):
+            if verbose:
+                print 'Simulating {0} out of {1} auctions'.format(itr,nGames)
+            [agent.randomValuation() for agent in auction.agentList]
+            
+            if verbose:
+                for idx, agent in enumerate(auction.agentList):
+                    print 'agent[{0}] = {1} ; l = {2}, v = {3}'.format(idx, agent.type(), agent.l, agent.v)
+            
+            auction.runAuction()
+            
+            auction.notifyAgents()
+            
+            surplus = auction.agentSurplus()
+            
+            agentSurplus[itr,:] = surplus
+            
+            if verbose:
+                print 'Agent Surplus = {0}'.format(surplus)
         
     if oDir:
         oDir = os.path.realpath(oDir)
@@ -101,5 +137,6 @@ def comp2Agents(**kwargs):
         numpy.savetxt(sFile, agentSurplus) 
         
     return agentSurplus
+
     
     
