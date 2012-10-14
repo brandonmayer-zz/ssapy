@@ -69,6 +69,9 @@ class margLocalBid(margDistPredictionAgent):
         
         if viz:
             bidList.append(bids)
+            
+        retStats = kwargs.get('retStats',False)
+        
         
         #precompute cdfs for speed
         cdf = []
@@ -142,16 +145,24 @@ class margLocalBid(margDistPredictionAgent):
                 plt.show()
                     
             if sse <= tol:
+                
                 if verbose:
                     print ''
                     print 'localBid terminated.'
                     print 'prevBid = {0}'.format(prevBid)
                     print 'bids    = {0}'.format(bids)
                     print 'sse     = {0}'.format(numpy.dot(prevBid - bids,prevBid - bids))
+                    
+                if retStats:
+                    converged = True
+                    return bids, converged, itr, sse
                 break
                 
                 
-                
+        if retStats:
+            converged = False
+            return bids, converged, itr, sse
+        
         return bids
                 
             
