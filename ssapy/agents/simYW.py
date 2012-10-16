@@ -12,6 +12,94 @@ import itertools
 import numpy
 import operator
 
+def bundles(m = 5):
+    """
+    Return a numpy 2d array of all possible bundles that the agent can
+        bid on given the number of auctions.
+        
+    The Rows represent the bundle index.
+        
+    The Columns Represent the good index.        
+        
+    Return bundles as booleans for storage and computational efficiency
+    """
+    return numpy.atleast_2d([bin for bin in itertools.product([False,True],repeat=nGoods)]).astype(bool)
+
+def valuation(bundles, v, l):
+    """Compute the revenue (valuation) for a given list of bundles (collection of goods)
+    
+    Parameters
+    ----------
+    bundles: array_like, shape (n_bundles, n_goods)
+        List of collection of goods. Each row is collection, each column a good index.
+        A 1 in the i^{th} row and j^{th} column implies the good j is contained in the 
+        i^{th} listed bundle.
+    
+    v: array_like, shape (n_goods)
+        The value vector described in the Market Scheduling game of YW.
+        
+    l: int,
+        The minimal number of goods the agent needs to win to obtain value.
+        Another parameter of the market schedule game.
+        
+    Returns
+    -------
+    valution: array_like, shape (n_bundles)
+        valution[i] is the revenue the agent would receive had
+        he/she been able to procure the collection of goods bundle[i]. 
+    """
+    bundles = numpy.atleast_2d(bundles)
+    
+    cs = [numpy.atleast_1d(i) for i in itertools.imap(numpy.cumsum,bundles)]
+        
+    valuation = []
+    for bundle in cs:
+        if bundle[-1] < l:
+            valuation.append(0)
+        else:
+            t = numpy.nonzero(bundle >= l)[0][0]
+            valuation.append(v[t])
+            
+    return numpy.atleast_1d(valuation)
+
+def cost(bundles, price):
+    """Compute the price of a list of bundles given closing prices of each good
+    
+    Parameters
+    ----------
+    bundles: array_like, shape (n_bundles, n_goods)
+        List of collection of goods. Each row is collection, each column a good index.
+        A 1 in the i^{th} row and j^{th} column implies the good j is contained in the 
+        i^{th} listed bundle.
+        
+    price: array_like, shape (n_goods)
+        A list of closing prices, one for each 
+        possible good (e.g. price.shape[0] == bundles.shape[1])
+    
+    Returns
+    -------
+    cost: array_list, shape (n_bundles)
+        A 1d array such that cost[i] is the price of aquiring 
+        the collection of goods indicated by bundles[i]
+    """
+    bundles = numpy.atleast_2d(bundles)
+    
+    prices  = numpy.atleast_1d(prices).astype(numpy.float)
+    
+    if numpy.any(price == float('inf')):
+        # if there are items which are unobtainable (cost = inf)
+        # then the cost for the bundles containing that good should
+        # be inf but the bundles not containing those goods should be the 
+        # cost of other goods
+        
+        # lists are mutable, deep copy the original price vector
+        # in order to preserve the argument
+        
+        pass
+    else:
+        return numpy.atleast_1d([numpy.dot(bundle,price) for bundle in bundles])
+    
+
 class simYW(agentBase):
     """
     Base class for agents competing in the auction for time slots described by
@@ -236,59 +324,6 @@ class simYW(agentBase):
         print "Please instantiate a concrete agent"
         raise AssertionError
         
-    @staticmethod
-    def allBundles(nGoods = 5):
-        """
-        Return a numpy 2d array of all possible bundles that the agent can
-        bid on given the number of auctions.
-        
-        The Rows represent the bundle index.
-        
-        The Columns Represent the good index.        
-        
-        Return bundles as booleans for storage and computational efficiency
-        """
-        assert isinstance(nGoods,int) and nGoods >=0,\
-            "nGoods = {0} is not a positive integer".format(nGoods)
-        return numpy.atleast_2d([bin for bin in itertools.product([False,True],repeat=nGoods)]).astype(bool)
-    
-#    @staticmethod
-#    def bundleGenerator(nGoods = 5):
-#        for bin in itertools.product([False,True],repeat = nGoods):
-#            yield bin
-        
-    
-    
-    @staticmethod
-    def valuation(bundles = None, v = None, l= None):
-        """
-        Calculate the valuation of a given list of bundles
-        """
-        numpy.testing.assert_(isinstance(bundles,numpy.ndarray) or\
-                              isinstance(bundles,list), 
-                              msg="bundles must be a list or numpy.ndarray")
-        
-        numpy.testing.assert_(isinstance(v,numpy.ndarray),
-                              msg="v must be a numpy.ndarray")
-        
-        assert isinstance(l,int) and l >= 0 and l <= v.shape[0],\
-            "simYW::valuation l = {0} must be a positive integer "+\
-            "which is smaller than the size of v = {1}".format(l,v)
-            
-            
-        bundles = numpy.atleast_2d(bundles)
-        
-        cs = [numpy.atleast_1d(i) for i in itertools.imap(numpy.cumsum,bundles)]
-        
-        valuation = []
-        for bundle in cs:
-            if bundle[-1] < l:
-                valuation.append(0)
-            else:
-                t = numpy.nonzero(bundle >= l)[0][0]
-                valuation.append(v[t])
-                
-        return numpy.atleast_1d(valuation)
         
     @staticmethod
     def cost(bundles = None, price = None):
