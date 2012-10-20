@@ -74,7 +74,7 @@ class margDistPredictionAgent(pricePredictionAgent):
         return self.SS( pricePrediction = pricePrediction,
                         bundles         = bundles,
                         l               = l,
-                        valuation       = simYW.valuation(bundles,self.v,self.l))
+                        valuation       = simYW.valuation(bundles, v, l))
         
     def printSummary(self,**kwargs):
         """
