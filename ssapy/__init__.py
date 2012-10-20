@@ -1,3 +1,112 @@
-import os
-BM_LAPTOP_EXP_DIR = os.path.realpath("C:/auctionResearch/experiments")
-SSAPY_ROOT_DIR = os.path.realpath(".")
+import numpy
+import itertools
+
+def bundles(m = 5):
+    """
+    Return a numpy 2d array of all possible bundles that the agent can
+        bid on given the number of auctions.
+        
+    The Rows represent the bundle index.
+        
+    The Columns Represent the good index.        
+        
+    Return bundles as booleans for storage and computational efficiency
+    """
+    return numpy.atleast_2d([bin for bin in itertools.product([False,True],repeat=m)]).astype(bool)
+
+def idx2bundle(index=None, nGoods = 5):
+    # convert to decimal rather than enumerating power set
+    # and selecting correct bundle
+    
+    assert index != None and nGoods != None,\
+        "simYW::bundleFromIndex must specify all arguments."
+        
+    assert isinstance(index,int) and index >= 0,\
+        "simYW::bundleFromIndex index must be a positive integer."
+        
+    assert isinstance(nGoods,int) and nGoods >0,\
+        "simYw::bundleFromIndex nGoods must be a strictly positive integer."
+    
+    binList = []
+    n = index
+    while n > 0:
+        binList.insert(0,n%2)
+        n = n >> 1
+        
+    # just checking the index wasn't
+    # past the maximum bundle
+    if len(binList) > nGoods: raise ValueError, "simYW::bundleFromIndex Error: Dec-Binary Conversion"
+    
+    for i in xrange(nGoods-len(binList)):
+        binList.insert(0,0)
+        
+    return numpy.atleast_1d(binList)
+
+def bundle2idx(bundle = None):
+        numpy.testing.assert_(bundle.dtype == bool,
+                              msg="bundle.dtype = {0} != bool".format(bundle.dtype))
+        idx = 0
+        for i in xrange(bundle.shape[0]):
+            idx = (2**((bundle.shape[0]-1)-i))*bundle[i]
+            
+        return idx
+
+def cost(bundles, price):
+    """Compute the price of a list of bundles given closing prices of each good
+    
+    Parameters
+    ----------
+    bundles: array_like, shape (n_bundles, n_goods)
+        List of collection of goods. Each row is collection, each column a good index.
+        A 1 in the i^{th} row and j^{th} column implies the good j is contained in the 
+        i^{th} listed bundle.
+        
+    price: array_like, shape (n_goods)
+        A list of closing prices, one for each 
+        possible good (e.g. price.shape[0] == bundles.shape[1])
+    
+    Returns
+    -------
+    cost: array_list, shape (n_bundles)
+        A 1d array such that cost[i] is the price of aquiring 
+        the collection of goods indicated by bundles[i]
+    """
+    bundles = numpy.atleast_2d(bundles)
+    
+    price = numpy.atleast_1d(price).astype(numpy.float)
+    
+    if (price == float('inf')).any():
+        # if there are items which are unobtainable (cost = inf)
+        # then the cost for the bundles containing that good should
+        # be inf but the bundles not containing those goods should be the 
+        # cost of other goods
+        
+        # lists are mutable, deep copy the original price vector
+        # in order to preserve the argument
+        unobtainableGoods = numpy.nonzero(price == float('inf'))[0]
+        # make a deep copy so not to mutate func. argument
+        priceInfZero = numpy.atleast_1d(numpy.array(price))
+        priceInfZero[unobtainableGoods] = 0
+        
+        cost = []
+        for idx in xrange(bundles.shape[0]):
+            if (bundles[idx][unobtainableGoods] == 0).all():
+                cost.append(numpy.dot(bundles[idx],priceInfZero))
+            else:
+                cost.append(float('inf'))
+                
+        return numpy.atleast_1d(cost)
+    else:
+        return numpy.atleast_1d([numpy.dot(bundle,price) for bundle in bundles])
+    
+def surplus(bundles=None, valuation = None, priceVector = None):
+        """
+        Calculate the surplus for a given array of bundles, prices and a valuation (scalar).
+        Surplus equals valuation less cost.
+        """
+                   
+        bundles = numpy.atleast_2d(bundles)
+        
+        valuation = numpy.atleast_1d(valuation)
+        
+        return valuation - cost(bundles = bundles, price = priceVector)
