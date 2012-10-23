@@ -127,6 +127,9 @@ def acq(**kwargs):
         
         valuation     :=     an numpy array of valuations, one for each bundle
         
+        ties          :=     a flag on deciding how bunldes with same utility are decided
+                             valid options = 'random'
+        
         
     Returns
     -------
@@ -139,14 +142,53 @@ def acq(**kwargs):
     
     priceVector = numpy.atleast_1d(kwargs.get('priceVector'))
     
-    splus = kwargs.get('surplus', surplus(bundles     = bundles,
-                                          valuation   = valuation,
-                                          priceVector = priceVector))
+    ties = kwargs.get('ties','random')
+    
+    splus = kwargs.get('surplus')
+    
+    if splus == None:
+        val = kwargs.get('valuation')
+        
+        if val == None:
+            raise KeyError("Must specify either surplus or valuation.")
+        
+        splus = kwargs.get('surplus', surplus(bundles     = bundles,
+                                              valuation   = valuation,
+                                              priceVector = priceVector))
     
     optBundleIdxList = numpy.nonzero(splus == numpy.max(splus))[0] 
     
     if optBundleIdxList.shape[0] == 1:
         return bundles[optBundleIdxList], splus[optBundleIdxList] 
     else:
-        retIdx = numpy.random.random_integers(0,optBundleIdxList.shape[0]-1,1)
-        return bundles[optBundleIdxList[retIdx]], splus[optBundleIdxList[retIdx]]
+        if ties == 'random':
+            retIdx = numpy.random.random_integers(0,optBundleIdxList.shape[0]-1,1)
+            return bundles[optBundleIdxList[retIdx]], splus[optBundleIdxList[retIdx]]
+        
+def marginalUtility(bundles, priceVector, valuation, goodIdx):
+#        priceVector = numpy.atleast_1d(priceVector)
+    priceVector = numpy.asarray(priceVector,dtype = numpy.float)
+    
+    tempPriceInf = priceVector.copy()
+    tempPriceInf[goodIdx] = numpy.float('inf')
+    
+    tempPriceZero = priceVector.copy()
+    tempPriceZero[goodIdx] = numpy.float(0.0)
+    
+
+    optBundleInf, predictedSurplusInf = acq(bundles     = bundles,
+                                            valuation   = valuation,
+                                            priceVector = tempPriceInf)                                               
+                                                    
+        
+    optBundleZero, predictedSurplusZero = acq(bundles     = bundles,
+                                              valuation   = valuation,
+                                              priceVector = tempPriceZero)   
+                                                      
+
+
+    margUtil = predictedSurplusZero - predictedSurplusInf
+    if margUtil < 0:
+        raise ValueError("simYW.marginalUtility(...) - Negative Marginal Utility (shouldn't happen).")
+    
+    return margUtil

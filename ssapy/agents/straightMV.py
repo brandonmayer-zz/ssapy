@@ -65,7 +65,10 @@ class straightMV(pointPredictionAgent):
         n_goods = bundles.shape[1]
         marginalValueBid = numpy.zeros(n_goods,dtype=numpy.float64)
         for goodIdx in xrange(n_goods):
-            marginalValueBid[goodIdx] = simYW.marginalUtility(bundles, pointPricePrediction, valuation, l, goodIdx)
+            marginalValueBid[goodIdx] = \
+                    ssapy.marginalUtility(bundles, pointPricePrediction,
+                                          valuation, goodIdx) 
+                                          
 
         return marginalValueBid
         

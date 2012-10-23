@@ -63,86 +63,6 @@ def valuation(bundles, v, l):
             
     return numpy.atleast_1d(valuation)
 
-
-def marginalUtility(bundles, priceVector, valuation, l, goodIdx):
-#        priceVector = numpy.atleast_1d(priceVector)
-    priceVector = numpy.asarray(priceVector,dtype = numpy.float)
-    
-    tempPriceInf = priceVector.copy()
-    tempPriceInf[goodIdx] = numpy.float('inf')
-    
-    tempPriceZero = priceVector.copy()
-    tempPriceZero[goodIdx] = numpy.float(0.0)
-    
-
-    optBundleInf, predictedSurplusInf = simYW.acqYW(bundles     = bundles,
-                                                    valuation   = valuation,
-                                                    l           = l,
-                                                    priceVector = tempPriceInf)
-        
-    optBundleZero, predictedSurplusZero = simYW.acqYW(bundles     = bundles,
-                                                      valuation   = valuation,
-                                                      l           = l, 
-                                                      priceVector = tempPriceZero)
-
-
-    margUtil = predictedSurplusZero - predictedSurplusInf
-    if margUtil < 0:
-        raise ValueError("simYW.marginalUtility(...) - Negative Marginal Utility (shouldn't happen).")
-    
-    return margUtil
-
-def acqYW(**kwargs):
-    """
-    Given the number of goods, a price vector over each good
-    and a valuation for each good, compute the optimal acquisition
-    as described in Boyan and Greenwald 2001.
-    
-    INPUTS:
-        bundles       :=     a numpy 2d array
-                             rows indicate individual bundles
-                             columns are individual goods
-                             
-        priceVector   :=     vector of prices over goods.
-                             priceVector.shape[0] == bundles.shape[1] == number of goods
-        
-        valuation     :=     an numpy array of valuations, one for each bundle
-    
-    """    
-    bundles = kwargs.get('bundles')
-    if bundles == None:
-        raise KeyError("simYW.acqYW(...) - Must specify possible bundles")
-    
-    bundles = numpy.atleast_2d(bundles)
-    
-    valuation = kwargs.get('valuation')
-    if valuation == None:
-        raise KeyError("simYW.acqYW(...) - Must specify valuation vector")
-    
-    valuation = numpy.atleast_1d(valuation)
-                                 
-    priceVector = kwargs.get('priceVector')
-    if priceVector == None:
-        raise KeyError("simYW.acqYW(...) - Must specify price vector")
-    
-    priceVector = numpy.atleast_1d(priceVector)
-    
-    l = kwargs.get('l')
-    if l == None:
-        raise KeyError("simYW.acqYW(...) - Must specify l (number of target goods")
-    
-    surplus = numpy.atleast_1d( kwargs.get('surplus', ssapy.surplus(bundles     = bundles,
-                                                                    valuation   = valuation,
-                                                                    priceVector = priceVector)) )        
-    
-    # there may be more than one "optimal bundles" i.e. bundles with
-    # the same maximal surplus
-    optBundleIdxList = numpy.nonzero(surplus == numpy.max(surplus))[0]
-    
-    return simYW.minMaxBundle(bundles = bundles[optBundleIdxList],
-                              utility = surplus[optBundleIdxList],
-                              l       = l)  
-
 class simYW(agentBase):
     """
     Base class for agents competing in the auction for time slots described by
@@ -213,15 +133,17 @@ class simYW(agentBase):
             
         self.vmax = kwargs.get('vmax',50)   
         
+        self.pricePrediction = kwargs.get('pricePrediction')
+        
         if 'v' in kwargs:    
             self.v = numpy.atleast_1d(kwargs['v'])
             numpy.testing.assert_equal(self.v.shape[0], self.m,
                                        err_msg="self.v.shape[0] = {0} != self.m = {1}".format(self.v.shape[0],self.m))
         else:
-            self.v = self.randomValueVector(vmin = self.vmin, 
-                                            vmax = self.vmax, 
-                                            m    = self.m,
-                                            l    = self.l)[0]
+            self.v = randomValueVector(vmin = self.vmin, 
+                                       vmax = self.vmax, 
+                                       m    = self.m,
+                                       l    = self.l)[0]
             
         # a bit vector indicating which items where won
         # at auction
@@ -253,10 +175,10 @@ class simYW(agentBase):
         priceVector = kwargs['priceVector']
         bundles = simYW.allBundles(self.m)
         valuation = simYW.valuation(bundles,self.v,self.l)
-        return acqYW(bundles     = bundles,
-                     valuation   = valuation,
-                     priceVector = priceVector,
-                     l           = self.l)
+        return ssapy.acq(bundles     = bundles,
+                         valuation   = valuation,
+                         priceVector = priceVector )
+                     
         
     def printSummary(self, **kwargs):
         """
@@ -296,12 +218,12 @@ class simYW(agentBase):
         v                  = kwargs.get('v', self.v)
         l                  = kwargs.get('l', self.l)
         pricePrediction    = kwargs.get('pricePrediction', self.pricePrediction)
-        bundles            = kwargs.get('bundles', self.allBundles(m))
+        bundles            = kwargs.get('bundles', ssapy.allBundles(m))
         
         return self.SS( pricePrediction = pricePrediction,
                         bundles         = bundles,
                         l               = l,
-                        valuation       = simYW.valuation(bundles, v, l))  
+                        valuation       = valuation(bundles, v, l))  
     
     def finalSurplus(self):
         numpy.testing.assert_(isinstance(self.bundleWon,numpy.ndarray),
@@ -311,13 +233,13 @@ class simYW(agentBase):
             msg="invalid self.finalPrices")
         
         return ssapy.surplus(self.bundleWon, 
-                             self.valuation(self.bundleWon, self.v, self.l),
+                             valuation(self.bundleWon, self.v, self.l),
                              self.finalPrices)[0]
   
                 
-    def validatePriceVector(self,priceVector):
+    def validatePriceVector(self, priceVector):
         """
-        Return true if a given list of prices is compatible with this agent's functions.
+        Return true if a given list of prices is compatible with this agent's state.
         """
         pv = numpy.atleast_2d(priceVector)
         
