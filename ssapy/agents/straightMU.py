@@ -11,13 +11,14 @@ and calculates the mean(s) for price prediction
 import numpy
 
 from margDistPredictionAgent import margDistPredictionAgent
+from ssapy.agents.simYW import simYW
 from ssapy.agents.straightMV import straightMV
 from ssapy.pricePrediction.margDistSCPP import margDistSCPP
 from ssapy.pricePrediction.jointGMM import jointGMM
 
 import copy
 
-class straightMU(margDistPredictionAgent):
+class straightMU(simYW):
     def __init__(self,**kwargs):
         super(straightMU,self).__init__(**kwargs)
                 
@@ -80,7 +81,7 @@ class straightMU(margDistPredictionAgent):
                              l                   = l,
                              valuation           = valuation)
                
-class straightMU8(margDistPredictionAgent):
+class straightMU8(simYW):
     """
     A concrete class for straightMU8
     """
@@ -138,7 +139,7 @@ class straightMU8(margDistPredictionAgent):
             
         super(straightMU8,self).printSummary(**tkwargs)
         
-class straightMU64(margDistPredictionAgent):
+class straightMU64(simYW):
     """
     A concrete class for straightMU64
     """
@@ -201,7 +202,7 @@ class straightMU64(margDistPredictionAgent):
             
         super(straightMU64,self).printSummary(**tkwargs)
         
-class straightMU256(margDistPredictionAgent):
+class straightMU256(simYW):
     """
     A concrete class for straightMU64
     """

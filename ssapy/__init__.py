@@ -1,7 +1,7 @@
 import numpy
 import itertools
 
-def bundles(m = 5):
+def allBundles(m = 5):
     """
     Return a numpy 2d array of all possible bundles that the agent can
         bid on given the number of auctions.
@@ -110,3 +110,43 @@ def surplus(bundles=None, valuation = None, priceVector = None):
         valuation = numpy.atleast_1d(valuation)
         
         return valuation - cost(bundles = bundles, price = priceVector)
+    
+def acq(**kwargs):
+    """
+    Given the number of goods, a price vector over each good
+    and a valuation for each good, compute the optimal acquisition
+    as described in Boyan and Greenwald 2001.
+    
+    INPUTS:
+        bundles       :=     a numpy 2d array
+                             rows indicate individual bundles
+                             columns are individual goods
+                             
+        priceVector   :=     vector of prices over goods.
+                             priceVector.shape[0] == bundles.shape[1] == number of goods
+        
+        valuation     :=     an numpy array of valuations, one for each bundle
+        
+        
+    Returns
+    -------
+        optimalBundle, optimalSurplus
+    
+    """   
+    bundles = numpy.atleast_2d(kwargs.get('bundles'))
+     
+    valuation = numpy.atleast_1d(kwargs.get('valuation'))
+    
+    priceVector = numpy.atleast_1d(kwargs.get('priceVector'))
+    
+    splus = kwargs.get('surplus', surplus(bundles     = bundles,
+                                          valuation   = valuation,
+                                          priceVector = priceVector))
+    
+    optBundleIdxList = numpy.nonzero(splus == numpy.max(splus))[0] 
+    
+    if optBundleIdxList.shape[0] == 1:
+        return bundles[optBundleIdxList], splus[optBundleIdxList] 
+    else:
+        retIdx = numpy.random.random_integers(0,optBundleIdxList.shape[0]-1,1)
+        return bundles[optBundleIdxList[retIdx]], splus[optBundleIdxList[retIdx]]

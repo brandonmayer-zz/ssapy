@@ -141,66 +141,7 @@ def acqYW(**kwargs):
     
     return simYW.minMaxBundle(bundles = bundles[optBundleIdxList],
                               utility = surplus[optBundleIdxList],
-                              l       = l)
-
-
-def minMaxHelper(_bundles, _utility, _l):
-    if _bundles.shape[0] == 1:
-    #if there is one bundle and utility
-        _optBundle   = _bundles[0]
-        _optUtility  = _utility[0]
-        return _optBundle, _optUtility
-    else:
-        t = numpy.float('inf')
-        _optBundle  = None
-        _optUtility = None
-        for idx in xrange(_bundles.shape[0]):
-            tempBinList = _bundles[idx]
-            cs          = numpy.cumsum(tempBinList)
-            tNew        = (numpy.array(cs) >= _l).nonzero()
-            if tNew[0].any():
-                tNew = tNew[0][0]
-                if tNew < t:
-                    t = tNew
-                    _optBundle        = _bundles[idx]
-                    _optUtility       = _utility[idx]
-                    
-        return _optBundle, _optUtility  
-    
-def minMaxBundle(**kwargs):
-    """
-    A function to compute the "minimal" bundle given a list of
-    bundles.
-    
-    If there are bundles with equal "value" to the agent pick the one
-    that completes the tasks first, e.g.
-    
-    if $\lambda$ = 2 and m = 5 [1 1 0 0 0 ] should be prefered to [1 0 0 0 1]
-    given both have equal utility
-    """
-    #will raise assertions if not in kwargs
-    bundles = numpy.atleast_2d(kwargs['bundles'])
-    utility    = numpy.atleast_1d(kwargs['utility'])
-    
-    numpy.testing.assert_equal(bundles.shape[0], utility.shape[0],
-                               err_msg="Each bundle must have a corresponding utility.")
-    
-    optBundle = None
-    optUtility = None
-    
-    if 'l' in kwargs:
-        optBundle, optUtility = simYW.minMaxHelper(bundles,utility,kwargs['l'])
-        if optBundle == None:
-            #return the minimum bundle that finishes earliest
-            lmin = numpy.min([numpy.sum(bundles[bundleIdx]) for bundleIdx in xrange(bundles.shape[0])])
-            optBundle, optUtility = simYW.minMaxHelper(bundles,utility,lmin)
-    else:
-        #pick the smallest bundle that finishes first
-        lmin = numpy.min([numpy.sum(bundles[bundleIdx]) for bundleIdx in xrange(bundles.shape[0])])
-        optBundle,optUtility = simYW.minMaxHelper(bundles,utility,lmin)
-        
-         
-    return numpy.atleast_1d(optBundle).astype(bool), optUtility        
+                              l       = l)  
 
 class simYW(agentBase):
     """
