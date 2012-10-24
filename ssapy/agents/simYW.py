@@ -7,10 +7,12 @@ Date:      11/26/2011
 A base class for agents who participate in simultaneous auctions of the type
 described by Yoon & Wellman 2011
 """
-from agentBase import *
 import ssapy
+from agentBase import agentBase
+
 import itertools
 import numpy
+
 
 def randomValueVector(vmin = 1, vmax = 50, m = 5, l = None):
     if l is None:
@@ -89,6 +91,8 @@ class simYW(agentBase):
     def __init__(self, **kwargs):
         """
             INPUTS:
+                strategy     := a string specifying the bidding strategy
+                
                 m            := the total number of time slots up for auction
                 
                 l            := the target number of time slots for the specific agent
@@ -135,26 +139,25 @@ class simYW(agentBase):
         
         self.pricePrediction = kwargs.get('pricePrediction')
         
-        if 'v' in kwargs:    
-            self.v = numpy.atleast_1d(kwargs['v'])
-            numpy.testing.assert_equal(self.v.shape[0], self.m,
-                                       err_msg="self.v.shape[0] = {0} != self.m = {1}".format(self.v.shape[0],self.m))
+        self.strategy = kwargs.get('strategy')
+        if self.strategy == None:
+            raise ValueError("Must Specify Strategy")
+        elif isinstance(self.strategy,str):
+            self.strategy = ssapy.getStrategy(self.strategy)     
+        
+        self.v = kwargs.get('v')
+        
+        if 'v' == None:
+            randomValueVector(vmin = self.vmin, 
+                              vmax = self.vmax, 
+                              m    = self.m,
+                              l    = self.l)[0]
         else:
-            self.v = randomValueVector(vmin = self.vmin, 
-                                       vmax = self.vmax, 
-                                       m    = self.m,
-                                       l    = self.l)[0]
-            
-        # a bit vector indicating which items where won
-        # at auction
-        self.bundleWon = None
-        
-        # a vector of final prices for all goods
-        self.finalPrices = None
-        
+            numpy.testing.assert_equal(self.v.shape[0], self.m,
+                                       err_msg="self.v.shape[0] = {0} != self.m = {1}".\
+                                       format(self.v.shape[0],self.m))
+             
         super(simYW,self).__init__(**kwargs)
-        
-    
     
     def randomValuation(self, *args, **kwargs):
         """
@@ -189,20 +192,6 @@ class simYW(agentBase):
         print "Agent Type:              {0}".format(self.type())
         print "Agent lambda           = {0}".format(self.l)
         print "Agent Valuation Vector = {0}".format(self.v)
-        
-    @staticmethod
-    def SS(self,**kwargs):
-        """
-        An agents' strategy profile. Computes the optimal bid given the
-        agent's status and arguments to SS. Should be implmented for each
-        agent type.
-        
-        Should be given the bundles to bid on, the valuation for each bundle
-        and any other relavant information for the concrete agent type.
-        """
-        print "Cannot Bid with abstract simYW."
-        print "Please instantiate a concrete agent"
-        raise AssertionError
     
     def bid(self, **kwargs):
         """
@@ -214,16 +203,26 @@ class simYW(agentBase):
 #        print "Cannot Bid with abstract simYW."
 #        print "Please instantiate a concrete agent"
 #        raise AssertionError
+
+        
+        strategy = kwargs.get('strategy',self.strategy)
+        
+        if strategy == None:
+            raise ValueError("Must Specify Strategy")
+        
+        elif isinstance(strategy,str):
+            strategy = ssapy.getStrategy(strategy)
+            
         m                  = kwargs.get('m', self.m)
         v                  = kwargs.get('v', self.v)
         l                  = kwargs.get('l', self.l)
         pricePrediction    = kwargs.get('pricePrediction', self.pricePrediction)
         bundles            = kwargs.get('bundles', ssapy.allBundles(m))
         
-        return self.SS( pricePrediction = pricePrediction,
+        
+        return strategy(pricePrediction = pricePrediction,
                         bundles         = bundles,
-                        l               = l,
-                        valuation       = valuation(bundles, v, l))  
+                        valuation       = valuation(bundles,v,l))
     
     def finalSurplus(self):
         numpy.testing.assert_(isinstance(self.bundleWon,numpy.ndarray),
@@ -234,7 +233,7 @@ class simYW(agentBase):
         
         return ssapy.surplus(self.bundleWon, 
                              valuation(self.bundleWon, self.v, self.l),
-                             self.finalPrices)[0]
+                             self.finalPrices)
   
                 
     def validatePriceVector(self, priceVector):

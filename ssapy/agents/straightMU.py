@@ -10,7 +10,6 @@ and calculates the mean(s) for price prediction
 """
 import numpy
 
-from margDistPredictionAgent import margDistPredictionAgent
 from ssapy.agents.simYW import simYW
 from ssapy.agents.straightMV import straightMV
 from ssapy.pricePrediction.margDistSCPP import margDistSCPP
@@ -80,64 +79,104 @@ class straightMU(simYW):
                              bundles             = bundles,
                              l                   = l,
                              valuation           = valuation)
-               
-class straightMU8(simYW):
+        
+def straightMU8(**kwargs):
     """
-    A concrete class for straightMU8
+    Calculate the expected using inverse sampling method and 8 samples
+    Then bid via straightMV with the resulting expected prices
     """
-    @staticmethod
-    def type():
-        return "straightMU8"
     
-    @staticmethod
-    def SS(**kwargs):
-        """
-        Calculate the expected using inverse sampling method and 8 samples
-        Then bid via straightMV with the resulting expected prices
-        """
-        
-        pricePrediction = kwargs.get('pricePrediction')
-        if pricePrediction == None:
-            raise KeyError("straightMU8.SS(...) - must specify pricePrediction")
-        
-        bundles = kwargs.get('bundles')
-        if bundles == None:
-            raise KeyError("straightMU8.SS(...) - must specify bundles")
-                
-        valuation = kwargs.get('valuation')
-        if valuation == None:
-            raise KeyError("straightMU8 - must specify valuation")
-        
-        l = kwargs.get('l')
-        if l == None:
-            raise KeyError("straightMU8 - must specify l (target number of time slots)")
-        
-        if isinstance(pricePrediction, margDistSCPP):
-            expectedPrices = pricePrediction.expectedPrices(method = 'iTsample', nSamples = 8)
+    pricePrediction = kwargs.get('pricePrediction')
+    if pricePrediction == None:
+        raise KeyError("straightMU8.SS(...) - must specify pricePrediction")
+    
+    bundles = kwargs.get('bundles')
+    if bundles == None:
+        raise KeyError("straightMU8.SS(...) - must specify bundles")
             
-        elif isinstance(pricePrediction, numpy.ndarray):
-            expectedPrices = pricePrediction
-                   
-        elif isinstance(pricePrediction, jointGMM):
-            samples = pricePrediction.sample(n_samples=8)
-            expectedPrices = numpy.mean(samples,0)
-            
-        else:
-            raise ValueError("straightMU8 - Unknown price prediction type.")
+    valuation = kwargs.get('valuation')
+    if valuation == None:
+        raise KeyError("straightMU8 - must specify valuation")
+    
+    l = kwargs.get('l')
+    if l == None:
+        raise KeyError("straightMU8 - must specify l (target number of time slots)")
+    
+    if isinstance(pricePrediction, margDistSCPP):
+        expectedPrices = pricePrediction.expectedPrices(method = 'iTsample', nSamples = 8)
         
-        return straightMV.SS( pointPricePrediction = expectedPrices,
-                              bundles              = bundles,
-                              valuation            = valuation,
-                              l                    = l)
+    elif isinstance(pricePrediction, numpy.ndarray):
+        expectedPrices = pricePrediction
+               
+    elif isinstance(pricePrediction, jointGMM):
+        samples = pricePrediction.sample(n_samples=8)
+        expectedPrices = numpy.mean(samples,0)
         
-    def printSummary(self,**kwargs):
-        tkwargs = copy.deepcopy(kwargs)
-        if 'expectedPrices' not in kwargs:
-            
-            tkwargs['method']   = 'iTsample'
-            tkwargs['nSamples'] = 8
-            
-        super(straightMU8,self).printSummary(**tkwargs)
+    else:
+        raise ValueError("straightMU8 - Unknown price prediction type.")
+    
+    return straightMV( pricePrediction = expectedPrices,
+                       bundles              = bundles,
+                       valuation            = valuation )
+                       
+               
+#class straightMU8(simYW):
+#    """
+#    A concrete class for straightMU8
+#    """
+#    @staticmethod
+#    def type():
+#        return "straightMU8"
+#    
+#    @staticmethod
+#    def SS(**kwargs):
+#        """
+#        Calculate the expected using inverse sampling method and 8 samples
+#        Then bid via straightMV with the resulting expected prices
+#        """
+#        
+#        pricePrediction = kwargs.get('pricePrediction')
+#        if pricePrediction == None:
+#            raise KeyError("straightMU8.SS(...) - must specify pricePrediction")
+#        
+#        bundles = kwargs.get('bundles')
+#        if bundles == None:
+#            raise KeyError("straightMU8.SS(...) - must specify bundles")
+#                
+#        valuation = kwargs.get('valuation')
+#        if valuation == None:
+#            raise KeyError("straightMU8 - must specify valuation")
+#        
+#        l = kwargs.get('l')
+#        if l == None:
+#            raise KeyError("straightMU8 - must specify l (target number of time slots)")
+#        
+#        if isinstance(pricePrediction, margDistSCPP):
+#            expectedPrices = pricePrediction.expectedPrices(method = 'iTsample', nSamples = 8)
+#            
+#        elif isinstance(pricePrediction, numpy.ndarray):
+#            expectedPrices = pricePrediction
+#                   
+#        elif isinstance(pricePrediction, jointGMM):
+#            samples = pricePrediction.sample(n_samples=8)
+#            expectedPrices = numpy.mean(samples,0)
+#            
+#        else:
+#            raise ValueError("straightMU8 - Unknown price prediction type.")
+#        
+#        return straightMV.SS( pointPricePrediction = expectedPrices,
+#                              bundles              = bundles,
+#                              valuation            = valuation,
+#                              l                    = l)
+#        
+#    def printSummary(self,**kwargs):
+#        tkwargs = copy.deepcopy(kwargs)
+#        if 'expectedPrices' not in kwargs:
+#            
+#            tkwargs['method']   = 'iTsample'
+#            tkwargs['nSamples'] = 8
+#            
+#        super(straightMU8,self).printSummary(**tkwargs)
         
 class straightMU64(simYW):
     """

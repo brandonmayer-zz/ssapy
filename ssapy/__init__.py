@@ -1,6 +1,21 @@
 import numpy
 import itertools
 
+from ssapy.agents.straightMV import straightMV
+from ssapy.agents.straightMU import straightMU8
+
+strategies = {'straightMV': straightMV,
+              'straightMU8': straightMU8}
+
+def getStrategy(ss):
+    strategy = strategies.get(ss)
+    
+    if strategy == None:
+        raise ValueError("Unknown Strategy - {0}".format(strategy))
+    
+    return strategy
+    
+
 def allBundles(m = 5):
     """
     Return a numpy 2d array of all possible bundles that the agent can
@@ -12,7 +27,7 @@ def allBundles(m = 5):
         
     Return bundles as booleans for storage and computational efficiency
     """
-    return numpy.atleast_2d([bin for bin in itertools.product([False,True],repeat=m)]).astype(bool)
+    return numpy.atleast_2d([b for b in itertools.product([False,True],repeat=m)]).astype(bool)
 
 def idx2bundle(index=None, nGoods = 5):
     # convert to decimal rather than enumerating power set
@@ -176,17 +191,15 @@ def marginalUtility(bundles, priceVector, valuation, goodIdx):
     tempPriceZero[goodIdx] = numpy.float(0.0)
     
 
-    optBundleInf, predictedSurplusInf = acq(bundles     = bundles,
-                                            valuation   = valuation,
-                                            priceVector = tempPriceInf)                                               
+    predictedSurplusInf = acq(bundles     = bundles,
+                              valuation   = valuation,
+                              priceVector = tempPriceInf)[1]                                               
                                                     
         
-    optBundleZero, predictedSurplusZero = acq(bundles     = bundles,
-                                              valuation   = valuation,
-                                              priceVector = tempPriceZero)   
+    predictedSurplusZero = acq(bundles     = bundles,
+                               valuation   = valuation,
+                               priceVector = tempPriceZero)[1]   
                                                       
-
-
     margUtil = predictedSurplusZero - predictedSurplusInf
     if margUtil < 0:
         raise ValueError("simYW.marginalUtility(...) - Negative Marginal Utility (shouldn't happen).")

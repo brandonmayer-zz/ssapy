@@ -7,6 +7,8 @@ Date: 11/13/2011
 The agent base class.
 '''
 
+from ssapy import surplus
+
 class agentBase(object):
     """
     Base class for agents.
@@ -24,8 +26,29 @@ class agentBase(object):
             self.id           = agentBase.nextId
             agentBase.nextId += 1
             
+        self.bundleWon = None
+        
+        self.finalPrices = None
+            
     def id(self):
         return self.id
+    
+    def finalSurplus(self, **kwargs):
+        if self.bundleWon == None:
+            raise KeyError("Agent {0} : {1} self.bundleWon = None".\
+                           format(self.id, self.name))
+                           
+        if self.finalPrices == None:
+            raise KeyError("Agent {0} : {1} self.finalPrices = None".\
+                           format(self.id,self.name))
+            
+        val = kwargs.get('valuation')
+        
+        if val == None:
+            raise KeyError("Must Specify Valuation for won bundle.")
+            
+        return surplus( self.bundleWon,
+                        val, self.finalPrices)
     
     @staticmethod
     def type():
