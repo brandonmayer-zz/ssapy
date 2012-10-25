@@ -397,6 +397,11 @@ class margDistSCPP(pointSCPP):
         if isinstance(good,int):
             
             hist,binEdges = self.data[good]
+            
+            if x >= binEdges[-1]:
+                return 1.0
+            elif x < binEdges[0]:
+                return 0.0
                         
             p = hist / numpy.float(numpy.dot(hist, numpy.diff(binEdges)))
             
@@ -406,10 +411,10 @@ class margDistSCPP(pointSCPP):
             
             cdf = f(x)
             
-            if cdf > 1.0:
+            if cdf > 1.001:
                 raise ValueError("margDistScpp.margCdf\n" +\
                                  "cdf = {0} > 1.0".format(cdf))
-            elif cdf < 0.0:
+            elif cdf < -1e-3:
                 raise ValueError("margDistScpp.margCdf\n" +\
                                  "cdf = {0} < 0.0".format(cdf))
                 
@@ -435,6 +440,11 @@ class margDistSCPP(pointSCPP):
     
     def eval(self, q, goodIdx, kind = 'linear'):
         hist,binEdges = self.data[goodIdx]
+        
+        if q >= binEdges[-1]:
+            return 1.0
+        elif q < binEdges[0]:
+            return 0
         
         p = hist / numpy.float(numpy.dot(hist, numpy.diff(binEdges)))
         

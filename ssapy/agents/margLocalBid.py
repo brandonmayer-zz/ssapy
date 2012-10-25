@@ -184,7 +184,7 @@ def margLocalBidUtility(**kwargs):
     
     n_itr = kwargs.get('n_itr', 50)
         
-    tol = kwargs.get('tol',-numpy.float('inf'))
+    tol = kwargs.get('tol',1e-2)
     
     initialBidderType = kwargs.get('initialBidder','straightMU8')
     
@@ -212,6 +212,8 @@ def margLocalBidUtility(**kwargs):
     
     stepUtilityList = []
     itrUtilityList = [] 
+    newBidsList = [bids]
+    converged = False
     for itr in xrange(n_itr):
         if verbose:
             print "itr = {0}, bid = {1}".format(itr,bids)
@@ -260,6 +262,8 @@ def margLocalBidUtility(**kwargs):
                 
             bids[bidIdx] = newBid
             
+            newBidsList.append(bids)
+            
             stepExpVal = pricePrediction.expectedValuation(bundles,valuation,bids)
             stepExpCost = pricePrediction.expectedCost(bundles,valuation,bids)
             stepUtil = stepExpVal - stepExpCost
@@ -285,7 +289,7 @@ def margLocalBidUtility(**kwargs):
             print 'sse       = {0}'.format(sse)
             
         if sse <= tol:
-                
+            converged = True    
             if verbose:
                 print ''
                 print 'localBid terminated.'
@@ -293,9 +297,14 @@ def margLocalBidUtility(**kwargs):
                 print 'bids    = {0}'.format(bids)
                 print 'sse     = {0}'.format(numpy.dot(prevBid - bids,prevBid - bids))
         
-            break
-        
-    return bids, stepUtilityList, itrUtilityList
+            
+    if verbose:
+        print ''
+        print 'sse               = {0}'.format(sse)
+        print 'converged         = {0}'.format(converged)
+        print 'Step Utility List = {0}'.format(stepUtilityList)
+        print 'Itr Utility List  = {0}'.format(itrUtilityList)    
+    return bids, newBidsList, stepUtilityList, itrUtilityList,  converged
         
              
                      
