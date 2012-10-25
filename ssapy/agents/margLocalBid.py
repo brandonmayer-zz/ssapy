@@ -164,8 +164,140 @@ class margLocalBid(margDistPredictionAgent):
             return bids, converged, itr, sse
         
         return bids
-                
+    
+def margLocalBidUtility(**kwargs):
+    bundles = kwargs.get('bundles')
+    if bundles == None:
+        raise KeyError("Must specify bundles")
             
+    valuation = kwargs.get('valuation')
+    if valuation == None:
+        raise KeyError("Must specify valuation")
+    
+    pricePrediction = kwargs.get('pricePrediction')
+    if pricePrediction == None:
+        raise KeyError("Must specify pricePrediction")
+    
+    l = kwargs.get('l')
+    if l == None:
+        raise KeyError("Must specify l")
+    
+    n_itr = kwargs.get('n_itr', 50)
+        
+    tol = kwargs.get('tol',-numpy.float('inf'))
+    
+    initialBidderType = kwargs.get('initialBidder','straightMU8')
+    
+    verbose = kwargs.get('verbose',True)
+    
+    initialBidder = ssapy.agents.agentFactory.agentFactory(agentType = initialBidderType,
+                                                               m = bundles.shape[1])
+        
+    bids = initialBidder.SS(pricePrediction = pricePrediction,
+                            bundles = bundles,
+                            valuation = valuation,
+                            l = l)
+    
+    del initialBidder
+    
+    bundleValueDict = dict([(tuple(b),v) for b, v in zip(bundles,valuation)])
+                
+    cdf = []
+    if isinstance(pricePrediction,margDistSCPP):
+        for hist,binEdges in pricePrediction.data:
+            p = hist / numpy.float(numpy.dot(hist, numpy.diff(binEdges)))
+            c = numpy.hstack((0,numpy.cumsum(p*numpy.diff(binEdges),dtype=numpy.float)))
+            f = interp1d(binEdges,c,'linear')
+            cdf.append(f)    
+    
+    stepUtilityList = []
+    itrUtilityList = [] 
+    for itr in xrange(n_itr):
+        if verbose:
+            print "itr = {0}, bid = {1}".format(itr,bids)
+                
+        prevBid = bids.copy()
+        
+        for bidIdx in xrange(bids.shape[0]):
+                
+            newBid = 0.0
+#                posTarget = bundles[bundles[:,bidIdx] == True]
+#                negTarget = posTarget
+#                negTarget[:,bidIdx] = False
+            otherGoods = numpy.delete(numpy.arange(bids.shape[0]),bidIdx)
+            
+#                for posBundle,negBundle in zip(posTarget,negTarget):
+            for posBundle in bundles[bundles[:,bidIdx] == True]:
+                negBundle = posBundle.copy()
+                negBundle[bidIdx] = False
+                
+                v1 = bundleValueDict[tuple(posBundle)]
+                v0 = bundleValueDict[tuple(negBundle)]
+                
+                if isinstance(pricePrediction, jointGMM):
+                    p = 1.0
+                    for og in otherGoods:
+                        if posBundle[og] == True:
+                            p *= pricePrediction.margCdf(x = bids[og], margIdx = og)
+                        else:
+                            p *= (1- pricePrediction.margCdf(x = bids[og], margIdx = og))
+                                
+                elif isinstance(pricePrediction, margDistSCPP):
+
+                    p = 1.0
+                    for og in otherGoods:
+                        if bids[og] > pricePrediction.data[og][1][-1]:
+                            pass
+                        elif bids[og] < pricePrediction.data[og][1][0]:
+                            p *= 1e-8
+                        elif posBundle[og] == True:
+                            p*=cdf[og](bids[og])
+                        else:    
+                            p*=(1-cdf[og](bids[og]))
+                            
+                            
+                newBid += (v1 - v0)*p
+                
+            bids[bidIdx] = newBid
+            
+            stepExpVal = pricePrediction.expectedValuation(bundles,valuation,bids)
+            stepExpCost = pricePrediction.expectedCost(bundles,valuation,bids)
+            stepUtil = stepExpVal - stepExpCost
+            stepUtilityList.append(stepUtil)
+            
+            if verbose:
+                print '\tStep Utility = {0}'.format(stepUtil)
+            
+        itrExpVal  = pricePrediction.expectedValuation(bundles,valuation,bids)
+        itrExpCost = pricePrediction.expectedCost(bundles,valuation,bids)
+        itrExpUtil = itrExpVal - itrExpCost
+        itrUtilityList.append(itrExpUtil)
+        
+        if verbose:
+            print '\tIteration Utility = {0}'.format(itrExpUtil)
+        
+        sse = numpy.dot(prevBid - bids,prevBid - bids)
+        if verbose:
+            print ''
+            print 'Iteration = {0}'.format(itr)
+            print 'prevBid   = {0}'.format(prevBid)
+            print 'newBid    = {0}'.format(bids)
+            print 'sse       = {0}'.format(sse)
+            
+        if sse <= tol:
+                
+            if verbose:
+                print ''
+                print 'localBid terminated.'
+                print 'prevBid = {0}'.format(prevBid)
+                print 'bids    = {0}'.format(bids)
+                print 'sse     = {0}'.format(numpy.dot(prevBid - bids,prevBid - bids))
+        
+            break
+        
+    return bids, stepUtilityList, itrUtilityList
+        
+             
                      
                 
         

@@ -94,10 +94,12 @@ class simYW(agentBase):
             
         # a bit vector indicating which items where won
         # at auction
-        self.bundleWon = None
+        self.bundleWon = kwargs.get('bundleWon')
         
         # a vector of final prices for all goods
-        self.finalPrices = None
+        self.finalPrices = kwargs.get('finalPrices')
+        
+        self.pricePrediction = kwargs.get('pricePrediction')
         
         super(simYW,self).__init__(**kwargs)
         
@@ -344,6 +346,40 @@ class simYW(agentBase):
         valuation = numpy.atleast_1d(valuation)
         
         return valuation - simYW.cost(bundles = bundles, price = priceVector)
+    
+    def expectedValuation(self,**kwargs):
+        pricePrediction = kwargs.get('pricePrediction', self.pricePrediction)
+        bundles         = kwargs.get('bundles',simYW.allBundles(self.m))
+        v               = kwargs.get('v',self.v)
+        l               = kwargs.get('l',self.l)
+        val             = kwargs.get('valuation',self.valuation(bundles, v, l))
+        bids            = kwargs.get('bids', self.bid(pricePrediction = pricePrediction))
+        
+        ev = pricePrediction.expectedValuation(bundles, val, bids)
+        
+        return ev
+    
+    def expectedCost(self,**kwargs):
+        pricePrediction = kwargs.get('pricePrediction', self.pricePrediction)
+        bundles         = kwargs.get('bundles', simYW.allBundles(self.m))
+        v               = kwargs.get('v',self.v)
+        l               = kwargs.get('l',self.l)
+        val             = kwargs.get('valuation',self.valuation(bundles, v, l))
+        bids            = kwargs.get('bids',self.bid(pricePrediction = pricePrediction))
+        qmin            = kwargs.get('qmin',0)
+        qstep           = kwargs.get('qstep',1)
+        
+        ec = pricePrediction.expectedCost(bundles,val,bids,qmin,qstep)
+        
+        return ec
+    
+    def expectedUtility(self,**kwargs):
+        ev = self.expectedValuation(**kwargs)
+        ec = self.expectedCost(**kwargs)
+        u = ev - ec
+        return u
+        
+        
 
     
     def finalSurplus(self):

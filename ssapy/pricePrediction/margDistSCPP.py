@@ -432,6 +432,43 @@ class margDistSCPP(pointSCPP):
                                      "cdf = {0} < 0.0".format(cdf[i]))
                     
         return cdf
+    
+    def eval(self, q, goodIdx, kind = 'linear'):
+        hist,binEdges = self.data[goodIdx]
+        
+        p = hist / numpy.float(numpy.dot(hist, numpy.diff(binEdges)))
+        
+        f = interp1d(binEdges, numpy.hstack((0,p)), kind)
+    
+        return f(q)
+        
+    def pWin(self, bundle, bids):
+        
+        p = 1.0
+        for goodIdx, good in enumerate(bundle):
+            if good == True:
+                p*=self.margCdf(bids[goodIdx], goodIdx)
+            else:
+                p*=(1-self.margCdf(bids[goodIdx], goodIdx))
+                
+        return p
+                
+    def expectedValuation(self, bundles, valuation, bids):
+        expVal = 0.0
+        for bundleIdx, bundle in enumerate(bundles):
+            expVal += (valuation[bundleIdx]*self.pWin(bundle,bids))
+        return expVal
+            
+    def expectedCost(self, bundles, valuation, bids, qmin = 0, qstep = 1):
+        expCost = 0.0
+    
+        for goodIdx in xrange(bundles.shape[1]):
+            ep = 0.0
+            for q in numpy.arange(qmin, bids[goodIdx], qstep):
+                ep += (q*self.eval(q,goodIdx))
+            expCost += ep
+            
+        return expCost
             
     def iTsample(self, **kwargs):
         """
