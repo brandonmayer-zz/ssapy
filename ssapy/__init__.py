@@ -1,8 +1,8 @@
 import numpy
 import itertools
 
-from ssapy.agents.straightMV import straightMV
-from ssapy.agents.straightMU import straightMU8
+#from ssapy.agents.straightMV import straightMV
+#from ssapy.agents.straightMU import straightMU8
 
 strategies = {'straightMV': straightMV,
               'straightMU8': straightMU8}
