@@ -1,11 +1,6 @@
 import numpy
 import itertools
-
-#from ssapy.agents.straightMV import straightMV
-#from ssapy.agents.straightMU import straightMU8
-
-strategies = {'straightMV': straightMV,
-              'straightMU8': straightMU8}
+from ssapy.strategies import strategies
 
 def getStrategy(ss):
     strategy = strategies.get(ss)
@@ -15,7 +10,6 @@ def getStrategy(ss):
     
     return strategy
     
-
 def allBundles(m = 5):
     """
     Return a numpy 2d array of all possible bundles that the agent can
