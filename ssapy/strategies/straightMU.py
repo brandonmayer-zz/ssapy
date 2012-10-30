@@ -49,18 +49,18 @@ def straightMU8(**kwargs):
     
     kwargs.update(n_samples = 8)
     
-    return straightMU(kwargs)
+    return straightMU(**kwargs)
     
 def straightMU64(**kwargs):
     
     kwargs.update(n_samples = 64)
     
-    return straightMU(kwargs)
+    return straightMU(**kwargs)
 
 def straightMU256(**kwargs):
     
     kwargs.update(n_samples = 256)
     
-    return straightMU(kwargs)
+    return straightMU(**kwargs)
     
     
