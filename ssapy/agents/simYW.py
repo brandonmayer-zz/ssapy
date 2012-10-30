@@ -147,12 +147,13 @@ class simYW(agentBase):
         
         self.v = kwargs.get('v')
         
-        if 'v' == None:
-            randomValueVector(vmin = self.vmin, 
-                              vmax = self.vmax, 
-                              m    = self.m,
-                              l    = self.l)[0]
+        if self.v == None:
+            self.v = randomValueVector(vmin = self.vmin, 
+                                       vmax = self.vmax, 
+                                       m    = self.m,
+                                       l    = self.l)[0]
         else:
+            self.v = numpy.atleast_1d(self.v)
             numpy.testing.assert_equal(self.v.shape[0], self.m,
                                        err_msg="self.v.shape[0] = {0} != self.m = {1}".\
                                        format(self.v.shape[0],self.m))
