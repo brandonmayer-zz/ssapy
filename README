@@ -1,10 +1,12 @@
-This is a public git repository for code I'm developing while a PhD candidate in the department of 
-Electrical Engineering at Brown University.
+This directory contains code written for CSCI2951, "Autonomous Agents and Computational Market Design"
+with Professor Amy Greenwald, and TA Eric Sodomka in the Computer Science Department at Brown University.
 
-I will keep source code developed for class projects and other random ideas here. 
+Link to course website:
+http://www.cs.brown.edu/courses/csci2951-c/
 
-I am also a developer for the vxl project and anything not related to vxl or 
-main thread of research (computer vision) will be stored here.
+References:
 
-For more information about me and my research please visit:
-http://vision.lems.brown.edu/profile_pages/Brandon%20Mayer
+Wellman, M.P. (2011). "Trading Agents". Morgan & Claypool Publishers
+
+Yoon, D.Y., & Wellman, P.M.(2011). "Self-Confirming Price Prediction for Bidding in Simultaneous Second
+Price Sealed Bid Auctions". The 2011 Workshop on Trading Agent Design and Analysis. Barcelona, Catalonia, Spain.
