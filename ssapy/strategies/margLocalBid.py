@@ -6,7 +6,12 @@ from scipy.interpolate import interp1d
 
 import numpy
 import matplotlib.pyplot as plt
-from ssapy import getStrategy
+
+from straightMU import straightMU8, straightMU64, straightMU256
+
+initStrategies = {'straightMU8': straightMU8,
+                  'straightMU64': straightMU64,
+                  'straightMU256':straightMU256}
 
 
 def margLocalBid(**kwargs):
@@ -35,7 +40,7 @@ def margLocalBid(**kwargs):
     
     initSS = kwargs.get('initStrategy','straightMU8')
     
-    initialStrategy = getStrategy(initSS)
+    initialStrategy = initStrategies[initSS]
     
     bids = initialStrategy( pricePrediction = pricePrediction,
                             bundles         = bundles,
@@ -51,7 +56,8 @@ def margLocalBid(**kwargs):
             
     if vis or verboseOut:
         bidList = [bids]
-        
+    
+    converged = False
     for itr in xrange(n_itr):
         if verbose:
             print 'itr = {0}, bid = {0}'.format(itr, bids)
@@ -78,9 +84,14 @@ def margLocalBid(**kwargs):
                 if isinstance(pricePrediction, jointGMM):
                     for og in otherGoods:
                         if bundle[og] == True:
+                            
                             p *= pricePrediction.margCdf(x = bids[og], margIdx = og)
+                            if verbose:
+                                print 'p = {0}'.format(p)
                         else:
                             p *= (1- pricePrediction.margCdf(x = bids[og], margIdx = og))
+                            if verbose:
+                                print 'p = {0}'.format(p)
                             
                 elif isinstance(pricePrediction, margDistSCPP):
                     for og in otherGoods:
@@ -117,6 +128,9 @@ def margLocalBid(**kwargs):
                     
             bids[bidIdx] = newBid
             
+            if verboseOut or vis:
+                bidList.append(bids)
+            
         sse = numpy.dot(prevBid - bids, prevBid - bids)
         
         if verbose:
@@ -126,12 +140,25 @@ def margLocalBid(**kwargs):
             print 'newBid    = {0}'.format(bids)
             print 'sse       = {0}'.format(sse)
             
+        if sse <= tol:
+            converged = True
+            if verbose:
+                print 'sse = {0} < tol = {1}'.format(sse,tol)
+                print 'converged = True'
+                
+            break
+                
+            
+    if vis:
+        plt.plot(bidList[:-1],'bo-',markerfacecolor=None)
+        plt.plot(bidList[-1],'ro')
+        plt.show()
         
-        if vis:
-            bidList.append(bids)
-            plt.plot(bidList[:-1],'bo',markerfacecolor=None)
-            plt.plot(bidList[-1],'ro')
-            plt.show()
+        
+    if verboseOut:
+        return bids, bidList, converged
+    else:
+        return bids
                             
                         
                 
