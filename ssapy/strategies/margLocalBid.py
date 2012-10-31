@@ -87,11 +87,13 @@ def margLocalBid(**kwargs):
                             
                             p *= pricePrediction.margCdf(x = bids[og], margIdx = og)
                             if verbose:
-                                print 'p = {0}'.format(p)
+                                print '\t\t\t p*=cdf({0})'.format(bids[og])
+                                print '\t\t\tp = {0}'.format(p)
                         else:
                             p *= (1- pricePrediction.margCdf(x = bids[og], margIdx = og))
                             if verbose:
-                                print 'p = {0}'.format(p)
+                                print '\t\t\tp*=(1-cdf({0}))'.format(bids[og])
+                                print '\t\t\tp = {0}'.format(p)
                             
                 elif isinstance(pricePrediction, margDistSCPP):
                     for og in otherGoods:
