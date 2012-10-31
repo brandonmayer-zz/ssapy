@@ -128,6 +128,9 @@ def margLocalBid(**kwargs):
                 else:
                     newBid -= (val*p)
                     
+                if verbose:
+                    print '\t\tnewBid = {0}'.format(newBid)
+                    
             bids[bidIdx] = newBid
             
             if verboseOut or vis:
