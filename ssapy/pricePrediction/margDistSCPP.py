@@ -1,12 +1,11 @@
-from pointSCPP import *
-#from types import * #for type checking
+import numpy
 import matplotlib.pyplot as plt
 import itertools
 import os
 import copy
 from scipy.interpolate import interp1d
 
-class margDistSCPP(pointSCPP):
+class margDistSCPP(object):
     """
     Wrapper for marinal distribution self confirming price predictions.
     
@@ -440,24 +439,24 @@ class margDistSCPP(pointSCPP):
                 p*=self.margCdf(bids[goodIdx], goodIdx)
             else:
                 p*=(1-self.margCdf(bids[goodIdx], goodIdx))
+        return p
                 
     def eval(self, q, goodIdx, kind = 'linear'):
         hist, binEdges = self.data[goodIdx]
         
-        if q >= binEdges[-1]:
-            return 1.0
-        elif q < binEdges[0]:
-            return 0.0
-        
         p = hist/numpy.float(numpy.dot(hist,numpy.diff(binEdges)))
-        
         binCenters = .5*(binEdges[:-1]+binEdges[1:])
-        pmf = interp1d(binCenters,p,kind)
-        
-        return pmf(q)
         
         
+        if q < binCenters[0]:
+            return p[0]
             
+        elif q > binCenters[-1]:
+            return p[-1]
+        else:
+            pmf = interp1d(binCenters,p,kind)
+            return pmf(q)
+        
     def iTsample(self, **kwargs):
         """
         Kept for backwards-combatibility of function call.

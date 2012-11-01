@@ -1,7 +1,6 @@
-import json
-import numbers
+import matplotlib.pyplot as plt
+
 import numpy
-import copy
  
 from ssapy.pricePrediction.margDistSCPP import margDistSCPP
 
@@ -24,9 +23,7 @@ class hist(object):
         
     def binFromVal(self, val):
         if val < self.minPrice or val > self.maxPrice:
-            print '----ERROR----'
-            print 'margHist: val not in histogram range.'
-            raise valueError
+            raise ValueError("val = {0} not in histogram range".format(val))
         
         lowerBound = numpy.nonzero(self.binEdges < val)[0]
         
@@ -36,19 +33,15 @@ class hist(object):
             return lowerBound[-1]
         
     def frequency(self,goodId,val):
-        if goodID < 0 or goodID > self.m - 1:
-            print '----ERROR----'
-            print 'goodID out of range (note zero index)'
-            raise valueError
+        if goodId < 0 or goodId > self.m - 1:
+            raise ValueError("goodID = {0} out of bounds".format(goodId))
         
-        binIdx = binFromVal(val)
+        binIdx = self.binFromVal(val)
         return self.counts[goodId][binIdx]
         
     def upcount(self, goodId, val, mag = 1):
         if goodId < 0 or goodId > self.m - 1:
-            print '----ERROR----'
-            print 'goodId out of range (note zero index)'
-            raise valueError
+            raise ValueError("goodID = {0} out of bounds".format(goodId))
         
         binIdx = self.binFromVal(val)
         self.counts[goodId][binIdx]+=mag
@@ -58,25 +51,16 @@ class hist(object):
         """
         Return a numpy array of probabilities from the counts
         """       
-        a = area(goodId)
+        a = self.area(goodId)
         
         return numpy.array(self.counts[goodId],dtype='float64')/a
-    
-    def p(self):
-        prob = numpy.array(self.counts,dtype='float64')
-        for i in len(self.counts):
-            prob[i] /= self.area[i]
-            
-        return prob
-            
+                
     def area(self,goodId):
-        if goodID < 0 or goodID > self.m - 1:
-            print '----ERROR----'
-            print 'goodID out of range (note zero index)'
-            raise valueError
+        if goodId < 0 or goodId > self.m - 1:
+            raise ValueError("goodID = {0} out of bounds".format(goodId))
         
         a = 0.0
-        for i in xrange(len(binEdges)):
+        for i in xrange(len(self.binEdges)):
             a += self.counts[goodId][i]*self.delta
             
         return a
@@ -106,43 +90,42 @@ class hist(object):
         """
         Function to plot the data using matplot lib
         """
-        if not joint:
-            numpy.testing.assert_(len(self.binEdges),len(self.counts))
+        numpy.testing.assert_(len(self.binEdges),len(self.counts))
+        
+        if 'colorStyles' in kwargs:    
+            numpy.testing.assert_(len(kwargs['colorStyles']), len(self.binEdges))
             
-            if 'colorStyles' in kwargs:    
-                numpy.testing.assert_(len(kwargs['colorStyles']), len(self.binEdges))
-                
-                colorStyles = kwargs['colorStyles']
-            else:
-                #pick some random colors
-                cmap = plt.cm.get_cmap('hsv')
-                colorStyles = [cmap(i) for i in numpy.linspace(0,0.9,len(self.counts))]
+            colorStyles = kwargs['colorStyles']
+        else:
+            #pick some random colors
+            cmap = plt.cm.get_cmap('hsv')
+            colorStyles = [cmap(i) for i in numpy.linspace(0,0.9,len(self.counts))]
+        
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        
+        for i in xrange(len(self.counts)):
+            ax.plot(.5*(self.binEdges[i][:-1]+self.binEdges[i][1:]),self.counts[i],c=colorStyles[i],label='Slot {0}'.format(i))
             
-            fig = plt.figure()
-            ax = fig.add_subplot(111)
+        if 'xlabel' in kwargs:
+            plt.xlabel(kwargs['xlabel'])
+        else:
+            plt.xlabel('Prices')
             
-            for i in xrange(len(self.counts)):
-                ax.plot(.5*(self.binEdges[i][:-1]+self.binEdges[i][1:]),self.counts[i],c=colorStyles[i],label='Slot {0}'.format(i))
-                
-            if 'xlabel' in kwargs:
-                plt.xlabel(kwargs['xlabel'])
-            else:
-                plt.xlabel('Prices')
-                
-            if 'ylabel' in kwargs:
-                plt.ylabel(kwargs['ylabel'])
-            else:
-                plt.ylabel('Probability')
+        if 'ylabel' in kwargs:
+            plt.ylabel(kwargs['ylabel'])
+        else:
+            plt.ylabel('Probability')
+        
+        if 'title' in kwargs:
+            plt.title(kwargs['title'])
+        else:
+            plt.title('Price Distribution')
             
-            if 'title' in kwargs:
-                plt.title(kwargs['title'])
-            else:
-                plt.title('Price Distribution')
-                
-#            plt.legend()
-            leg = ax.legend(loc='best',fancybox=True)
-            leg.get_frame().set_alpha(0.5)
-            
-            plt.show()
+
+        leg = ax.legend(loc='best',fancybox=True)
+        leg.get_frame().set_alpha(0.5)
+        
+        plt.show()
         
         
