@@ -38,13 +38,18 @@ def margLocalBid(**kwargs):
     
     tol = kwargs.get('tol',1e-3)
     
-    initSS = kwargs.get('initStrategy','straightMU8')
+    initialBid = kwargs.get('initialBid')
+    if initialBid == None:
+        initSS = kwargs.get('initStrategy','straightMU8')
+        initialStrategy = initStrategies[initSS]
+        bids = initialStrategy( pricePrediction = pricePrediction,
+                                bundles         = bundles,
+                                valuation       = valuation )
+    else:
+        bids = initialBid
     
-    initialStrategy = initStrategies[initSS]
-    
-    bids = initialStrategy( pricePrediction = pricePrediction,
-                            bundles         = bundles,
-                            valuation       = valuation )
+    if verbose:
+        print 'initial bid = {0}'.format(bids)
     
     if isinstance(pricePrediction,margDistSCPP):
         cdf = []
@@ -155,8 +160,9 @@ def margLocalBid(**kwargs):
                 
             
     if vis:
-        plt.plot(bidList[:-1],'bo-',markerfacecolor=None)
-        plt.plot(bidList[-1],'ro')
+        bidList = numpy.atleast_2d(bidList)
+        plt.plot(bidList[:-1,0],bidList[:-1,1],'bo-',markerfacecolor=None)
+        plt.plot(bidList[-1,0], bidList[-1,1],'ro')
         plt.show()
         
         
