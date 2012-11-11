@@ -153,7 +153,6 @@ class dok_hist(object):
             samples.append(sample)
             
         return samples
-    
 def main():
     hist = dok_hist(m=1)
     hist.upcount(5,10)
