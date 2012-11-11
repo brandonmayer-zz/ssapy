@@ -5,6 +5,8 @@ import os
 
 isnumber = lambda n: isinstance(n, (int, float, long, complex))
 
+machine_precision = numpy.finfo(numpy.double).eps
+
 class dok_hist(object):
     """
     A dictionary of keys sparse histogram.
@@ -13,12 +15,15 @@ class dok_hist(object):
         [0], (0,1], (1,2], ...
         
     [0] gets its own bin
-    
+
     for all others:
     val belongs to bin i implies:
     bin[i] < val < bin[i+1]
     
     all other bins follow the lower exclusive upper inclusive pattern.
+    
+    This TERRIBLE convention was not my choice! It is to maintain
+    compatability with Dr. Wellman's code.
     """
     def __init__(self, **kwargs):
         extent = kwargs.get('extent')
@@ -93,32 +98,72 @@ class dok_hist(object):
             r.append( (bin_list[mid], bin_list[mid+1]) )
             
         return r
-                 
+                
+    def key_from_val(self,val):
+        return tuple(self.range_from_val(numpy.atleast_1d(val)))
+     
     def upcount(self, val, mag = 1.0):
-        r = tuple(self.range_from_val(numpy.atleast_1d(val)))
+        k = self.key_from_val(val)
         
         try:
-            self.c[r] += mag
+            self.c[k] += mag
         except KeyError:
-            self.c[r] = mag
+            self.c[k] = mag
                 
     def counts(self, val):
-        r = tuple(self.range_from_val(numpy.atleast_1d(val)))
+        k = self.key_from_val(val)
         
-        c = self.c.get(r)
+        c = self.c.get(k)
         
         if c == None:
             return 0
         else:
             return c
         
+    def sample(self, n_samples = 1):
+        dim = self.dim()
+        keys = self.c.keys()
+        counts = self.c.values()
+        p = counts/numpy.sum(counts,dtype=numpy.float)
+        
+        #1. sample ranges
+        range_samples = []
+        for i in xrange(n_samples):
+            range_samples.append(keys[numpy.random.multinomial(1,p).argmax()])
+            
+        #2. sample uniformly from ranges
+        samples = []
+        for r in range_samples:
+            if dim == 1:
+                if r[0][0] == r[0][1]:
+                    sample = r[0][0]
+                else:
+                    # because we used obscene convention (x,y] and samplers
+                    # use the correct convention [x,y), add the machine precision to 
+                    # get desired functionality
+                    sample = r[0][0] + machine_precision + numpy.random.uniform()
+            else:
+                sample = numpy.zeros(dim)
+                for dim_idx in xrange(len(r)):
+                    if r[dim_idx][0] == r[dim_idx][1]:
+                        sample[dim_idx] = r[dim_idx][0]
+                    else:
+                        sample[dim_idx] = r[dim_idx][0] + machine_precision + numpy.random.uniform()
+                
+            samples.append(sample)
+            
+        return samples
     
 def main():
     hist = dok_hist(m=1)
-#    key = hist.key_from_val(0)
-    val = 25
-    r = hist.range_from_val(val) 
-    print 'r = {0}'.format(r)
+    hist.upcount(5,10)
+    hist.upcount(20,5)
+    hist.upcount(0,7)
+    hist.upcount(50,4)
+    
+    samples = hist.sample(10)
+    
+    print 'samples = {0}'.format(samples)
 
 if __name__ == "__main__":
     main()
