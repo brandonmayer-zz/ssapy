@@ -2,6 +2,8 @@ import numpy
 import itertools
 from ssapy.strategies import strategies
 
+from ssapy.pricePrediction.dok_hist import dok_hist
+
 def getStrategy(ss):
     strategy = strategies.get(ss)
     

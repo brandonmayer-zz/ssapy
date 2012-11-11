@@ -89,18 +89,7 @@ class dok_hist(object):
     
 def main():
     hist = dok_hist(m=1)
-    k  = hist.key_from_val(4)
-    print k
-    r = hist.range_from_val(4)
-    print r
-    
-    print hist.range_from_val(4.5)
-    print hist.range_from_val(50)
-    pass
-#    hist.upcount([1,2],5)
-#    print'{0}'.format(hist.range_from_val([1,2]))
-#    pass
-#    pass
+    key = hist.key_from_val(0)
 
 if __name__ == "__main__":
     main()
