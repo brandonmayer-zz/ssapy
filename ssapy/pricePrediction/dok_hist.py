@@ -73,7 +73,7 @@ class dok_hist(object):
             last  = len(bin_list)
             while True:
                 
-                mid = int((last-first)/2)
+                mid = first + int((last-first)/2)
                 
                 if first >= last:
                     raise ValueError("No bin found for v = {0} in\nbins = {1}".format(v, bin_list))
@@ -116,7 +116,7 @@ class dok_hist(object):
 def main():
     hist = dok_hist(m=1)
 #    key = hist.key_from_val(0)
-    val = 0
+    val = 25
     r = hist.range_from_val(val) 
     print 'r = {0}'.format(r)
 
