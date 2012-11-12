@@ -41,7 +41,14 @@ class dok_hist(object):
                 for j in xrange(0,51):
                     self.bins[i].append(j)
                     
+        self.type = kwargs.get(type, 'discrete')
+        
+        
         self.c = {}
+        
+        self.isnormed = False
+        
+        self.counts_accum = 0.0
         
     def extent(self):
         return [(bins[0], bins[-1]) for bins in self.bins]
@@ -109,7 +116,47 @@ class dok_hist(object):
             self.c[k] += mag
         except KeyError:
             self.c[k] = mag
+            
+        self.counts_accum += mag
+        
+    def norm_constant(self, type = 'discrete'):
+        """
+        Compute and return the normalization constant
+        given the current state of the histogram.
+        
+        type can be either 'discrete' or 'density'
+        
+        type = 'discrete' 
+        Implies we are approximating the true
+        distribution with point masses at the center of each bin. 
+        The normalization constant is then just the sum of all counts
+        for all bins.
+        
+        type = 'density' 
+        Assume each bin is uniformly distributed over its interval. 
+        The normalization constant is then the the counts assocaited with the interval
+        multiplied by the area of the bin. 
+        """
+        z = 0.0
+        
+        if type == 'discrete':
+            for counts in self.c.values():
+                z += counts
                 
+        if type == 'density':
+            for intervals, counts in self.c.iteritems():
+                a = 1.0
+                for interval in intervals:
+                    a*=(interval[1] - interval[0]) 
+                z += counts
+                
+        return z
+                
+    def normalize(self, type = 'discrete'):
+        z = self.norm_constant(type)
+        for key in self.c.keys():
+            self.c[key]/=z
+            
     def counts(self, val):
         k = self.key_from_val(val)
         
@@ -153,16 +200,25 @@ class dok_hist(object):
             samples.append(sample)
             
         return samples
+    
+    
 def main():
+    import matplotlib.pyplot as plt
+        
     hist = dok_hist(m=1)
-    hist.upcount(5,10)
-    hist.upcount(20,5)
-    hist.upcount(0,7)
-    hist.upcount(50,4)
+    for i in xrange(1,51):
+        hist.upcount(i, 1.0)
+        
+    print 'counts = {0}'.format(hist.c)
     
-    samples = hist.sample(10)
-    
+    samples = hist.sample(100)
+
+    h,b = numpy.histogram(samples, bins = range(0,51))
+    plt.bar(b[0:-1],h)
+    plt.show()
+        
     print 'samples = {0}'.format(samples)
+
 
 if __name__ == "__main__":
     main()
