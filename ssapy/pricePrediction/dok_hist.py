@@ -153,10 +153,29 @@ class dok_hist(object):
         return z
                 
     def normalize(self, type = 'discrete'):
+        """
+        Normalize the counts, return normalization constant.
+        """
+        
         z = self.norm_constant(type)
         for key in self.c.keys():
             self.c[key]/=z
             
+        self.isnormed = True
+        
+        return z
+            
+    def eval(self, val):
+        k = self.key_from_val(val)
+        
+        c = self.c.get(k)
+        
+        if c == None:
+            return 0
+        else:
+            return c / self.counts_accum
+        
+        
     def counts(self, val):
         k = self.key_from_val(val)
         
@@ -200,6 +219,45 @@ class dok_hist(object):
             samples.append(sample)
             
         return samples
+    
+    def expected_cost(self, bid):
+        """
+        Compute the expected cost given a vector of bids.
+        Approximating \int_{q=0}^bqp(q)dq.
+        """
+        dim = self.dim()
+        
+        if self.isnormed:
+            raise NotImplementedError
+        else:
+            ec = numpy.zeros(dim)
+            for bin_range, counts in self.c:
+                bin_valid = True
+                for d in xrange(dim):
+                    if bid[d] < bin_range[d][1]:
+                        bin_valid = False
+                        
+    def bin_centers(self):
+        bin_centers = []
+        for bin_list in self.bins:
+            bin_centers.append(bin_list[0:-1] + numpy.diff(bin_list)/2.0)
+        return bin_centers
+    
+    def marginal(self, target_dim):
+        bin_centers = self.bin_centers()
+        
+        target_bin_centers = bin_centers[target_dim]
+        marg = {}
+        for target_bin_center in target_bin_centers:
+            
+        
+     
+                        
+                    
+                    
+                     
+ 
+
     
     
 def main():
