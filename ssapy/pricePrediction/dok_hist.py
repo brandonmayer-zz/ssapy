@@ -1,6 +1,8 @@
 import numpy
 from scipy.sparse import dok_matrix
 
+import matplotlib.pyplot as plt
+
 import os
 import copy
 
@@ -153,6 +155,11 @@ class dok_hist(object):
         self.counts_accum += mag
         
     def set(self, val, mag):
+        if not isinstance(mag,int) and self.isdensity == False:
+            s = "Histogram is not a density. Must provide " +\
+                "an interger count to set(...)"
+            raise ValueError(s)
+        
         k = self.key_from_val(val)
         
         self.c[k] = mag
@@ -257,6 +264,27 @@ class dok_hist(object):
         
         return marg
         
+    def show(self, filename = '', density = True):
+        if self.dim() == 1:
+            bin_centers = self.bin_centers()[0]
+            
+            y = []
+            for bc in bin_centers:
+                if density:
+                    y.append(self.density(bc))
+                else:
+                    y.append(self.counts(bc))
+                    
+            plt.bar(bin_centers,y, align='center')
+            
+            if filename == '':
+                plt.show()
+            else:
+                plt.savefig(filename)
+        else:
+            raise NotImplementedError("NOT IMPLEMENTED")
+            
+            
         
 def marginal_expected_cost( hob_hist, bid):
     if hob_hist.dim() != 1:
@@ -310,21 +338,10 @@ def expected_cost( hob_hist, bids ):
         
             
 def main():
-    import matplotlib.pyplot as plt
-        
-    hist = dok_hist(m=1)
-    for i in xrange(1,51):
-        hist.upcount(i, 1.0)
-        
-    print 'counts = {0}'.format(hist.c)
-    
-    samples = hist.sample(100)
-
-    h,b = numpy.histogram(samples, bins = range(0,51))
-    plt.bar(b[0:-1],h)
-    plt.show()
-        
-    print 'samples = {0}'.format(samples)
+    h = dok_hist(m=1, isdensity = True)
+    h.set(0,0.5)
+    h.set(30,0.5)
+    h.show()
 
 
 if __name__ == "__main__":

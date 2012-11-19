@@ -66,7 +66,10 @@ class test_dok_hist(unittest.TestCase):
         self.assertAlmostEqual(ec,0.0)
         
     def test_expected_cost(self):
-        pass
+        hist = dok_hist(m=2)
+        
+        hist.set([0,30],0.5)
+        hist.set([30,0],0.5)
         
         
 if __name__ == '__main__':
