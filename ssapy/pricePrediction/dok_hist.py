@@ -2,6 +2,7 @@ import numpy
 from scipy.sparse import dok_matrix
 
 import os
+import copy
 
 isnumber = lambda n: isinstance(n, (int, float, long, complex))
 
@@ -43,10 +44,9 @@ class dok_hist(object):
                     
         self.type = kwargs.get(type, 'discrete')
         
+        self.isdensity = kwargs.get('isdensity',False)
         
         self.c = {}
-        
-        self.isnormed = False
         
         self.counts_accum = 0.0
         
@@ -105,10 +105,43 @@ class dok_hist(object):
             r.append( (bin_list[mid], bin_list[mid+1]) )
             
         return r
+    
+    def center_from_range(self,r):
+        """
+        The range should be a list of tuples (each with 2 entries) or a single
+        tuple (2 entries).
+        
+        For discrete entries: t[0] == t[1] -> just use the value of the discrete
+        entry as the center. (just by convention)
+        """
+        if isinstance(r,tuple) and len(r) == 2:
+            return r[0] + 0.5*numpy.diff(r)
+        
+        elif isinstance(r,list) and len(r) == self.dim():
+            center = numpy.zeros(len(r))
+            for idx, t in enumerate(r):
+                if t[0] == t[1]:
+                    center[idx] = t[0]
+                elif t[1] > t[0]:
+                    center[idx] = t[0] + 0.5*(t[1] - t[0])
+                else:
+                    raise ValueError("Could Not Compute Center of {0}".format(t))
+                
+            return center
+        else:
+            raise ValueError("Unknown range format {0}".format(r))
+            
+                
                 
     def key_from_val(self,val):
         return tuple(self.range_from_val(numpy.atleast_1d(val)))
      
+    def bin_centers(self):
+        bin_centers = []
+        for bin_list in self.bins:
+            bin_centers.append(bin_list[0:-1] + numpy.diff(bin_list)/2.0)
+        return bin_centers
+    
     def upcount(self, val, mag = 1.0):
         k = self.key_from_val(val)
         
@@ -119,63 +152,11 @@ class dok_hist(object):
             
         self.counts_accum += mag
         
-    def norm_constant(self, type = 'discrete'):
-        """
-        Compute and return the normalization constant
-        given the current state of the histogram.
-        
-        type can be either 'discrete' or 'density'
-        
-        type = 'discrete' 
-        Implies we are approximating the true
-        distribution with point masses at the center of each bin. 
-        The normalization constant is then just the sum of all counts
-        for all bins.
-        
-        type = 'density' 
-        Assume each bin is uniformly distributed over its interval. 
-        The normalization constant is then the the counts assocaited with the interval
-        multiplied by the area of the bin. 
-        """
-        z = 0.0
-        
-        if type == 'discrete':
-            for counts in self.c.values():
-                z += counts
-                
-        if type == 'density':
-            for intervals, counts in self.c.iteritems():
-                a = 1.0
-                for interval in intervals:
-                    a*=(interval[1] - interval[0]) 
-                z += counts
-                
-        return z
-                
-    def normalize(self, type = 'discrete'):
-        """
-        Normalize the counts, return normalization constant.
-        """
-        
-        z = self.norm_constant(type)
-        for key in self.c.keys():
-            self.c[key]/=z
-            
-        self.isnormed = True
-        
-        return z
-            
-    def eval(self, val):
+    def set(self, val, mag):
         k = self.key_from_val(val)
         
-        c = self.c.get(k)
-        
-        if c == None:
-            return 0
-        else:
-            return c / self.counts_accum
-        
-        
+        self.c[k] = mag
+    
     def counts(self, val):
         k = self.key_from_val(val)
         
@@ -185,7 +166,44 @@ class dok_hist(object):
             return 0
         else:
             return c
+                                    
+    def eval(self, val):
+        """
+        Backwards compatible wrapper around dok_hist.density()
+        """
+        return self.density(val)
         
+    def density(self, val):
+        r = self.range_from_val(val)
+        k = tuple(r)
+        
+        c = self.c.get(k)
+        
+        if c == None or c == 0.0:
+            return 0.0
+        elif self.isdensity:
+            return numpy.float(c)
+        else:
+            dif = numpy.diff(r)
+            dif[dif==0]=1
+            volume = numpy.prod(dif) 
+            return numpy.float(c) / numpy.float(self.counts_accum*volume)
+        
+    def counts_sum(self):
+        """
+        If the histogram is not a density, return the sum of all counts.
+        """
+        if self.isdensity:
+            raise ValueError("Cannot Compute Sum of counts for density")
+        
+        z = 0.0
+        for counts in self.c.itervalues():
+            z += counts
+            
+        self.counts_accum = z
+        
+        return z
+    
     def sample(self, n_samples = 1):
         dim = self.dim()
         keys = self.c.keys()
@@ -219,47 +237,78 @@ class dok_hist(object):
             samples.append(sample)
             
         return samples
-    
-    def expected_cost(self, bid):
-        """
-        Compute the expected cost given a vector of bids.
-        Approximating \int_{q=0}^bqp(q)dq.
-        """
-        dim = self.dim()
-        
-        if self.isnormed:
-            raise NotImplementedError
-        else:
-            ec = numpy.zeros(dim)
-            for bin_range, counts in self.c:
-                bin_valid = True
-                for d in xrange(dim):
-                    if bid[d] < bin_range[d][1]:
-                        bin_valid = False
                         
-    def bin_centers(self):
-        bin_centers = []
-        for bin_list in self.bins:
-            bin_centers.append(bin_list[0:-1] + numpy.diff(bin_list)/2.0)
-        return bin_centers
-    
     def marginal(self, target_dim):
-        bin_centers = self.bin_centers()
+        """
+        Comput marginal distribution of given dimension.
         
-        target_bin_centers = bin_centers[target_dim]
-        marg = {}
-        for target_bin_center in target_bin_centers:
+        target_dim is zero indexed.
+        """
+        marg = dok_hist(m=1)
+        
+        marg.isnormed = True
+        
+        marg.bins = [self.bins[target_dim]]
+        
+        for r in self.c.keys():
+            center = self.center_from_range(list(r))
+            target_center = center[target_dim]
+            marg.upcount(target_center,self.density(center))
+        
+        return marg
+        
+        
+def marginal_expected_cost( hob_hist, bid):
+    if hob_hist.dim() != 1:
+        err_str = "Must provide marginal histogram," +\
+                  "hob_hist.dim() = {0} != 1".format(hob_hist.dim())
+        raise ValueError(err_str)
+    if isnumber(bid):
+        pass
+    elif len(bid) != 1:
+        raise ValueError("len(bid) = {0} ! = 1".format(len(bid)))
+    
+    ec = 0.0
+    
+    for r in hob_hist.c.keys():
+        r = r[0]
+         
+        if r[0] < bid and r[1] <= bid:
+            scale = 0.5*(r[1]**2 - r[0]**2)
+            ec += hob_hist.density(r[1])*scale
+        elif bid > r[0] and bid < r[1]:
+            scale = 0.5*(bid**2 - r[0]**2)
+            ec += hob_hist.density(r[1])*scale
             
+    return ec
         
-     
-                        
-                    
-                    
-                     
- 
-
-    
-    
+           
+        
+def expected_cost( hob_hist, bids ):
+    """
+    inputs:
+        highest other agent bid histogram
+        bid vector
+    outputs:
+        expected cost given bid
+    """
+    if isnumber(bids):
+        bidv = numpy.asarray([bids])
+    else:
+        bidv = numpy.asarray(bids)
+        
+    if not bidv.shape[0] == hob_hist.dim():
+        raise ValueError("hob_hist.dim() = {0} != bids.shape[0] = {1}".\
+                         format(hob_hist.dim(), bidv.shape[0]))
+        
+    ec = 0.0
+    for d, bid in enumerate(bidv):
+        marg = hob_hist.marginal(d)
+        ec += marginal_expected_cost(marg, bid)
+        
+    return ec
+        
+            
 def main():
     import matplotlib.pyplot as plt
         
