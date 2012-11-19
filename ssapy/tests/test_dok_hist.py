@@ -2,7 +2,7 @@ import copy
 import unittest
 
 from ssapy import dok_hist
-from ssapy.pricePrediction.dok_hist import expected_cost
+from ssapy.pricePrediction.dok_hist import expected_cost, prob_win_given_bid
 
 class test_dok_hist(unittest.TestCase):
     def setUp(self):
@@ -66,10 +66,70 @@ class test_dok_hist(unittest.TestCase):
         self.assertAlmostEqual(ec,0.0)
         
     def test_expected_cost(self):
-        hist = dok_hist(m=2)
+        hist = dok_hist(m=2, isdensity=True)
         
         hist.set([0,30],0.5)
         hist.set([30,0],0.5)
+        
+        bid = [25,25]
+        
+        ec = expected_cost(hist,bid)
+        
+        self.assertAlmostEqual(ec,0.0)
+        
+        bid = [31,31]
+        
+        ec = expected_cost(hist,bid)
+        
+        self.assertAlmostEqual(ec, 29.5)
+        
+    def test_prob_win_given_bid(self):
+        hist = dok_hist(m=2, isdensity=True)
+        
+        hist.set([2.5,2.5],.25)
+        hist.set([5.5,1.5],.75)
+        
+        bid = [2.5,2.5]
+        
+        pwin = {}
+        
+        sum = 0.0
+        for i in [0,1]:
+            for j in [0,1]:
+                pwin[(i,j)] = prob_win_given_bid(hist,[i,j],bid)
+                sum+=pwin[(i,j)]
+                
+        self.assertAlmostEqual(pwin[(0,0)], 1./16)
+        self.assertAlmostEqual(pwin[(1,0)], 1./16)
+        self.assertAlmostEqual(pwin[(0,1)], 13./16)
+        self.assertAlmostEqual(pwin[(1,1)], 1./16)
+        self.assertAlmostEqual(sum,1.0)
+        
+        del hist
+        hist = dok_hist(m=2, isdensity = True)
+        hist.set([2.5,2.5],0.25)
+        hist.set([5.5,1.5],0.25)
+        hist.set([4.5,4.5],0.5)
+        bid = [4,3]
+        pwin = {}
+        sum= 0.0
+        for i in [0,1]:
+            for j in [0,1]:
+                pwin[(i,j)] = prob_win_given_bid(hist,[i,j],bid)
+                sum += pwin[(i,j)]
+                
+        self.assertAlmostEqual(pwin[(0,0)], 0.5)
+        self.assertAlmostEqual(pwin[(0,1)], 0.25)
+        self.assertAlmostEqual(pwin[(1,0)], 0.0)
+        self.assertAlmostEqual(pwin[(1,1)], 0.25)
+        self.assertAlmostEqual(sum,1.0)
+        
+                
+        
+        
+        
+
+        
         
         
 if __name__ == '__main__':

@@ -335,13 +335,64 @@ def expected_cost( hob_hist, bids ):
         ec += marginal_expected_cost(marg, bid)
         
     return ec
+
+def prob_win_given_bid( hob_hist, bundle, bids):
+    if not isinstance(hob_hist, dok_hist):
+        raise ValueError("Must provide dok_hist instance.")
+    
+    bid_view = numpy.atleast_1d(bids)
+    bundle_view = numpy.atleast_1d(bundle)
+    
+    if not (bid_view.shape[0] == bundle_view.shape[0]) \
+         and not(bid_view.shape[0] == hob_hist.dim()):
+        msg = "Dimension Mismatch:\n" +\
+              "bid.shape[0] = {0}, bundle.shape[0] = {1}, hob_hist.dim() = {2}"\
+            .format(bid_view.shape[0], bundle_view.shape[0], hob_hist.dim())
+        raise ValueError(msg)
+    
+    
+    pwin = 0.0
+    for bin_range in hob_hist.c.keys():
+        include = True
         
+        if hob_hist.dim() == 1:
+            bin_range = bin_range[0]
+        
+        volume = 1.0
+        for good_idx, good in enumerate(bundle_view):
+            if good and (bid_view[good_idx] < bin_range[good_idx][0]):
+                #if you would loose the good but the target
+                #bundle included the good
+                include = False   
+            elif not good and (bid_view[good_idx] > bin_range[good_idx][1]):
+                #if you would win the good but it isn't included
+                #in the bundle
+                include = False
+                
+            if include == False:
+                break
+            else:
+                if bin_range[good_idx][0] == bin_range[good_idx][1]:
+                    pass
+                else:
+                    if good:
+                        volume*=(numpy.min([bid_view[good_idx],bin_range[good_idx][1]]) - bin_range[good_idx][0])
+                    else:
+                        volume*=(bin_range[good_idx][1] - numpy.max([bid_view[good_idx], bin_range[good_idx][0]]))
             
+        if include:
+            centers = hob_hist.center_from_range(list(bin_range))
+            density = hob_hist.density(centers)                
+            pwin += density*volume
+                    
+    return pwin
+                            
 def main():
-    h = dok_hist(m=1, isdensity = True)
-    h.set(0,0.5)
-    h.set(30,0.5)
-    h.show()
+    h = dok_hist(m=2, isdensity = True)
+    h.set([2.5,2.5],.25)
+    h.set([5.5,1.5],.75)
+    
+    
 
 
 if __name__ == "__main__":
