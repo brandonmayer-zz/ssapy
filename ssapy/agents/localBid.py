@@ -62,11 +62,6 @@ class localBid(margDistPredictionAgent):
             
             samples = pricePrediction.sample(n_samples = nSamples)
                        
-        
-            
-        
-        
-        
         #to avoid circular import (NameError exception)
         initialBidder = ssapy.agents.agentFactory.agentFactory(agentType = initialBidderType,
                                                                m = bundles.shape[1])

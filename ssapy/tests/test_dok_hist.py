@@ -2,7 +2,8 @@ import copy
 import unittest
 
 from ssapy import dok_hist
-from ssapy.pricePrediction.dok_hist import expected_cost, prob_win_given_bid
+from ssapy.pricePrediction.dok_hist import expected_cost, \
+    prob_win_given_bid, expected_utility
 
 class test_dok_hist(unittest.TestCase):
     def setUp(self):
@@ -124,14 +125,31 @@ class test_dok_hist(unittest.TestCase):
         self.assertAlmostEqual(pwin[(1,1)], 0.25)
         self.assertAlmostEqual(sum,1.0)
         
-                
+#    def test_expected_utility(self):
+#        hist = dok_hist(m=2, isdensity = True)
+#        hist.set([0,30],0.5)
+#        hist.set([30,0],0.5)
+#        import ssapy
+#        import numpy
+#        
+#        bundles = ssapy.allBundles(2)
+#        valuation = numpy.zeros(bundles.shape[0])
+#        valuation[-1] = 50
+#        
+#        bids = [25,25]
+#        eu = expected_utility(hist, bundles, valuation, bids)
+#        
+#        print 'eu = {0}'.format(eu)
+#        self.assertAlmostEqual(eu, 0.0)
+#        
+#        bids = [31,25]
+#        ec = expected_cost(hist,bids)
+#        print 'ec = {0}'.format(ec)
+#        eu = expected_utility(hist,bundles,valuation,bids)
+#        print 'eu = {0}'.format(eu)
+#        self.assertAlmostEqual(eu,10)
         
-        
-        
-
-        
-        
-        
+    
 if __name__ == '__main__':
     unittest.main()
         

@@ -336,6 +336,16 @@ def expected_cost( hob_hist, bids ):
         
     return ec
 
+def expected_utility( hob_hist, bundles, valuations, bids):
+    pass
+    ev = 0.0
+    for bundle, value in zip(bundles, valuations):
+        ev += value*prob_win_given_bid(hob_hist, bundle, bids)
+        
+    ec = expected_cost(hob_hist, bids)
+    
+    return ev - ec
+    
 def prob_win_given_bid( hob_hist, bundle, bids):
     if not isinstance(hob_hist, dok_hist):
         raise ValueError("Must provide dok_hist instance.")
