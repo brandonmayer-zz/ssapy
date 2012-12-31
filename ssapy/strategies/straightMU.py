@@ -19,12 +19,16 @@ import numpy
 def straightMU(**kwargs):
     pricePrediction = kwargs.get('pricePrediction')
     if pricePrediction == None:
-        raise KeyError("Must specify pricePrediction.")
+        raise KeyError("Must specify pricePrediction")
     
-    revDict = kwargs.get('revDict')
-    if revDict == None:
-        raise KeyError("Must specify  revDict.")
-        
+    bundles = kwargs.get('bundles')
+    if bundles == None:
+        raise KeyError("Must specify bundles")
+            
+    valuation = kwargs.get('valuation')
+    if valuation == None:
+        raise KeyError("Must specify valuation")
+    
     n_samples = kwargs.get('n_samples')
     if n_samples == None:
         raise KeyError("Must specify number of samples")
@@ -34,7 +38,8 @@ def straightMU(**kwargs):
     expectedPrices = numpy.mean(samples, 0)
     
     return straightMV( pricePrediction = expectedPrices,
-                       revDict         = revDict)
+                       bundles         = bundles,
+                       valuation       = valuation)
   
 def straightMU8(**kwargs):
     """
@@ -42,19 +47,19 @@ def straightMU8(**kwargs):
     Then bid via straightMV with the resulting expected prices
     """
     
-    kwargs.update(n_samples = 8)
+    kwargs.update({'n_samples':8})
     
     return straightMU(**kwargs)
     
 def straightMU64(**kwargs):
     
-    kwargs.update(n_samples = 64)
+    kwargs.update({'n_samples':64})
     
     return straightMU(**kwargs)
 
 def straightMU256(**kwargs):
     
-    kwargs.update(n_samples = 256)
+    kwargs.update({'n_samples':256})
     
     return straightMU(**kwargs)
     
