@@ -16,19 +16,20 @@ import ssapy
 
 def straightMV(**kwargs):
     pricePrediction = kwargs.get('pricePrediction')
+    
     if pricePrediction == None:
         raise KeyError("Must specify pricePrediction")
     
-    revDict = kwargs.get('revDict')
-    if revDict == None:
-        raise KeyError("Must specify revDict.")
-    
     pricePrediction = numpy.atleast_1d(pricePrediction)
     
-    bundles = numpy.atleast_2d(revDict.keys())
+    bundles = kwargs.get('bundles')
+    if bundles == None:
+        raise KeyError("straightMV.SS(...) - must specify bundles")
+                    
+    valuation = kwargs.get('valuation')
+    if valuation == None:
+        raise KeyError("straightMV - must specify valuation")
     
-    valuation = numpy.atleast_1d(revDict.values())
-        
     n_goods = bundles.shape[1]
     marginalValueBid = numpy.zeros(n_goods,dtype=numpy.float64)
     for goodIdx in xrange(n_goods):
