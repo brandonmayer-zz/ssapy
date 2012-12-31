@@ -1,11 +1,11 @@
 import numpy
 import itertools
-from ssapy.strategies import strategies
+from ssapy.strategies import strategyDict
 
 from ssapy.pricePrediction.dok_hist import dok_hist
 
 def getStrategy(ss):
-    strategy = strategies.get(ss)
+    strategy = strategyDict.get(ss)
     
     if strategy == None:
         raise ValueError("Unknown Strategy - {0}".format(strategy))
