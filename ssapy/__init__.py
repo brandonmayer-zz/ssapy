@@ -176,11 +176,11 @@ def acq(**kwargs):
     optBundleIdxList = numpy.nonzero(splus == numpy.max(splus))[0] 
     
     if optBundleIdxList.shape[0] == 1:
-        return bundles[optBundleIdxList], splus[optBundleIdxList] 
+        return bundles[optBundleIdxList][0], splus[optBundleIdxList] 
     else:
         if ties == 'random':
             retIdx = numpy.random.random_integers(0,optBundleIdxList.shape[0]-1,1)
-            return bundles[optBundleIdxList[retIdx]], splus[optBundleIdxList[retIdx]]
+            return bundles[optBundleIdxList[retIdx]][0], splus[optBundleIdxList[retIdx]]
         
 def marginalUtility(bundles, priceVector, valuation, goodIdx):
 #        priceVector = numpy.atleast_1d(priceVector)

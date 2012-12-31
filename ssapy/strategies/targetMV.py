@@ -42,7 +42,7 @@ def targetMV(**kwargs):
 
 if __name__ == "__main__":
     import ssapy
-    import ssapy.marketSchedule
+    from ssapy.marketSchedule import listRevenue
     
     pp = [5,5]
     
@@ -51,7 +51,7 @@ if __name__ == "__main__":
     l = 1
     v = [20, 10]
     
-    valuation = ssapy.marketSchedule.valuation(bundles, v, l)
+    valuation = listRevenue(bundles, v, l)
     
     print bundles
     print valuation
