@@ -147,9 +147,15 @@ def acq(**kwargs):
         optimalBundle, optimalSurplus
     
     """   
-    bundles = numpy.atleast_2d(kwargs.get('bundles'))
-     
-    valuation = numpy.atleast_1d(kwargs.get('valuation'))
+    
+    revDict = kwargs.get('revDict')
+    if revDict == None:
+        bundles = numpy.atleast_2d(kwargs.get('bundles'))
+         
+        valuation = numpy.atleast_1d(kwargs.get('valuation'))
+    else:
+        bundles = numpy.atleast_2d(revDict.keys())
+        valuation = numpy.atleast_1d(revDict.values())
     
     priceVector = numpy.atleast_1d(kwargs.get('priceVector'))
     
@@ -202,6 +208,8 @@ def marginalUtility(bundles, priceVector, valuation, goodIdx):
     
     return margUtil
 
+    
+    
 
             
 
