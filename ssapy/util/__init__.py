@@ -1,5 +1,7 @@
 import numpy
 import itertools
+from ssapy.util.padnums import pprint_table
+import sys
 
 def listBundles(m = 5):
     """
@@ -11,6 +13,14 @@ def listBundles(m = 5):
     The Columns Represent the good index.        
         
     Return bundles as booleans for storage and computational efficiency
+    
+    Inputs
+    ------
+        m        := (int) number of goods.
+    
+    Returns
+    -------
+        bundles  := (2d numpy array dtype = bool)
     """
     return numpy.atleast_2d([b for b in itertools.product([False,True],repeat=m)]).astype(bool)
 
@@ -24,8 +34,9 @@ def bundle2idx(bundle = None):
         return idx
     
 def idx2bundle(index=None, nGoods = 5):
-    # convert to decimal rather than enumerating power set
-    # and selecting correct bundle
+    """Convert to decimal rather than enumerating power set
+       and selecting correct bundle
+    """
     
     assert index != None and nGoods != None,\
         "simYW::bundleFromIndex must specify all arguments."
@@ -54,8 +65,8 @@ def idx2bundle(index=None, nGoods = 5):
 def cost(bundles, price):
     """Compute the price of a list of bundles given closing prices of each good
     
-    Parameters
-    ----------
+    Inputs
+    ------
     bundles: array_like, shape (n_bundles, n_goods)
         List of collection of goods. Each row is collection, each column a good index.
         A 1 in the i^{th} row and j^{th} column implies the good j is contained in the 
@@ -99,10 +110,29 @@ def cost(bundles, price):
     else:
         return numpy.atleast_1d([numpy.dot(bundle,price) for bundle in bundles])
     
-def surplus(bundles=None, valuation = None, priceVector = None):
+def surplus(bundles, valuation, priceVector):
         """
         Calculate the surplus for a given array of bundles, prices and a valuation (scalar).
         Surplus equals valuation less cost.
+        
+        INPUTS
+        ------
+            bundles       :=     (2d array-like)
+                                 rows indicate individual bundles
+                                 columns are individual goods
+                                 
+            valuation     :=     (1d array-like)
+                                 an numpy array of valuations, one for each bundle
+                                 
+            priceVector   :=     (1d array-like) 
+                                 A point price prediction. Each element corresponds to a good 
+                                 priceVector.shape[0] == bundles.shape[1] == number of goods
+                                 
+        Returns
+        -------
+            surplus       :=     (1d array-like)
+                                 List of surplus 1:1 correspondence with bundles.
+                                 surplus = revenue - cost
         """
                    
         bundles = numpy.atleast_2d(bundles)
@@ -111,21 +141,28 @@ def surplus(bundles=None, valuation = None, priceVector = None):
         
         return valuation - cost(bundles = bundles, price = priceVector)
     
-def acq(**kwargs):
+def acq(bundles, revenue, priceVector, verbose = False, ties = 'random'):
     """
     Given the number of goods, a price vector over each good
     and a valuation for each good, compute the optimal acquisition
     as described in Boyan and Greenwald 2001.
     
+    Enumerates surplus for each listed bundle and 
+    returns argmax (a bundle) and max surplus.
+    
     INPUTS:
-        bundles       :=     a numpy 2d array
+        bundles       :=     (2d array-like)
                              rows indicate individual bundles
                              columns are individual goods
                              
-        priceVector   :=     vector of prices over goods.
+        valuation     :=     (1d array-like)
+                             an numpy array of valuations, one for each bundle
+                             
+        priceVector   :=     (1d array-like) 
+                             A point price prediction. Each element corresponds to a good 
                              priceVector.shape[0] == bundles.shape[1] == number of goods
         
-        valuation     :=     an numpy array of valuations, one for each bundle
+        verbose       :=     output debugging info to stdout
         
         ties          :=     a flag on deciding how bunldes with same utility are decided
                              valid options = 'random'
@@ -137,41 +174,71 @@ def acq(**kwargs):
     
     """   
     
-    revDict = kwargs.get('revDict')
-    if revDict == None:
-        bundles = numpy.atleast_2d(kwargs.get('bundles'))
+    b = numpy.atleast_2d(bundles)
          
-        valuation = numpy.atleast_1d(kwargs.get('valuation'))
-    else:
-        bundles = numpy.atleast_2d(revDict.keys())
-        valuation = numpy.atleast_1d(revDict.values())
-    
-    priceVector = numpy.atleast_1d(kwargs.get('priceVector'))
-    
-    ties = kwargs.get('ties','random')
-    
-    splus = kwargs.get('surplus')
-    
-    if splus == None:
-        val = kwargs.get('valuation')
-        
-        if val == None:
-            raise KeyError("Must specify either surplus or valuation.")
-        
-        splus = kwargs.get('surplus', surplus(bundles     = bundles,
-                                              valuation   = valuation,
-                                              priceVector = priceVector))
+    rev = numpy.atleast_1d(revenue)
+
+    pp = numpy.atleast_1d(priceVector)
+           
+    splus = surplus(bundles     = bundles,
+                    valuation   = rev,
+                    priceVector = priceVector)
     
     optBundleIdxList = numpy.nonzero(splus == numpy.max(splus))[0] 
     
+    argMax = None
+    
     if optBundleIdxList.shape[0] == 1:
-        return bundles[optBundleIdxList][0], splus[optBundleIdxList] 
+        argMax = optBundleIdxList
     else:
         if ties == 'random':
             retIdx = numpy.random.random_integers(0,optBundleIdxList.shape[0]-1,1)
-            return bundles[optBundleIdxList[retIdx]][0], splus[optBundleIdxList[retIdx]]
+            argMax = optBundleIdxList[retIdx]
+
+     
+    optBundle  = bundles[argMax][0]       
+    optSurplus = splus[argMax]
+     
+    if verbose:
+        print "acq(...): Computing Optimal Bundle"
+        table = []
+        table.append(["Bundles", "Revenue", "Cost", "Surplus", "argmax"])
         
-def marginalUtility(bundles, priceVector, valuation, goodIdx):
+        costs = cost(bundles, pp)
+        binaryArgMax = numpy.zeros(bundles.shape[0])
+        binaryArgMax[argMax] = 1
+        for bundle, val, c, s, am in zip(b,rev,costs,splus,binaryArgMax):
+            table.append(["{0}".format(bundle.astype('int')), val, c, s, am])
+        
+        pprint_table(sys.stdout, table)
+        
+    return optBundle, optSurplus
+            
+        
+def marginalUtility(bundles, revenue, priceVector, goodIdx):
+    """
+    Computes the marginal utility of a specific good given a revenue function
+    represented as a list of bundles and revenue arrays and a point price prediction.
+    
+    INPUTS:
+        bundles       :=     (2d array-like)
+                             rows indicate individual bundles
+                             columns are individual goods
+                             
+        valuation     :=     (1d array-like) 
+                             a list of revenues in 1:1 correspondence 
+                             with bundles (rows). E.g. valuation.shape[0] = bundles.shape[0]
+                             
+        priceVector   :=     (1d array-like) 
+                             A point price prediction. Each element corresponds to a good 
+                             priceVector.shape[0] == bundles.shape[1] == number of goods
+                             
+        goodIdx       :=     (int) 
+                             A specific good index for which to compute marginal utility
+    Returns
+    -------
+        marginal utility (float)
+    """
 #        priceVector = numpy.atleast_1d(priceVector)
     priceVector = numpy.asarray(priceVector,dtype = numpy.float)
     
@@ -182,14 +249,11 @@ def marginalUtility(bundles, priceVector, valuation, goodIdx):
     tempPriceZero[goodIdx] = numpy.float(0.0)
     
 
-    predictedSurplusInf = acq(bundles     = bundles,
-                              valuation   = valuation,
-                              priceVector = tempPriceInf)[1]                                               
+    predictedSurplusInf = acq(bundles, revenue,
+                              tempPriceInf)[1]                                               
                                                     
-        
-    predictedSurplusZero = acq(bundles     = bundles,
-                               valuation   = valuation,
-                               priceVector = tempPriceZero)[1]   
+    predictedSurplusZero = acq(bundles, revenue,
+                               tempPriceZero)[1]   
                                                       
     margUtil = predictedSurplusZero - predictedSurplusInf
     if margUtil < 0:
