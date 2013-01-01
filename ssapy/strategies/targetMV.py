@@ -1,6 +1,6 @@
 import numpy
 
-from ssapy import acq, marginalUtility
+from ssapy.util import acq, marginalUtility, listBundles
 
 def targetMV(**kwargs):
     pricePrediction = kwargs.get('pricePrediction')
@@ -41,12 +41,11 @@ def targetMV(**kwargs):
     return bid
 
 if __name__ == "__main__":
-    import ssapy
     from ssapy.marketSchedule import listRevenue
     
     pp = [5,5]
     
-    bundles = ssapy.allBundles(2)
+    bundles = listBundles(2)
     
     l = 1
     v = [20, 10]

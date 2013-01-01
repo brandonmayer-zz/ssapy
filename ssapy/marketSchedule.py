@@ -3,7 +3,7 @@
 # "Self-confirming price-prediction strategies for simultaneous one-shot auctions" Yoon et al.
 
 import numpy
-from ssapy import allBundles
+from ssapy.util import listBundles
 import itertools
 
 def randomValueVector(vmin = 1, vmax = 50, m = 5, l = None):
@@ -44,7 +44,7 @@ def listRevenue(bundles, v, l):
         he/she been able to procure the collection of goods bundle[i]. 
     """
     if bundles == None:
-        bundles = allBundles(numpy.atleast_1d(v).shape[0])
+        bundles = listBundles(numpy.atleast_1d(v).shape[0])
     else:
         bundles = numpy.atleast_2d(bundles)
     
@@ -66,7 +66,7 @@ def revenueDict(v, l):
     
     rev = {}
     
-    for bundle in allBundles(m):
+    for bundle in listBundles(m):
         cs = numpy.cumsum(bundle)
         if cs[-1] < l:
             rev[tuple(bundle)] = 0
