@@ -2,27 +2,22 @@ import numpy
 
 from ssapy.util import acq, marginalUtility, listBundles
 
-def targetMV(**kwargs):
-    pricePrediction = kwargs.get('pricePrediction')
+def targetMV(bundles, revenue, pricePrediction, verbose = False):
+    """
+    Returns bid according to targetMV strategy.
+    1) solve for optimal bundle
+    2) for all goods in optimal bundle, bid marginal utility for that good.
+    """
     
-    if pricePrediction == None:
-        raise KeyError("Must specify pricePrediction.")
+    b = numpy.atleast_2d(bundles)
     
+    rev = numpy.atleast_1d(revenue)
     
-    bundles = kwargs.get('bundles')
-    if bundles == None:
-        raise KeyError("Must specify bundles.")
-    
-    valuation = kwargs.get('valuation')
-    if valuation == None:
-        raise KeyError("Must specify valuation.")
+    pp = numpy.atleast_1d(pricePrediction)
     
     
-    verbose = kwargs.get('verbose', False)
-    
-    [optBundle, optSurplus] = acq(bundles     = bundles,
-                                  valuation   = valuation,
-                                  priceVector = pricePrediction)
+    [optBundle, optSurplus] = acq(b, rev, pp)
+                                  
     
     if verbose:
         print "optBundle  = {0}".format(optBundle)
@@ -33,7 +28,8 @@ def targetMV(**kwargs):
     
     for goodIdx, good in enumerate(optBundle):
         if good:
-            bid[goodIdx] = marginalUtility(bundles, pricePrediction, valuation, goodIdx)
+            bid[goodIdx] = marginalUtility(bundles, valuation, 
+                                           pricePrediction, goodIdx)
             
     if verbose:
         print "bid = {0}".format(bid)
@@ -55,6 +51,6 @@ if __name__ == "__main__":
     print bundles
     print valuation
     
-    bid = targetMV(bundles = bundles, valuation = valuation, pricePrediction = pp, verbose = True)
+    bid = targetMV(bundles, valuation, pp, True)
     
     

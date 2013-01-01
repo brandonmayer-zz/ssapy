@@ -14,26 +14,34 @@ Yoon and Wellman (2011)
 import numpy
 from ssapy.util import marginalUtility
 
-def straightMV(**kwargs):
-    pricePrediction = kwargs.get('pricePrediction')
-    
-    if pricePrediction == None:
-        raise KeyError("Must specify pricePrediction")
-    
-    pricePrediction = numpy.atleast_1d(pricePrediction)
-    
-    bundles = kwargs.get('bundles')
-    if bundles == None:
-        raise KeyError("straightMV.SS(...) - must specify bundles")
-                    
-    valuation = kwargs.get('valuation')
-    if valuation == None:
-        raise KeyError("straightMV - must specify valuation")
+def straightMV(bundles, revenue, pricePrediction, verbose = False):
+    b = numpy.atleast_2d(bundles)
+    rev = numpy.atleast_1d(revenue)
+    pp = numpy.atleast_1d(pricePrediction)
     
     n_goods = bundles.shape[1]
     marginalValueBid = numpy.zeros(n_goods,dtype=numpy.float64)
     for goodIdx in xrange(n_goods):
         marginalValueBid[goodIdx] = \
-                marginalUtility(bundles, pricePrediction,
-                                valuation, goodIdx) 
+                marginalUtility(b,rev,pp,goodIdx)
+                                 
+    if verbose:
+        print marginalValueBid
+                                         
     return marginalValueBid
+
+if __name__ == "__main__":
+    from ssapy.util import listBundles
+    from ssapy.marketSchedule import listRevenue
+    
+    pp = [5,5]
+    bundles = listBundles(2)
+    l = 1
+    v = [20,10]
+    rev = listRevenue(bundles, v, l)
+     
+    print bundles
+    print rev
+    
+    bid = straightMV(bundles, rev,pp,True)
+
