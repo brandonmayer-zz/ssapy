@@ -1,15 +1,15 @@
 from ssapy.pricePrediction import dok_hist
 import numpy
 
-def local_bid(**kwargs):
+def jointLocalBid(bundles, valuation, pricePrediction, bids, verbose = False):
     pricePrediction = kwargs.get('pricePrediction')
     
     if pricePrediction == None:
         raise KeyError("Must specify pricePrediction.")
     
 
-def local_bid_update(bundles, valuation, price_prediction,
-                     bid_vector, update_index, verbose ):
+def jointLocalBidUpdate(bundles, valuation, pricePrediction,
+                        bid_vector, update_index, verbose ):
     
     bundle_value_dict = dict([(tuple(b),v) for b,v, in zip(bundles,valuation)])
     
@@ -48,9 +48,9 @@ def local_bid_update(bundles, valuation, price_prediction,
             print 'v0 = {0}'.format(v0)
         
         
-        if isinstance(price_prediction, dok_hist.dok_hist):
-            p1 = dok_hist.prob_win_given_bid(price_prediction, bundle1, bid_vector)
-            p0 = dok_hist.prob_win_given_bid(price_prediction, bundle0, bid_vector)
+        if isinstance(pricePrediction, dok_hist.dok_hist):
+            p1 = dok_hist.prob_win_given_bid(pricePrediction, bundle1, bid_vector)
+            p0 = dok_hist.prob_win_given_bid(pricePrediction, bundle0, bid_vector)
             
             if verbose:
                 print 'p1 = {0}'.format(p1)
