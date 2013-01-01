@@ -9,63 +9,12 @@ described by Yoon & Wellman 2011
 """
 import ssapy
 from agentBase import agentBase
+from ssapy.marketSchedule import randomValueVector, listRevenue
 
-import itertools
 import numpy
 
 
-def randomValueVector(vmin = 1, vmax = 50, m = 5, l = None):
-    if l is None:
-        l = numpy.random.random_integers(low = 1, high = m)
-        
-    v = numpy.zeros(m)
-    
-    sortedRandInts = numpy.random.random_integers(low = vmin, high=vmax, size = (m-l+1))
-    sortedRandInts.sort()
-    sortedRandInts = sortedRandInts[::-1]
-    
-    v[(l-1):] = sortedRandInts
-
-    return v, l 
-
-def valuation(bundles, v, l):
-    """Compute the revenue (valuation) for a given list of bundles (collection of goods)
-    
-    Parameters
-    ----------
-    bundles: array_like, shape (n_bundles, n_goods)
-        List of collection of goods. Each row is collection, each column a good index.
-        A 1 in the i^{th} row and j^{th} column implies the good j is contained in the 
-        i^{th} listed bundle.
-    
-    v: array_like, shape (n_goods)
-        The value vector described in the Market Scheduling game of YW.
-        
-    l: int,
-        The minimal number of goods the agent needs to win to obtain value.
-        Another parameter of the market schedule game.
-        
-    Returns
-    -------
-    valution: array_like, shape (n_bundles)
-        valution[i] is the revenue the agent would receive had
-        he/she been able to procure the collection of goods bundle[i]. 
-    """
-    bundles = numpy.atleast_2d(bundles)
-    
-    cs = [numpy.atleast_1d(i) for i in itertools.imap(numpy.cumsum,bundles)]
-        
-    valuation = []
-    for bundle in cs:
-        if bundle[-1] < l:
-            valuation.append(0)
-        else:
-            t = numpy.nonzero(bundle >= l)[0][0]
-            valuation.append(v[t])
-            
-    return numpy.atleast_1d(valuation)
-
-class simYW(agentBase):
+class msAgent(agentBase):
     """
     Base class for agents competing in the auction for time slots described by
     Yoon & Wellman 2011.
@@ -138,13 +87,7 @@ class simYW(agentBase):
         self.vmax = kwargs.get('vmax',50)   
         
         self.pricePrediction = kwargs.get('pricePrediction')
-        
-        self.strategy = kwargs.get('strategy')
-        if self.strategy == None:
-            raise ValueError("Must Specify Strategy")
-        elif isinstance(self.strategy,str):
-            self.strategy = ssapy.getStrategy(self.strategy)     
-        
+                
         self.v = kwargs.get('v')
         
         if self.v == None:
@@ -158,7 +101,7 @@ class simYW(agentBase):
                                        err_msg="self.v.shape[0] = {0} != self.m = {1}".\
                                        format(self.v.shape[0],self.m))
              
-        super(simYW,self).__init__(**kwargs)
+        super(msAgent,self).__init__(**kwargs)
     
     def randomValuation(self, *args, **kwargs):
         """
@@ -177,8 +120,8 @@ class simYW(agentBase):
         Calculate the optimal bundle for this class instance.
         """
         priceVector = kwargs['priceVector']
-        bundles = simYW.allBundles(self.m)
-        valuation = simYW.valuation(bundles,self.v,self.l)
+        bundles = ssapy.allBundles(self.m)
+        valuation = listRevenue(bundles,self.v,self.l)
         return ssapy.acq(bundles     = bundles,
                          valuation   = valuation,
                          priceVector = priceVector )
@@ -194,36 +137,36 @@ class simYW(agentBase):
         print "Agent lambda           = {0}".format(self.l)
         print "Agent Valuation Vector = {0}".format(self.v)
     
-    def bid(self, **kwargs):
-        """
-        An interface to trigger the agent to bid.
-        Though this function should be called to return a specific agent's bid,
-        the bid is computed using the agent's strategy profile class.SS(self, args={})
-        which can be called with arbitrary arguments.
-        """
-#        print "Cannot Bid with abstract simYW."
-#        print "Please instantiate a concrete agent"
-#        raise AssertionError
-
-        
-        strategy = kwargs.get('strategy',self.strategy)
-        
-        if strategy == None:
-            raise ValueError("Must Specify Strategy")
-        
-        elif isinstance(strategy,str):
-            strategy = ssapy.getStrategy(strategy)
-            
-        m                  = kwargs.get('m', self.m)
-        v                  = kwargs.get('v', self.v)
-        l                  = kwargs.get('l', self.l)
-        pricePrediction    = kwargs.get('pricePrediction', self.pricePrediction)
-        bundles            = kwargs.get('bundles', ssapy.allBundles(m))
-        
-        
-        return strategy(pricePrediction = pricePrediction,
-                        bundles         = bundles,
-                        valuation       = valuation(bundles,v,l))
+#    def bid(self, **kwargs):
+#        """
+#        An interface to trigger the agent to bid.
+#        Though this function should be called to return a specific agent's bid,
+#        the bid is computed using the agent's strategy profile class.SS(self, args={})
+#        which can be called with arbitrary arguments.
+#        """
+##        print "Cannot Bid with abstract simYW."
+##        print "Please instantiate a concrete agent"
+##        raise AssertionError
+#
+#        
+#        strategy = kwargs.get('strategy',self.strategy)
+#        
+#        if strategy == None:
+#            raise ValueError("Must Specify Strategy")
+#        
+#        elif isinstance(strategy,str):
+#            strategy = ssapy.getStrategy(strategy)
+#            
+#        m                  = kwargs.get('m', self.m)
+#        v                  = kwargs.get('v', self.v)
+#        l                  = kwargs.get('l', self.l)
+#        pricePrediction    = kwargs.get('pricePrediction', self.pricePrediction)
+#        bundles            = kwargs.get('bundles', ssapy.allBundles(m))
+#        
+#        
+#        return strategy(pricePrediction = pricePrediction,
+#                        bundles         = bundles,
+#                        valuation       = valuation(bundles,v,l))
     
     def finalSurplus(self):
         numpy.testing.assert_(isinstance(self.bundleWon,numpy.ndarray),
@@ -233,7 +176,7 @@ class simYW(agentBase):
             msg="invalid self.finalPrices")
         
         return ssapy.surplus(self.bundleWon, 
-                             valuation(self.bundleWon, self.v, self.l),
+                             listRevenue(self.bundleWon, self.v, self.l),
                              self.finalPrices)
   
                 

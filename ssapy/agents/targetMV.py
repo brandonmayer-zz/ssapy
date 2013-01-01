@@ -7,61 +7,45 @@ Date: 11/17/2011
 Specialized agent class to replicate targetMV from
 Yoon and Wellman (2011)
 """
-from pointPredictionAgent import *
+import ssapy
+import ssapy.strategies.targetMV as tmv
 
-class targetMV(pointPredictionAgent):
+from ssapy.agents.msAgent import msAgent
+class targetMV(msAgent):
+    def __init__(self,**kwargs):
+        super(targetMV, self).__init__(**kwargs)
         
-    @staticmethod
-    def type():
-        return "targetMV"
-              
-    @staticmethod
-    def SS(**kwargs):
-        """
-        Calculate a vector of marginal values given a price
-        vector.
-        """
+    def bid(self, **kwargs):
         
-        pointPricePrediction = kwargs.get('pointPricePrediction')
-        if pointPricePrediction == None:
-            raise KeyError("targetMV.SS(...) - must specify pricePrediction")
+        pricePrediction = kwargs.get('pricePrediction',self.pricePrediction)
         
-        bundles = kwargs.get('bundles')
-        if bundles == None:
-            raise KeyError("targetMV.SS(...) - must specify bundles")
-                
-        valuation = kwargs.get('valuation')
-        if valuation == None:
-            raise KeyError("targetMV - must specify valuation")
+        bundles = kwargs.get('bundles', ssapy.allBundles(self.m))
         
-        l = kwargs.get('l')
-        if l == None:
-            raise KeyError("targetMV - must specify l (target number of time slots)")
+        valuation = kwargs.get('valuation',ssapy.marketSchedule.listRevenue(bundles, self.v, self.l))
+                              
+        return tmv.targetMV(bundles = bundles, valuation = valuation, pricePrediction = pricePrediction)
+    
+if __name__ == "__main__":
+    import numpy
+    pp = numpy.asarray([5,5])
+    m = 2
+    l = 1
+    v = [20,10]
+    
+    agent = targetMV(m = m, l = l, v = v, pricePrediction = pp)
+    #answer should be [15., 0.]
+    print agent.bid()
+    
+    agent2 = targetMV(m=2)
+    print 'v = {0}'.format(agent2.v)
+    print 'l = {0}'.format(agent2.l)
+    
+    print 'agent2.bid = {0}'.format(agent2.bid(pricePrediction = pp))
+    
+    agent3 = targetMV(m=2)
+    print 'v = {0}'.format(agent3.v)
+    print 'l = {0}'.format(agent3.l)
+    print 'agent3.bid = {0}'.format(agent3.bid(pricePrediction = pp))
         
-        if isinstance(pointPricePrediction, pointSCPP):
-            pricePrediction = numpy.asarray(pointPricePrediction.data, dtype = numpy.float)
-            
-        elif isinstance(pointPricePrediction, numpy.ndarray):
-            pricePrediction = pointPricePrediction
-            
-        else:
-            raise ValueError("targetMV - Unknown pointPricePrediction type")
-        
-                
-        # solve acq for optimal bundle
-        # size checks of parameters will be done in acq
-        [optBundle, optSurplus] = simYW.acqYW(bundles       = bundles,
-                                              valuation     = valuation,
-                                              l             = l,
-                                              priceVector   = pricePrediction)
-        
-        n_goods = bundles.shape[1]
-        bid = numpy.zeros(n_goods,dtype=numpy.float)
-        
-        for goodIdx, good in enumerate(optBundle):
-            if good:
-                bid[goodIdx] = simYW.marginalUtility(bundles, pricePrediction, valuation, l, goodIdx)
-        
-            
-        return bid
+
             
