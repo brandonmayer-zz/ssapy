@@ -1,6 +1,6 @@
 from ssapy.agents.msAgent import msAgent
 import ssapy.strategies.straightMV as strategy
-from ssapy import allBundles
+from ssapy.util import listBundles
 from ssapy.marketSchedule import listRevenue
 
 class straightMV(msAgent):
@@ -10,7 +10,7 @@ class straightMV(msAgent):
     def bid(self, **kwargs):
         pricePrediction = kwargs.get('pricePrediction',self.pricePrediction)
         
-        bundles = kwargs.get('bundles', allBundles(self.m))
+        bundles = kwargs.get('bundles', listBundles(self.m))
         
         valuation = kwargs.get('valuation',
                                listRevenue(bundles, self.v, self.l))

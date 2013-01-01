@@ -7,7 +7,7 @@ Date: 11/13/2011
 The agent base class.
 '''
 
-from ssapy import surplus
+from ssapy.util import surplus
 
 class agentBase(object):
     """

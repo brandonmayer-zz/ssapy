@@ -12,7 +12,7 @@ Yoon and Wellman (2011)
 """
 
 import numpy
-import ssapy
+from ssapy.util import marginalUtility
 
 def straightMV(**kwargs):
     pricePrediction = kwargs.get('pricePrediction')
@@ -34,6 +34,6 @@ def straightMV(**kwargs):
     marginalValueBid = numpy.zeros(n_goods,dtype=numpy.float64)
     for goodIdx in xrange(n_goods):
         marginalValueBid[goodIdx] = \
-                ssapy.marginalUtility(bundles, pricePrediction,
-                                      valuation, goodIdx) 
+                marginalUtility(bundles, pricePrediction,
+                                valuation, goodIdx) 
     return marginalValueBid
