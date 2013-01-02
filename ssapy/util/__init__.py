@@ -33,18 +33,16 @@ def bundle2idx(bundle = None):
             
         return idx
     
-def idx2bundle(index=None, nGoods = 5):
+def idx2bundle(index, nGoods = 5):
     """Convert to decimal rather than enumerating power set
        and selecting correct bundle
     """
-    
-    assert index != None and nGoods != None,\
-        "simYW::bundleFromIndex must specify all arguments."
         
-    assert isinstance(index,int) and index >= 0,\
+    index = int(index)
+    assert index >= 0,\
         "simYW::bundleFromIndex index must be a positive integer."
         
-    assert isinstance(nGoods,int) and nGoods >0,\
+    assert nGoods >0,\
         "simYw::bundleFromIndex nGoods must be a strictly positive integer."
     
     binList = []
@@ -55,7 +53,7 @@ def idx2bundle(index=None, nGoods = 5):
         
     # just checking the index wasn't
     # past the maximum bundle
-    if len(binList) > nGoods: raise ValueError, "simYW::bundleFromIndex Error: Dec-Binary Conversion"
+    if len(binList) > nGoods: raise ValueError, "simYW::bundleFromIndex Error: Dec-Binary Conversion."
     
     for i in xrange(nGoods-len(binList)):
         binList.insert(0,0)
