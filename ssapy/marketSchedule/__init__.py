@@ -1,7 +1,18 @@
-#Functions to replicate market-based scheduling game described in
-# "Exploring bidding strategies for market-based scheduling." Reeves et al.
-# "Self-confirming price-prediction strategies for simultaneous one-shot auctions" Yoon et al.
+"""
+this is /ssapy/marketSchedule/__init__.py
 
+Author: Brandon A. Mayer
+Date: 1/1/2013
+
+Module for Market Scheduling Game functions and agents as described in:
+
+"Exploring bidding strategies for market-based scheduling", Reeves et. al.
+
+and
+
+"Self-Confirming Price-Prediction Strategies for Simultaneous One-Shot Auctions",
+Yoon et. al.
+"""
 import numpy
 from ssapy.util import listBundles
 import itertools
@@ -75,9 +86,3 @@ def revenueDict(v, l):
             rev[tuple(bundle)] = v[t]
             
     return rev
-        
-    
-    
-    
-        
-
