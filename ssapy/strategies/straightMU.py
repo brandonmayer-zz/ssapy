@@ -16,51 +16,44 @@ from ssapy.strategies.straightMV import straightMV
 
 import numpy
 
-def straightMU(**kwargs):
-    pricePrediction = kwargs.get('pricePrediction')
-    if pricePrediction == None:
-        raise KeyError("Must specify pricePrediction")
+def straightMU(bundles, revenue, pricePrediction, n_samples, verbose = False):
     
-    bundles = kwargs.get('bundles')
-    if bundles == None:
-        raise KeyError("Must specify bundles")
-            
-    valuation = kwargs.get('valuation')
-    if valuation == None:
-        raise KeyError("Must specify valuation")
-    
-    n_samples = kwargs.get('n_samples')
-    if n_samples == None:
-        raise KeyError("Must specify number of samples")
-    
+    if verbose:
+        print "straightMU - Drawing {0} samples.".format(n_samples)
+        
     samples = pricePrediction.sample(n_samples = n_samples)
+    
+    if verbose:
+        print "Samples:"
+        print "{0}".format(samples)
     
     expectedPrices = numpy.mean(samples, 0)
     
-    return straightMV( pricePrediction = expectedPrices,
-                       bundles         = bundles,
-                       valuation       = valuation)
+    if verbose:
+        print "Expected Price Vector: {0}".format(expectedPrices)
+    
+    return straightMV( bundles, revenue, expectedPrices, verbose)
   
-def straightMU8(**kwargs):
+def straightMU8(bundles, revenue, pricePrediction, verbose = False):
     """
-    Calculate the expected using inverse sampling method and 8 samples
-    Then bid via straightMV with the resulting expected prices
+    Compute straight marginal value bid by sampling from a distribution
+    (8 samples) to compute an expected price vector.
     """
+    return straightMU(bundles, revenue, pricePrediction, 8, verbose)
     
-    kwargs.update({'n_samples':8})
-    
-    return straightMU(**kwargs)
-    
-def straightMU64(**kwargs):
-    
-    kwargs.update({'n_samples':64})
-    
-    return straightMU(**kwargs)
+def straightMU64(bundles, revenue, pricePrediction, verbose = False):
+    """
+    Compute straight marginal value bid by sampling from a distribution
+    (64 samples) to compute an expected price vector.
+    """   
+    return straightMU(bundles, revenue, pricePrediction, 64, verbose)
 
-def straightMU256(**kwargs):
+def straightMU256(bundles, revenue, pricePrediction, verbose = False):
+    """
+    Compute straight marginal value bid by sampling from a distribution
+    (256 samples) to compute an expected price vector.
+    """   
     
-    kwargs.update({'n_samples':256})
-    
-    return straightMU(**kwargs)
+    return straightMU(bundles, revenue, pricePrediction, 256, verbose)
     
     

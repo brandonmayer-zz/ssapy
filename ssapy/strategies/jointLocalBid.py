@@ -2,10 +2,7 @@ from ssapy.pricePrediction import dok_hist
 import numpy
 
 def jointLocalBid(bundles, valuation, pricePrediction, bids, verbose = False):
-    pricePrediction = kwargs.get('pricePrediction')
-    
-    if pricePrediction == None:
-        raise KeyError("Must specify pricePrediction.")
+    pass
     
 
 def jointLocalBidUpdate(bundles, valuation, pricePrediction,
