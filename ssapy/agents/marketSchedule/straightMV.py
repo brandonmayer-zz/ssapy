@@ -1,7 +1,6 @@
-from ssapy.agents.msAgent import msAgent
 import ssapy.strategies.straightMV as strategy
 from ssapy.util import listBundles
-from ssapy.marketSchedule import listRevenue
+from ssapy.agents.marketSchedule import msAgent, listRevenue
 
 class straightMV(msAgent):
     def __init__(self, **kwargs):
