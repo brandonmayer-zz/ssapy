@@ -13,6 +13,7 @@ and
 "Self-Confirming Price-Prediction Strategies for Simultaneous One-Shot Auctions",
 Yoon et. al. 2007
 """
+
 import numpy
 import itertools
 
@@ -96,7 +97,6 @@ class msAgent(agentBase):
     Base class for agents competing in the auction for time slots described by
     Yoon & Wellman 2007 and Reeves 2005.
     """
-    
     def __init__(self, **kwargs):
         """
             INPUTS:
@@ -219,5 +219,5 @@ class msAgent(agentBase):
             
     @staticmethod
     def type():
-        return "simYW"
+        return "msAgent"
     
