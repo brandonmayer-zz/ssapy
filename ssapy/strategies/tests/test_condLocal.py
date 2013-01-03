@@ -1,7 +1,7 @@
 import unittest
 import numpy
 
-from ssapy.strategies.condLocalBid import condLocalUpdate, condLocal, plotCondLocal
+from ssapy.strategies.condLocal import condLocalUpdate, condLocal, plotCondLocal
 from ssapy import listBundles, msListRevenue
 
 

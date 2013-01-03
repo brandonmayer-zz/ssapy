@@ -1,7 +1,7 @@
 import unittest
 import numpy
 
-from ssapy.strategies.jointLocalBid import jointLocalUpdate 
+from ssapy.strategies.jointLocal import jointLocalUpdate 
 from ssapy import listBundles, msListRevenue
 
 class test_jointLocalBid(unittest.TestCase):
