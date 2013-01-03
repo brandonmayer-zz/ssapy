@@ -1,16 +1,16 @@
 import numpy
-from scipy.sparse import dok_matrix
+#from scipy.sparse import dok_matrix
 
 import matplotlib.pyplot as plt
 
-import os
-import copy
+#import os
+#import copy
 
 isnumber = lambda n: isinstance(n, (int, float, long, complex))
 
 machine_precision = numpy.finfo(numpy.double).eps
 
-class dok_hist(object):
+class dokHist(object):
     """
     A dictionary of keys sparse histogram.
     
@@ -176,7 +176,7 @@ class dok_hist(object):
                                     
     def eval(self, val):
         """
-        Backwards compatible wrapper around dok_hist.density()
+        Backwards compatible wrapper around dokHist.density()
         """
         return self.density(val)
         
@@ -251,7 +251,7 @@ class dok_hist(object):
         
         target_dim is zero indexed.
         """
-        marg = dok_hist(m=1)
+        marg = dokHist(m=1)
         
         marg.isnormed = True
         
@@ -347,8 +347,8 @@ def expected_utility( hob_hist, bundles, valuations, bids):
     return ev - ec
     
 def prob_win_given_bid( hob_hist, bundle, bids):
-    if not isinstance(hob_hist, dok_hist):
-        raise ValueError("Must provide dok_hist instance.")
+    if not isinstance(hob_hist, dokHist):
+        raise ValueError("Must provide dokHist instance.")
     
     bid_view = numpy.atleast_1d(bids)
     bundle_view = numpy.atleast_1d(bundle)
@@ -398,7 +398,7 @@ def prob_win_given_bid( hob_hist, bundle, bids):
     return pwin
                             
 def main():
-    h = dok_hist(m=2, isdensity = True)
+    h = dokHist(m=2, isdensity = True)
     h.set([2.5,2.5],.25)
     h.set([5.5,1.5],.75)
     

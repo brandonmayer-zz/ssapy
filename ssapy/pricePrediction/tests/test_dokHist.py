@@ -1,13 +1,14 @@
-import copy
 import unittest
 
-from ssapy import dok_hist
-from ssapy.pricePrediction.dok_hist import expected_cost, \
-    prob_win_given_bid, expected_utility
+from ssapy import dokHist
 
+from ssapy.pricePrediction.dokHist import expected_cost, \
+    prob_win_given_bid, expected_utility
+    
+    
 class test_dok_hist(unittest.TestCase):
     def setUp(self):
-        hist = dok_hist(m = 2)
+        hist = dokHist(m = 2)
         hist.upcount([0, 0], 10)
         hist.upcount([50,50], 10)
         
@@ -15,7 +16,7 @@ class test_dok_hist(unittest.TestCase):
         hist.upcount([11,20], 7)
                
     def test_marginal(self):
-        joint_hist = dok_hist(m=2)
+        joint_hist = dokHist(m=2)
         joint_hist.upcount([1,1],10)
         joint_hist.upcount([2,2],10)
         
@@ -28,7 +29,7 @@ class test_dok_hist(unittest.TestCase):
             self.assertEqual(marg_hist.density(i), 0.0, "marg_hist.density({0}) != .5".format(i))
             
             
-        joint_hist = dok_hist(m=2)        
+        joint_hist = dokHist(m=2)        
         joint_hist.upcount([1,1],0.5)
         joint_hist.upcount([1,2],0.1)
         joint_hist.upcount([2,1],0.2)
@@ -50,7 +51,7 @@ class test_dok_hist(unittest.TestCase):
         self.assertAlmostEqual(marg_hist.density(2),0.3)
         
     def test_marginal_expected_cost(self):
-        marg_hist = dok_hist(m=1)
+        marg_hist = dokHist(m=1)
         
         marg_hist.upcount(0, 50)
         marg_hist.upcount(.5, 25)
@@ -67,7 +68,7 @@ class test_dok_hist(unittest.TestCase):
         self.assertAlmostEqual(ec,0.0)
         
     def test_expected_cost(self):
-        hist = dok_hist(m=2, isdensity=True)
+        hist = dokHist(m=2, isdensity=True)
         
         hist.set([0,30],0.5)
         hist.set([30,0],0.5)
@@ -85,7 +86,7 @@ class test_dok_hist(unittest.TestCase):
         self.assertAlmostEqual(ec, 29.5)
         
     def test_prob_win_given_bid(self):
-        hist = dok_hist(m=2, isdensity=True)
+        hist = dokHist(m=2, isdensity=True)
         
         hist.set([2.5,2.5],.25)
         hist.set([5.5,1.5],.75)
@@ -107,7 +108,7 @@ class test_dok_hist(unittest.TestCase):
         self.assertAlmostEqual(sum,1.0)
         
         del hist
-        hist = dok_hist(m=2, isdensity = True)
+        hist = dokHist(m=2, isdensity = True)
         hist.set([2.5,2.5],0.25)
         hist.set([5.5,1.5],0.25)
         hist.set([4.5,4.5],0.5)
@@ -149,7 +150,6 @@ class test_dok_hist(unittest.TestCase):
 #        print 'eu = {0}'.format(eu)
 #        self.assertAlmostEqual(eu,10)
         
-    
 if __name__ == '__main__':
     unittest.main()
-        
+    
