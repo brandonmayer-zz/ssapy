@@ -36,7 +36,8 @@ def randomValueVector(vmin = 1, vmax = 50, m = 5, l = None):
     return v, l 
 
 def listRevenue(bundles, v, l):
-    """Compute the revenue (valuation) for a given list of bundles (collection of goods)
+    """Compute the revenue (valuation) for a given 
+    list of bundles (collection of goods)
     
     Parameters
     ----------
