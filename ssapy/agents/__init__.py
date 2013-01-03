@@ -1,4 +1,4 @@
-    '''
+'''
 This is /ssapy/agents/__init__.py
 
 Author: Brandon A. Mayer
