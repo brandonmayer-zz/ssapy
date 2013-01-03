@@ -38,7 +38,7 @@ def targetMVS(bundles, revenue, pricePrediction, verbose = False):
 
 if __name__ == "__main__":
     from ssapy.util import listBundles
-    from ssapy.marketSchedule import listRevenue
+    from ssapy.agents.marketSchedule import listRevenue
     
     pp = [5,5]
     l = 1
