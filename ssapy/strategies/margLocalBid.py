@@ -42,9 +42,10 @@ def margLocalBid(**kwargs):
     if initialBid == None:
         initSS = kwargs.get('initStrategy','straightMU8')
         initialStrategy = initStrategies[initSS]
-        bids = initialStrategy( pricePrediction = pricePrediction,
-                                bundles         = bundles,
-                                valuation       = valuation )
+#        bids = initialStrategy( pricePrediction = pricePrediction,
+#                                bundles         = bundles,
+#                                valuation       = valuation )
+        bids = initialStrategy( bundles, valuation, pricePrediction, verbose)
     else:
         bids = initialBid
     
