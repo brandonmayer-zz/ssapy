@@ -121,8 +121,9 @@ def condLocal(bundles, revenue, initialBids, samples, maxItr = 100, tol = 1e-5, 
         
         for gIdx in xrange(m):
             obids[gIdx] = condLocalUpdate(bundles, revenue, obids, gIdx, samples, verbose)
-        
-        l = numpy.dot(oldBid - obids, oldBid - obids)
+            
+        d = oldBid - obids
+        l = numpy.dot(d,d)
         
         if l <= tol:
             converged = True
@@ -131,6 +132,9 @@ def condLocal(bundles, revenue, initialBids, samples, maxItr = 100, tol = 1e-5, 
     return obids, converged, itr, l   
 
 def plotCondLocal(bundles, revenue, initialBids, samples, maxItr, tol, filename = None, verbose = True):
+    """
+    THIS NEEDS WORK!
+    """
     import matplotlib.pyplot as plt
     
     GREY = numpy.atleast_1d([169.,169.,169.])/255
