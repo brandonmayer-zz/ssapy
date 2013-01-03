@@ -6,7 +6,7 @@ from ssapy.pricePrediction.dokHist import expected_cost, \
     prob_win_given_bid, expected_utility
     
     
-class test_dok_hist(unittest.TestCase):
+class test_dokHist(unittest.TestCase):
     def setUp(self):
         hist = dokHist(m = 2)
         hist.upcount([0, 0], 10)
