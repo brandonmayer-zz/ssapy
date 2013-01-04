@@ -60,7 +60,7 @@ def jointLocalUpdate( bundles, revenue, bids, targetBid, samples, verbose = Fals
 
     return newBid
 
-def jointLocal(bundles, revenue, initialBids, samples, maxItr, tol, filename = None, verbose = True):
+def jointLocal(bundles, revenue, initialBids, samples, maxItr, tol, verbose = True):
     """
     Starting form an initial bid, run the jointLocal algorithm and return 
     an updated bid vector.
