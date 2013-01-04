@@ -50,8 +50,8 @@ def main():
         
         revenue = msListRevenue(bundles, v, l)
         
-        numpy.savetxt(os.path.join(oDir,'bundles'), bundles)
-        numpy.savetxt(os.path.join(oDir,'revenue'), revenue)
+        numpy.savetxt(os.path.join(oDir,'bundles.txt'), bundles)
+        numpy.savetxt(os.path.join(oDir,'revenue.txt'), revenue)
         
         for initBidIdx in xrange(nInitBids):
             print "\t initial bid number {0}".format(initBidIdx)
