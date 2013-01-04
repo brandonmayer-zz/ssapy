@@ -9,7 +9,7 @@ Implementation of bidEvaluator as described in Yoon & Wellman 2011:
 "Generate candidate bid vectors and evaluate them according to the given 
  price distribution. The BidEvaluator strategy uses other bidding
  strategies to propose candidates and estimates their performance
- by sampling from F and averageing over the resulting surpluses.
+ by sampling from F and averaging over the resulting surpluses.
  
  For instance BidEvaluator(SMU8) generates candidates using
  straightMU8. Since each invocation of StraightMU8 employs a new
