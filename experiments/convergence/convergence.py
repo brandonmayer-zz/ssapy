@@ -40,7 +40,8 @@ def main():
     
     maxItr = 100
     tol = 0.003
-    
+    numJointConverged = 0
+    numCondConverged = 0
     for valIdx in xrange(nRevFun):
         print "valIdx = {0}".format(valIdx)
         oDir = os.path.realpath(os.path.join(".",str(uuid.uuid4())))
@@ -59,6 +60,15 @@ def main():
             
             jbid, jconv, jitr, jl = jointLocal(bundles, revenue, initialBid, priceSamples, maxItr, tol, True)
             cbid, cconv, citr, cl = condLocal(bundles, revenue, initialBid, priceSamples, maxItr, tol, True)
+            
+            if jconv:
+                numJointConverged += 1
+                
+            if cconv:
+                numCondConverged +=1
+                
+            print 'jointLocal converged {0} out of {1}'.format(numJointConverged,initBidIdx+1)
+            print 'condLocal  converged {0} out of {1}'.format(numCondConverged, initBidIdx+1)
             
             with open(os.path.join(oDir,'initialBids.txt'),'a') as f:
                 f.write("{0}\n".format(initialBid))
@@ -86,13 +96,6 @@ def main():
                 
             with open(os.path.join(oDir,'condLocalDist.txt'),'a') as f:
                 f.write("{0}\n".format(cl))
-        
-        
-        
-        
-        
-        
-        
         
 
 if __name__ == "__main__":
