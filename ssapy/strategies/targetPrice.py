@@ -35,6 +35,26 @@ def targetPrice(bundles, revenue, pricePrediction, verbose = False):
         
     return bid
 
+def targetPrice8(bundles, revenue, pricePrediction, verbose = False):
+    samples = pricePrediction.sample(n_samples = 8)
+    
+    expectedPrices = numpy.mean(samples,0)
+    
+    return targetPrice(bundles, revenue, expectedPrices, verbose)
+
+def targetPrice64(bundles, revenue, pricePrediction, verbose = False):
+    samples = pricePrediction.sample(n_samples = 64)
+    
+    expectedPrices = numpy.mean(samples,0)
+    
+    return targetPrice(bundles, revenue, expectedPrices, verbose)
+
+def targetPrice256(bundles, revenue, pricePrediction, verbose = False):
+    samples = pricePrediction.sample(n_samples = 256)
+    
+    expectedPrices = numpy.mean(samples,0)
+    
+    return targetPrice(bundles, revenue, expectedPrices, verbose)
 if __name__ == "__main__":
     from ssapy.util import listBundles
     from ssapy.agents.marketSchedule import listRevenue
