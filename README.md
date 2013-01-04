@@ -2,7 +2,7 @@ SSAPY - Simultaneous Second-price Auction PYthon module
 =======================================================
 
 Originally written for CSCI2951, *"[Autonomous Agents and Computational Market Design](http://www.cs.brown.edu/courses/csci2951-c/)"*
-with Professor Amy Greenwald, and TA Eric Sodomka in the Computer Science Department at Brown University.
+taught by Professor Amy Greenwald, and TA Eric Sodomka in the Computer Science Department at Brown University.
 
 Algorithms and Data are separated as much as possible. To that end, ssapy.strategies implements heuristics as callable functions.
 Each strategy takes as input an arbitrary revenue function and price prediction and therefore can be used in any game specification.
