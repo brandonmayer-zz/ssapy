@@ -1,3 +1,15 @@
+"""
+this is ssapy/agents/marketSchedule/baselineBidder.py
+
+Author: Brandon A. Mayer
+Date: 11/17/2011
+
+Specialized agent class to replicate baselineBidding from
+Yoon and Wellman (2011)
+
+Modifications:
+    Brandon A. Mayer - Moved here 1/3/2013
+"""
 import numpy
 from . import msAgent
 
