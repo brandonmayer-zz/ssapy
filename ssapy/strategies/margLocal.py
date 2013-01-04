@@ -14,7 +14,7 @@ initStrategies = {'straightMU8': straightMU8,
                   'straightMU256':straightMU256}
 
 
-def margLocalBid(**kwargs):
+def margLocal(**kwargs):
     pricePrediction = kwargs.get('pricePrediction')
     if pricePrediction == None:
         raise KeyError("Must specify pricePrediction")
