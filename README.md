@@ -1,7 +1,7 @@
 SSAPY - Simultaneous Second-price Auction PYthon module
 =======================================================
 
-Originally written for CSCI2951, *"[Autonomous Agents and Computational Market Design]" (http://www.cs.brown.edu/courses/csci2951-c/)*
+Originally written for CSCI2951, *"[Autonomous Agents and Computational Market Design](http://www.cs.brown.edu/courses/csci2951-c/)"*
 with Professor Amy Greenwald, and TA Eric Sodomka in the Computer Science Department at Brown University.
 
 References:
