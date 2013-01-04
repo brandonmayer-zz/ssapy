@@ -9,7 +9,7 @@ Each strategy takes as input an arbitrary revenue function and price prediction 
 "Agents" encapsulate the state of individuals bidding in specific games. Agents use strategies and their current state to place bids.
 
 ssapy.agents is the home for agents. For all game types there should be a corresponding agent module. For example ssapy.agents.marketSchedule
-implements agents for the market scheduling game described in [Yoon11] [2] and [Reeves05] [3]. All agents should inherit from ssapy.agents.agentBase class which assigns 
+implements agents for the market scheduling game described in [Yoon11] and [Reeves05]. All agents should inherit from ssapy.agents.agentBase class which assigns 
 each agent a unique id (just an integer - maybe change to a uuid.uuid4()?) at the beginning of the simulation.
 
 All agents implement a bid(**kwargs) function which returns the bid placed by the agent either given arguments to the function or based
