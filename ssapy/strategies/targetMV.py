@@ -37,7 +37,7 @@ def targetMV(bundles, revenue, pricePrediction, verbose = False):
     return bid
 
 if __name__ == "__main__":
-    from ssapy.marketSchedule import listRevenue
+    from ssapy.agents.marketSchedule import listRevenue
     
     pp = [5,5]
     
