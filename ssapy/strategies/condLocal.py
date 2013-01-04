@@ -67,7 +67,7 @@ def condLocalUpdate(bundles, revenue, bids, targetBid, samples, verbose = False)
             raise ValueError("p0 = {0} < 0.0".format(p1))
         
     
-        newBid += (revenue[posIdx]*p1) - (revenue[negIdx]*p0)
+        newBid += ((revenue[posIdx]*p1) - (revenue[negIdx]*p0))
         
     return newBid
 
