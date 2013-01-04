@@ -20,7 +20,7 @@ def averageMU(bundles, revenue, pricePrediction, nSamples, verbose = False):
     samples = pricePrediction.sample(n_samples = nSamples)
     accum = numpy.zeros(bundleView.shape[1], dtype = 'float')
     
-    #accumulate sum
+    #accumulate sum of marginal utility
     for sample in samples:
         accum += straightMV(bundles, revenue, sample, verbose)
         
