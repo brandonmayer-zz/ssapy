@@ -1,4 +1,4 @@
-from ssapy.pricePrediction.margDistSCPP import margDistSCPP
+#from ssapy.pricePrediction.margDistSCPP import margDistSCPP
 from ssapy.pricePrediction.jointGMM import jointGMM
 
 from scipy.stats import norm
