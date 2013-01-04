@@ -17,8 +17,8 @@ soley on the current state of the agent.
 
 References:
 
-    [1]: Wellman, M.P. (2011). "Trading Agents". Morgan & Claypool Publishers "[Yoon11]"
+    [1]: Wellman, M.P. (2011). "Trading Agents". Morgan & Claypool Publishers   "Yoon11"
 
-    [2]: Yoon, D.Y., & Wellman, P.M.(2011). "Self-Confirming Price Prediction for Bidding in Simultaneous Second Price Sealed Bid Auctions". The 2011 Workshop on Trading Agent Design and Analysis. Barcelona, Catalonia, Spain. "[Wellman11]"
+    [2]: Yoon, D.Y., & Wellman, P.M.(2011). "Self-Confirming Price Prediction for Bidding in Simultaneous Second Price Sealed Bid Auctions". The 2011 Workshop on Trading Agent Design and Analysis. Barcelona, Catalonia, Spain.   "Wellman11"
 
-    [3]: Reeves, Wellman, MacKie-Mason, Osepayshvili (2005). "Exploring bidding strategies for market-based scheduling" Decision Support Systems. "[Reeves05]"
+    [3]: Reeves, Wellman, MacKie-Mason, Osepayshvili (2005). "Exploring bidding strategies for market-based scheduling" Decision Support Systems.   "Reeves05"
