@@ -159,13 +159,13 @@ def plotCondLocal(bundles, revenue, initialBids, samples, maxItr, tol, filename 
             
         plt.plot(obids[0],obids[1],color=RED)
             
-        l = numpy.dot(oldBid - obids, oldBid - obids)
+        d = numpy.dot(oldBid - obids, oldBid - obids)
         
-        if l <= tol:
+        if d <= tol:
             converged = True
             break
     
     plt.show()
         
-    return obids, converged, itr, l  
+    return obids, converged, itr, d  
     
