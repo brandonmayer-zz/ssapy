@@ -103,20 +103,18 @@ def jointLocal(bundles, revenue, initialBids, samples, maxItr, tol, verbose = Tr
     """
     
     m         = bundles.shape[1]
-    obids     = numpy.atleast_1d(initialBids).copy()
+    newBids   = numpy.atleast_1d(initialBids).copy()
     converged = False
     
     for itr in xrange(maxItr):
-        oldBid = obids.copy()
+        oldBids = newBids.copy()
         
         for gIdx in xrange(m):
-            obids[gIdx] = jointLocalUpdate(bundles, revenue, obids, gIdx, samples, verbose)
-            
-        d = oldBid - obids
-        l = numpy.dot(d,d)
-        
-        if l <= tol:
+            newBids[gIdx] = jointLocalUpdate(bundles, revenue, newBids, gIdx, samples, verbose)
+                
+        d = numpy.linalg.norm(oldBids - newBids)
+        if d <= tol:
             converged = True
             break
         
-    return obids, converged, itr, l
+    return newBids, converged, itr, d
