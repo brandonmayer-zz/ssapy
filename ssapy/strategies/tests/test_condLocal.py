@@ -37,11 +37,44 @@ class test_condLocalBid(unittest.TestCase):
         print itr
         print l
         
-    def test_plotCondLocal(self):
-        ibids = [25.,25.]
+#    def test_plotCondLocal(self):
+#        ibids = [25.,25.]
+#        
+#        plotCondLocal(self.bundles2d, self.revenue2d, ibids, 
+#                      self.samples2d, 100, 0.001, True)
         
-        plotCondLocal(self.bundles2d, self.revenue2d, ibids, 
-                      self.samples2d, 100, 0.001, True)
+    def test_ericCounterExample(self):
+        """
+        From Eric Sodomka's counter example of suboptimality.
+        Sould converte to [25,25]
+        """
+        m = 2
+        v = [0,50]
+        l = 2
+        bundles = listBundles(m)
+        revenue = msListRevenue(bundles, v, l)
+        initialBids = numpy.asarray([25.,25.],dtype = 'float')
+        targetBid = 0
+        nSamples = 300
+        samples = numpy.zeros((nSamples,m))
+        samples[:100,:] = [30,10]
+        samples[100:200,:] = [10,30]
+        samples[200:300,:] = [10,10]
+        
+        b1 = condLocalUpdate(bundles, revenue, initialBids, targetBid, samples, True)
+        
+        decimal = 5
+        
+        numpy.testing.assert_almost_equal(b1, 25, decimal, "condLocal - test_ericCounterExample Failed")
+        
+        
+        ret = condLocal(bundles,revenue, initialBids, samples, verbose = True)
+        
+        numpy.testing.assert_almost_equal(ret[0],numpy.asarray([25.,25.]),decimal)
+        
+        numpy.testing.assert_equal(ret[1], True, "condLocal - test_ericCounterExample Failed" )
+        
+        
         
         
     
