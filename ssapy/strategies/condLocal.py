@@ -113,23 +113,22 @@ def condLocal(bundles, revenue, initialBids, samples, maxItr = 100, tol = 1e-5, 
                     and the previous state of the bid vector.
     """
     m = bundles.shape[1]
-    obids = numpy.atleast_1d(initialBids).copy()
+    newBids = numpy.atleast_1d(initialBids).copy()
     converged = False
     
     for itr in xrange(maxItr):
-        oldBid = obids.copy()
+        oldBid = newBids.copy()
         
         for gIdx in xrange(m):
-            obids[gIdx] = condLocalUpdate(bundles, revenue, obids, gIdx, samples, verbose)
+            newBids[gIdx] = condLocalUpdate(bundles, revenue, newBids, gIdx, samples, verbose)
             
-        d = oldBid - obids
-        l = numpy.dot(d,d)
+        d = numpy.linalg.norm(oldBid-newBids)
         
-        if l <= tol:
+        if d <= tol:
             converged = True
             break
         
-    return obids, converged, itr, l   
+    return newBids, converged, itr, d   
 
 def plotCondLocal(bundles, revenue, initialBids, samples, maxItr, tol, filename = None, verbose = True):
     """
