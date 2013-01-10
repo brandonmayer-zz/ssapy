@@ -117,4 +117,4 @@ def jointLocal(bundles, revenue, initialBids, samples, maxItr, tol, verbose = Tr
             converged = True
             break
         
-    return newBids, converged, itr, d
+    return newBids, converged, itr + 1, d
