@@ -13,8 +13,135 @@ initStrategies = {'straightMU8': straightMU8,
                   'straightMU64': straightMU64,
                   'straightMU256':straightMU256}
 
-
-def margLocal(**kwargs):
+def margLocalUpdate(bundles, revenue, bids, targetBidIdx, samples, verbose = False):
+    """
+    Update a single bid index, targetBidIdx, of bids given a set of samples and a 
+    revenue function described by bundle - revenue pairs using the marginal local algorithm.
+    
+    INPUTS
+    ------
+        bundles    := (2d array-like) List of bundles
+        
+        revenue    := (1d array-like) List of revenue (1:1 correspondence with bundles)
+        
+        bids       := (1d array-like) List of bids. 
+        
+                        bids.shape[0] = bundles.shape[1]
+        targetBid  := (int) the (zero-indexed) bid to be updated.
+        
+        samples    := (2d array-like) List of samples
+                        samples.shape[0] = nSamples, samples.shape[1] = m (number of goods)
+        
+        verbose    := (boolean) output debugging info to stdout.
+        
+    OUTPUTS
+    -------
+        newBid     := (float) the new bid for the target good
+    """
+    newBid = 0.0
+    
+    pwin = numpy.sum(samples <= bids, 0, dtype = float)/samples.shape[0]
+    
+    posIdxList = numpy.flatnonzero(bundles[:,targetBidIdx == True])
+    
+    for posIdx in posIdxList:
+        posBundle = bundles[posIdx,:]
+        negBundle = posBundle.copy()
+        negBundle[targetBidIdx] = False
+        
+        negIdx = numpy.where( (bundles == negBundle).all(axis=1) )[0][0]
+        
+        posRev = revenue[posIdx]
+        negRev = revenue[negIdx]
+        
+        p = 1.0
+        for goodIdx, good in enumerate(posBundle):
+            if goodIdx == targetBidIdx:
+                pass
+            else:
+                if good:
+                    p*=pwin[goodIdx]
+                else:
+                    p*=(1-pwin[goodIdx])
+                    
+        if p > 1.0:
+            raise ValueError("p > 1.0")
+        elif p < 0.0:
+            raise ValueError(" p < 0.0")
+        
+        newBid += (posRev - negRev)*p
+        
+    return newBid
+        
+def margLocal(bundles, revenue, initialBids, samples, maxItr = 100, tol= 1e-5, verbose = True, ret = 'bids'):
+    """
+    Starting form an initial bid, run the margLocal algorithm and return 
+    an updated bid vector.
+    
+    Use the following convention:
+        Iteration - consists of m updates where m is the number of goods
+        Update - an update for a single bid.
+    
+    INPUTS
+    ------
+    bundles     := (2d array-like) List of bundles
+        
+    revenue     := (1d array-like) List of revenue (1:1 correspondence with bundles)
+    
+    initialBids := (1d array-like) List of initial bids, 1 per good at auction.
+                    bundles.shape[1] = initialBids.shape[0]
+                    
+    samples     := (2d array-like; shape = (nSamples x nGoods)) A list of samples from a 
+                    price distribution.
+                    
+    maxItr      := (int) Stop updating after maxItr iterations. If maxItr is reached,
+                    the algorithm is said to have diverged.
+    
+    tol         := (float) If the Euclidean distance between iterations 
+                    (an update has been performed to each of the m bids)
+                    is less than tol, the algorithm is said to have converged 
+                    and returns the updated bid vector.
+    
+    ret         := (string) If ret == 'bids' just return the new bid vector
+                            Else if ret == 'all' return tuple:
+                            (bids, converged (boolean), nItr (int), dist (float)) 
+    OUTPUTS
+    -------
+    obids        := (1d array-like) A list of bids - one for each good.
+    
+    converged    := (boolean) A flag indicating convergence.
+    
+    itr          := The number of Iterations (impying n*iterations updates were performed)
+                    performed. If converged = False -> itr = maxItr.
+                    
+    l            := Euclidean distance between the last update step 
+                    and the previous state of the bid vector.
+    """
+    m = bundles.shape[1]
+    newBids = numpy.atleast_1d(initialBids).copy()
+    converged = False
+    
+    for itr in xrange(maxItr):
+        oldBid = newBids.copy()
+        for gIdx in xrange(m):
+            newBids[gIdx] = margLocalUpdate(bundles,revenue, newBids, gIdx, samples, verbose)
+            
+        d = numpy.linalg.norm(oldBid-newBids)
+        
+        if d <= tol:
+            converged = True
+            break
+        
+    if ret == 'bids':
+        return newBids
+    else:
+        return newBids, converged, itr + 1, d
+    
+    
+def margLocalA(**kwargs):
+    """
+    Marg Local Analytic - computes probabilities analytically.
+    """
     pricePrediction = kwargs.get('pricePrediction')
     if pricePrediction == None:
         raise KeyError("Must specify pricePrediction")
