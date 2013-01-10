@@ -50,14 +50,15 @@ def condLocalUpdate(bundles, revenue, bids, targetBid, samples, verbose = False)
         
         p1 = numpy.count_nonzero( numpy.all(goodsWon == posBundle, 1) ) + 1
         p1 = numpy.float(p1) / (normWon + 2)
-        
+#        p1 = numpy.count_nonzero( numpy.all(goodsWon == posBundle, 1) )
+#        p1 = numpy.float(p1) / (normWon + 1)
         if p1 > 1.0:
             raise ValueError ("p1 = {0} > 1.0".format(p1))
         
         if p1 < 0.0:
             raise ValueError("p1 = {0} < 0.0".format(p1))
         
-        p0 = numpy.count_nonzero( numpy.all(goodsWon == negBundle, 1) ) + 1 
+        p0 = numpy.count_nonzero( numpy.all(goodsWon == negBundle, 1) ) + 1
         p0 = numpy.float(p0) / ( normLost +  2 )
         
         if p0 > 1.0:
@@ -71,7 +72,7 @@ def condLocalUpdate(bundles, revenue, bids, targetBid, samples, verbose = False)
         
     return newBid
 
-def condLocal(bundles, revenue, initialBids, samples, maxItr = 100, tol = 1e-5, verbose = False):
+def condLocal(bundles, revenue, initialBids, samples, maxItr = 100, tol = 1e-5, verbose = False, ret = 'bids'):
     """
     Starting form an initial bid, run the condLocal algorithm and return 
     an updated bid vector.
@@ -99,11 +100,15 @@ def condLocal(bundles, revenue, initialBids, samples, maxItr = 100, tol = 1e-5, 
                     (an update has been performed to each of the m bids)
                     is less than tol, the algorithm is said to have converged 
                     and returns the updated bid vector.
+                    
+    ret         := (string) Else return tuple:
+                            (bids, converged (boolean), nItr (int), dist (float)) 
     
     OUTPUTS
     -------
     obids        := (1d array-like) A list of bids - one for each good.
     
+    ONLY RETURNED IF ret == 'all'
     converged    := (boolean) A flag indicating convergence.
     
     itr          := The number of Iterations (impying n*iterations updates were performed)
@@ -128,9 +133,13 @@ def condLocal(bundles, revenue, initialBids, samples, maxItr = 100, tol = 1e-5, 
             converged = True
             break
         
-    return newBids, converged, itr, d   
+    if ret == 'bids':
+        return newBids
+    else:
+        return newBids, converged, itr + 1, d   
 
-def plotCondLocal(bundles, revenue, initialBids, samples, maxItr, tol, filename = None, verbose = True):
+def plotCondLocal(bundles, revenue, initialBids, samples, maxItr, 
+                  tol, filename = None, verbose = True, ret = 'bids'):
     """
     THIS NEEDS WORK!
     """
@@ -167,5 +176,8 @@ def plotCondLocal(bundles, revenue, initialBids, samples, maxItr, tol, filename 
     
     plt.show()
         
-    return obids, converged, itr, d  
+    if ret == 'bids':
+        return obids
+    else:
+        return obids, converged, itr, d  
     
