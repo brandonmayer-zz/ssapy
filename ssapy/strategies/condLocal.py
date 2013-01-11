@@ -7,7 +7,7 @@ Date: 1/2/2013 (adapted from ssapy.agents.condLocalBid)
 
 import numpy
 
-def condLocalUpdate(bundles, revenue, bids, targetBid, samples, verbose = False):
+def condLocalUpdate(bundles, revenue, bids, targetBid, samples, eps = 1e-5, verbose = False):
     """
     Update a single bid index, targetBid, of bids given a set of samples and a 
     revenue function described by bundle - revenue pairs.
@@ -37,8 +37,8 @@ def condLocalUpdate(bundles, revenue, bids, targetBid, samples, verbose = False)
         
     goodsWon = samples <= bids
     
-    normWon = numpy.count_nonzero(goodsWon[:,targetBid] == True)
-    normLost = numpy.count_nonzero(goodsWon[:,targetBid] == False)
+    normWon = numpy.float(numpy.count_nonzero(goodsWon[:,targetBid] == True))
+    normLost = numpy.float(numpy.count_nonzero(goodsWon[:,targetBid] == False))
     
     posIdxList = numpy.flatnonzero(bundles[:,targetBid] == True)
     
@@ -48,8 +48,14 @@ def condLocalUpdate(bundles, revenue, bids, targetBid, samples, verbose = False)
         negBundle[targetBid] = False
         negIdx = numpy.where((bundles == negBundle).all(axis=1))[0][0]
         
-        p1 = numpy.count_nonzero( numpy.all(goodsWon == posBundle, 1) ) + 1
-        p1 = numpy.float(p1) / (normWon + 2)
+#        p1 = numpy.count_nonzero( numpy.all(goodsWon == posBundle, 1) ) + eps
+#        p1 = numpy.float(p1) / (normWon + 2*eps)
+        if normWon == 0:
+            p1 = 0.
+        else:
+            p1 = numpy.float(numpy.count_nonzero( numpy.all(goodsWon == posBundle, 1) ) ) / normWon
+            
+            
 #        p1 = numpy.count_nonzero( numpy.all(goodsWon == posBundle, 1) )
 #        p1 = numpy.float(p1) / (normWon + 1)
         if p1 > 1.0:
@@ -58,8 +64,13 @@ def condLocalUpdate(bundles, revenue, bids, targetBid, samples, verbose = False)
         if p1 < 0.0:
             raise ValueError("p1 = {0} < 0.0".format(p1))
         
-        p0 = numpy.count_nonzero( numpy.all(goodsWon == negBundle, 1) ) + 1
-        p0 = numpy.float(p0) / ( normLost +  2 )
+#        p0 = numpy.count_nonzero( numpy.all(goodsWon == negBundle, 1) ) + eps
+#        p0 = numpy.float(p0) / ( normLost +  2*eps )
+
+        if normLost == 0:
+            p0 = 0.
+        else:
+            p0 = numpy.float(numpy.count_nonzero( numpy.all(goodsWon == negBundle, 1) )) / normLost
         
         if p0 > 1.0:
             raise ValueError ("p0 = {0} > 1.0".format(p1))
@@ -70,6 +81,8 @@ def condLocalUpdate(bundles, revenue, bids, targetBid, samples, verbose = False)
     
         newBid += ((revenue[posIdx]*p1) - (revenue[negIdx]*p0))
         
+    if verbose:
+        print newBid
     return newBid
 
 def condLocal(bundles, revenue, initialBids, samples, maxItr = 100, tol = 1e-5, verbose = False, ret = 'bids'):
@@ -135,8 +148,11 @@ def condLocal(bundles, revenue, initialBids, samples, maxItr = 100, tol = 1e-5, 
         
     if ret == 'bids':
         return newBids
+    elif ret == 'all':
+        return newBids, converged, itr + 1, d
     else:
-        return newBids, converged, itr + 1, d   
+        raise ValueError("Unknown Return Type.")
+       
 
 def plotCondLocal(bundles, revenue, initialBids, samples, maxItr, 
                   tol, filename = None, verbose = True, ret = 'bids'):
