@@ -57,10 +57,13 @@ def jointLocalUpdate( bundles, revenue, bids, targetBid, samples, verbose = Fals
             raise ValueError("p < 0.0")
         
         newBid += (posRev - negRev)*p
+        
+    if verbose:
+        print newBid
 
     return newBid
 
-def jointLocal(bundles, revenue, initialBids, samples, maxItr, tol, verbose = True):
+def jointLocal(bundles, revenue, initialBids, samples, maxItr = 100, tol = 1e-5, verbose = True, ret = 'bids'):
     """
     Starting form an initial bid, run the jointLocal algorithm and return 
     an updated bid vector.
@@ -88,11 +91,23 @@ def jointLocal(bundles, revenue, initialBids, samples, maxItr, tol, verbose = Tr
                     (an update has been performed to each of the m bids)
                     is less than tol, the algorithm is said to have converged 
                     and returns the updated bid vector.
+                    
+    ret         := (string) Else return tuple:
+                        (bids, converged (boolean), nItr (int), dist (float)) 
     
     OUTPUTS
     -------
     obids        := (1d array-like) A list of bids - one for each good.
     
+    converged    := (boolean) A flag indicating convergence.
+    
+    itr          := The number of Iterations (impying n*iterations updates were performed)
+                    performed. If converged = False -> itr = maxItr.
+                    
+    l            := Euclidean distance between the last update step 
+                    and the previous state of the bid vector.
+                    
+    ONLY RETURNED IF ret == 'all'
     converged    := (boolean) A flag indicating convergence.
     
     itr          := The number of Iterations (impying n*iterations updates were performed)
@@ -117,4 +132,9 @@ def jointLocal(bundles, revenue, initialBids, samples, maxItr, tol, verbose = Tr
             converged = True
             break
         
-    return newBids, converged, itr + 1, d
+    if ret == 'bids':
+        return newBids
+    elif ret == 'all':
+        return newBids, converged, itr + 1, d
+    else:
+        raise ValueError("Unknown Return String {0}".format(ret))
