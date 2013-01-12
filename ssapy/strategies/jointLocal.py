@@ -1,5 +1,52 @@
 import numpy
 
+def marginalUtility_(bundleRevenueDict, bids, targetBid, sample):
+    bundleWon = sample <= bids
+    
+    posBundle = bundleWon.copy()
+    negBundle = bundleWon.copy()
+    posBundle[targetBid] = True
+    negBundle[targetBid] = False
+    
+    return bundleRevenueDict[tuple(posBundle)] - bundleRevenueDict[tuple(negBundle)]
+    
+def jointLocalUpdateMc(bundles, revenue, bids, targetBid, samples, verbose = False):
+    """
+    Compute jointLocalUpdate via monte carlo estimate of marginal revenue for good {j}
+    """
+    bundleRevenueDict = {}
+    for bundle, r in zip(bundles,revenue):
+        bundleRevenueDict[tuple(bundle)] = r
+    muj = numpy.float64(0.0)
+    for sample in samples:
+        muj += marginalUtility_(bundles, revenue, bids, targetBid, sample)
+    
+    return muj/samples.shape[0]
+
+def jointLocalMc(bundles, revenue, initialBids, samples, maxItr = 100, tol = 1e-5, verbose = True, ret = 'bids'):
+    m         = bundles.shape[1]
+    newBids   = numpy.atleast_1d(initialBids)
+    converged = False
+    for itr in xrange(maxItr):
+        oldBids = newBids.copy()
+        
+        for gIdx in xrange(m):
+            newBids[gIdx] = jointLocalUpdateMc(bundles, revenue, newBids, gIdx, samples)
+            
+        d = numpy.linalg.norm(oldBids - newBids)
+        if d <= tol:
+            converged = True
+            break
+        
+        if ret == 'bids':
+            return newBids
+        elif ret == 'all':
+            return newBids, converged, itr + 1, d
+        else:
+            raise ValueError("Unknown Return String {0}".format(ret))
+        
+    
+    
 def jointLocalUpdate( bundles, revenue, bids, targetBid, samples, verbose = False ):
     """
     Update a single bid index, targetBid, of bids given a set of samples 
