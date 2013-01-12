@@ -25,8 +25,6 @@ class dokHist(object):
     
     all other bins follow the lower exclusive upper inclusive pattern.
     
-    This TERRIBLE convention was not my choice! It is to maintain
-    compatability with Dr. Wellman's code.
     """
     def __init__(self, **kwargs):
         extent = kwargs.get('extent')
