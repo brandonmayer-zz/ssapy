@@ -53,9 +53,16 @@ def condLocalUpdate(bundles, revenue, bids, targetBid, samples, eps = 1e-5, verb
         if normWon == 0:
             p1 = 0.
         else:
-            p1 = numpy.float(numpy.count_nonzero( numpy.all(goodsWon == posBundle, 1) ) ) / normWon
+            p1 = numpy.float(numpy.count_nonzero( numpy.all(goodsWon == posBundle, 1) ) )
+            if verbose:
+                print '\t#({0}) = {1}'.format(posBundle, p1)
+                print '\t#({0} = True) = {1}'.format(targetBid, normWon)
+                 
+            p1 /= normWon
             
-            
+        if verbose:
+            print 'p({0} | {1} = True ) = {2}'.format(posBundle,targetBid,p1)
+             
 #        p1 = numpy.count_nonzero( numpy.all(goodsWon == posBundle, 1) )
 #        p1 = numpy.float(p1) / (normWon + 1)
         if p1 > 1.0:
@@ -70,19 +77,29 @@ def condLocalUpdate(bundles, revenue, bids, targetBid, samples, eps = 1e-5, verb
         if normLost == 0:
             p0 = 0.
         else:
-            p0 = numpy.float(numpy.count_nonzero( numpy.all(goodsWon == negBundle, 1) )) / normLost
+#            p0 = numpy.float(numpy.count_nonzero( numpy.all(goodsWon == negBundle, 1) )) / normLost
+            p0 = numpy.float(numpy.count_nonzero( numpy.all(goodsWon == negBundle, 1) ))
+            if verbose:
+                print '\t#({0}) = {1}'.format(negBundle, p0)
+                print '\t#({0} = True) = {1}'.format(targetBid, normLost)
+            
+            p0 /= normLost
+        
+        if verbose:
+            print 'p({0} | {1} = False) = {2}'.format(posBundle,targetBid,p0)
         
         if p0 > 1.0:
-            raise ValueError ("p0 = {0} > 1.0".format(p1))
+            raise ValueError ("p0 = {0} > 1.0".format(p0))
         
         if p0 < 0.0:
-            raise ValueError("p0 = {0} < 0.0".format(p1))
+            raise ValueError("p0 = {0} < 0.0".format(p0))
         
     
         newBid += ((revenue[posIdx]*p1) - (revenue[negIdx]*p0))
         
     if verbose:
         print newBid
+        
     return newBid
 
 def condLocal(bundles, revenue, initialBids, samples, maxItr = 100, tol = 1e-5, verbose = False, ret = 'bids'):

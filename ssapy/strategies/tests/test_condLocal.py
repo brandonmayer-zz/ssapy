@@ -43,36 +43,84 @@ class test_condLocalBid(unittest.TestCase):
 #        plotCondLocal(self.bundles2d, self.revenue2d, ibids, 
 #                      self.samples2d, 100, 0.001, True)
         
-    def test_ericCounterExample(self):
-        """
-        From Eric Sodomka's counter example of suboptimality.
-        Sould converte to [25,25]
-        """
-        m = 2
-        v = [0,50]
-        l = 2
+#    def test_ericCounterExample(self):
+#        """
+#        From Eric Sodomka's counter example of suboptimality.
+#        Sould converte to [25,25]
+#        """
+#        m = 2
+#        v = [0,50]
+#        l = 2
+#        bundles = listBundles(m)
+#        revenue = msListRevenue(bundles, v, l)
+#        initialBids = numpy.asarray([25.,25.],dtype = 'float')
+#        targetBid = 0
+#        nSamples = 300
+#        samples = numpy.zeros((nSamples,m))
+#        samples[:100,:] = [30,10]
+#        samples[100:200,:] = [10,30]
+#        samples[200:300,:] = [10,10]
+#        
+#        b1 = condLocalUpdate(bundles, revenue, initialBids, targetBid, samples, True)
+#        
+#        decimal = 5
+#        
+#        numpy.testing.assert_almost_equal(b1, 25, decimal, "condLocal - test_ericCounterExample Failed")
+#        
+#        
+#        ret = condLocal(bundles,revenue, initialBids, samples, verbose = True, ret = 'all')
+#        
+#        numpy.testing.assert_almost_equal(ret[0],numpy.asarray([25.,25.]),decimal)
+#        
+#        numpy.testing.assert_equal(ret[1], True, "condLocal - test_ericCounterExample Failed" )
+        
+    def test_condLocal1(self):
+        samples = numpy.zeros((1000,2))
+        samples[:100,:] = numpy.asarray([20,15])
+        samples[100:500,:] = numpy.asarray([20,20])
+        samples[500:600,:] = numpy.asarray([30,15])
+        samples[600:,:] = numpy.asarray([30,20])
+        
+        m=2
+        l = 1
+        v = [45,20]
         bundles = listBundles(m)
         revenue = msListRevenue(bundles, v, l)
-        initialBids = numpy.asarray([25.,25.],dtype = 'float')
-        targetBid = 0
-        nSamples = 300
-        samples = numpy.zeros((nSamples,m))
-        samples[:100,:] = [30,10]
-        samples[100:200,:] = [10,30]
-        samples[200:300,:] = [10,10]
+        bids = numpy.asarray([25.,25.])
+
+        bids[0] = condLocalUpdate(bundles,revenue,bids,0,samples,True)
+        numpy.testing.assert_almost_equal(bids[0], 25, 3, "Update 1.1 Failed", True)
+                
+        bids[1] = condLocalUpdate(bundles,revenue,bids,1,samples,True)
+        numpy.testing.assert_almost_equal(bids[1], 10, 3, "Update 1.2 Failed", True )
+                
+        bids[0] = condLocalUpdate(bundles,revenue,bids,0,samples,True)
+        numpy.testing.assert_almost_equal(bids[0], 45, 3, "Update 2.1 Failed", True)
+                
+        bids[1] = condLocalUpdate(bundles,revenue,bids,1,samples,True)
+        numpy.testing.assert_almost_equal(bids[1], 0, 3, "Update 2.2 Failed", True)
+                
+        bids[0] = condLocalUpdate(bundles,revenue,bids,0,samples,True)
+        numpy.testing.assert_almost_equal(bids[0], 45, 3, "Update 3.1 Failed", True)
+                
+        bids[1] = condLocalUpdate(bundles,revenue,bids,1,samples,True)
+        numpy.testing.assert_almost_equal(bids[1], 0, 3, "Update 3.2 Failed", True)
         
-        b1 = condLocalUpdate(bundles, revenue, initialBids, targetBid, samples, True)
+        #should converge after 3 iterations
+        bids = numpy.asarray([25.,25.])
         
-        decimal = 5
+        bids, converged, itr, tol = condLocal(bundles, revenue, bids, samples, ret = 'all')
         
-        numpy.testing.assert_almost_equal(b1, 25, decimal, "condLocal - test_ericCounterExample Failed")
+        numpy.testing.assert_array_equal(bids, numpy.asarray([45,0]), "margLocal bids test failed", True)
+        
+        numpy.testing.assert_equal(converged, True, "margLocal converged failed", True)
+        
+        numpy.testing.assert_equal(itr,3,"margLocal number of iterations failed.", True)
+        
+        numpy.testing.assert_almost_equal(tol, 0., 8, "margLocal tol failed", True)
         
         
-        ret = condLocal(bundles,revenue, initialBids, samples, verbose = True)
         
-        numpy.testing.assert_almost_equal(ret[0],numpy.asarray([25.,25.]),decimal)
-        
-        numpy.testing.assert_equal(ret[1], True, "condLocal - test_ericCounterExample Failed" )
         
         
         
