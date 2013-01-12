@@ -1,6 +1,6 @@
 import numpy
 
-def marginalUtility_(bundleRevenueDict, bids, targetBid, sample):
+def marginalUtilityDict_(bundleRevenueDict, bids, targetBid, sample):
     bundleWon = sample <= bids
     
     posBundle = bundleWon.copy()
@@ -14,36 +14,70 @@ def jointLocalUpdateMc(bundles, revenue, bids, targetBid, samples, verbose = Fal
     """
     Compute jointLocalUpdate via monte carlo estimate of marginal revenue for good {j}
     """
-    bundleRevenueDict = {}
-    for bundle, r in zip(bundles,revenue):
-        bundleRevenueDict[tuple(bundle)] = r
+#    bundleRevenueDict = {}
+#    for bundle, r in zip(bundles,revenue):
+#        bundleRevenueDict[tuple(bundle)] = r
     muj = numpy.float64(0.0)
-    for sample in samples:
-        muj += marginalUtility_(bundles, revenue, bids, targetBid, sample)
+    goodsWon = samples <= bids
+    for w in goodsWon:
+#        w = sample <= bids
+        w[targetBid] = True
+        posIdx = numpy.where((bundles == w).all(axis=1))[0][0]
+        w[targetBid] = False
+        negIdx = numpy.where((bundles == w).all(axis=1))[0][0]
+        muj += revenue[posIdx]-revenue[negIdx]
     
+    if verbose:
+        print muj / samples.shape[0]
+        
     return muj/samples.shape[0]
 
-def jointLocalMc(bundles, revenue, initialBids, samples, maxItr = 100, tol = 1e-5, verbose = True, ret = 'bids'):
+def jointLocalUpdateMcDict(bundleRevenueDict, bids, targetBid, samples, verbose = False):
+    muj = numpy.float64(0.0)
+    for sample in samples:
+        muj += marginalUtilityDict_(bundleRevenueDict, bids, targetBid, sample)
+        
+    if verbose:
+        print muj / samples.shape[0]
+        
+    return muj / samples.shape[0]
+
+def jointLocalMc(bundles, revenue, initialBids, samples, maxItr = 100, tol = 1e-5, verbose = False, ret = 'bids'):
     m         = bundles.shape[1]
     newBids   = numpy.atleast_1d(initialBids)
     converged = False
+    
+    bundleRevenueDict = {}
+    for bundle, r in zip(bundles,revenue):
+        bundleRevenueDict[tuple(bundle)] = r
+    
     for itr in xrange(maxItr):
         oldBids = newBids.copy()
         
         for gIdx in xrange(m):
-            newBids[gIdx] = jointLocalUpdateMc(bundles, revenue, newBids, gIdx, samples)
+#            newBids[gIdx] = jointLocalUpdateMc(bundles, revenue, newBids, gIdx, samples, verbose)
+            newBids[gIdx] = jointLocalUpdateMcDict(bundleRevenueDict, newBids, gIdx, samples, verbose)
+            
+        if verbose:
+            print 'newBids = {0}'.format(newBids)
             
         d = numpy.linalg.norm(oldBids - newBids)
+        
+        if verbose:
+            print 'd = {0}'.format(d)
         if d <= tol:
             converged = True
+            
+            if verbose:
+                print 'converged = {0}'.format(converged)
             break
         
-        if ret == 'bids':
-            return newBids
-        elif ret == 'all':
-            return newBids, converged, itr + 1, d
-        else:
-            raise ValueError("Unknown Return String {0}".format(ret))
+    if ret == 'bids':
+        return newBids
+    elif ret == 'all':
+        return newBids, converged, itr + 1, d
+    else:
+        raise ValueError("Unknown Return String {0}".format(ret))
         
     
     
