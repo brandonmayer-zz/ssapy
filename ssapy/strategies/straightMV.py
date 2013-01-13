@@ -29,19 +29,3 @@ def straightMV(bundles, revenue, pricePrediction, verbose = False):
         print marginalValueBid
                                          
     return marginalValueBid
-
-if __name__ == "__main__":
-    from ssapy.util import listBundles
-    from ssapy.marketSchedule import listRevenue
-    
-    pp = [5,5]
-    bundles = listBundles(2)
-    l = 1
-    v = [20,10]
-    rev = listRevenue(bundles, v, l)
-     
-    print bundles
-    print rev
-    
-    bid = straightMV(bundles, rev,pp,True)
-
