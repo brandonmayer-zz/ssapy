@@ -5,6 +5,11 @@ from ssapy.agents.agentFactory import agentFactory
 import multiprocessing
 import numpy
 
+def collectBids(agentList):
+    
+    bids = [agent.bid() for agent in agentList]
+    return numpy.atleast_2d(bids)
+
 def simAuctionHelper(**kwargs):
     agentType = kwargs.get('agentType')
         
@@ -154,8 +159,6 @@ def simulateAuction(**kwargs):
             
     selfIdx: int, required if retType == 'hob'
         Index of agent considered to be self. Excluded from max bid calculation.
-        
-    
     """
 
     agentType = kwargs.get('agentType')
