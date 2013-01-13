@@ -1,13 +1,13 @@
 from ..marketSchedule import listRevenue
 from .msAgent import msAgent
-from ...strategies.straightMU import straightMU as strategies
+from ...strategies import straightMU as strategies
 
 class straightMUa(msAgent):
     def __init__(self, **kwargs):
         super(straightMUa, self).__init__(**kwargs)
         
     def bid(self, **kwargs):
-        pricePrediction = kwargs.get('pricePrediction')
+        pricePrediction = kwargs.get('pricePrediction',self.pricePrediction)
         
         bundles = kwargs.get('bundles', self.listBundles())
         
@@ -23,7 +23,7 @@ class straightMU8(msAgent):
         
     def bid(self, **kwargs):
         
-        pricePrediction = kwargs.get('pricePrediction')
+        pricePrediction = kwargs.get('pricePrediction',self.pricePrediction)
         
         bundles = kwargs.get('bundles', self.listBundles())
         
@@ -39,7 +39,7 @@ class straightMU64(msAgent):
         super(straightMU64, self).__init__(**kwargs)
         
     def bid(self, **kwargs):
-        pricePrediction = kwargs.get('pricePrediction')
+        pricePrediction = kwargs.get('pricePrediction',self.pricePrediction)
         
         bundles = kwargs.get('bundles', self.listBundles())
         
@@ -54,7 +54,7 @@ class straightMU256(msAgent):
         super(straightMU256, self).__init__(**kwargs)
         
     def bid(self, **kwargs):
-        pricePrediction = kwargs.get('pricePrediction')
+        pricePrediction = kwargs.get('pricePrediction',self.pricePrediction)
         
         bundles = kwargs.get('bundles', self.listBundles())
         
