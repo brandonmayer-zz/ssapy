@@ -38,7 +38,7 @@ def straightMUa(bundles, revenue, pricePrediction, verbose = False):
     if verbose:
         print "straightMUa"
         
-    expectedPrices = pricePrediction.expectedValues()
+    expectedPrices = pricePrediction.expectedValue()
     
     return straightMV(bundles, revenue, expectedPrices, verbose)
 
