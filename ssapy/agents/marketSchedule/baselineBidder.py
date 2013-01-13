@@ -11,7 +11,7 @@ Modifications:
     Brandon A. Mayer - Moved here 1/3/2013
 """
 import numpy
-from . import msAgent
+from .msAgent import msAgent
 
 class baselineBidder(msAgent):
     """
