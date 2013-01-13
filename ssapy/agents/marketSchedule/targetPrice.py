@@ -1,4 +1,5 @@
-from . import msAgent, listRevenue
+from . import listRevenue
+from .msAgent import msAgent
 from ...strategies import targetPrice
 from ...util import listBundles
 
