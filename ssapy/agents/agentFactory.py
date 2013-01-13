@@ -13,6 +13,8 @@ def agentFactory(**kwargs):
         raise ValueError("Must provide agentType (string).")
     elif agentType == "msStraightMV":
         return msStraightMV.straightMV(**kwargs)
+    elif agentType == "msStraightMUa":
+        return msStraightMU.straightMUa(**kwargs)
     elif agentType == "msStraightMU8":
         return msStraightMU.straightMU8(**kwargs)
     elif agentType == "msStraightMU64":
