@@ -1,6 +1,9 @@
-import ssapy.strategies.straightMV as strategy
+import ssapy.strategies.straightMV as straightMV_
 from ssapy.util import listBundles
-from ssapy.agents.marketSchedule import msAgent, listRevenue
+from ssapy.agents.marketSchedule import listRevenue
+
+#from ssapy.agents.marketSchedule.msAgent import msAgent
+from .msAgent import msAgent
 
 class straightMV(msAgent):
     def __init__(self, **kwargs):
@@ -9,33 +12,11 @@ class straightMV(msAgent):
     def bid(self, **kwargs):
         pricePrediction = kwargs.get('pricePrediction',self.pricePrediction)
         
-        bundles = kwargs.get('bundles', listBundles(self.m))
+        bundles = kwargs.get('bundles', self.listBundles())
         
-        valuation = kwargs.get('valuation',
+        revenue = kwargs.get('revenue',
                                listRevenue(bundles, self.v, self.l))
                               
-        return strategy(bundles = bundles, 
-                        valuation = valuation, 
+        return straightMV_(bundles = bundles, 
+                        revenue = revenue, 
                         pricePrediction = pricePrediction)
-        
-if __name__ == "__main__":
-    import numpy
-    pp = numpy.asarray([5,5])
-    m = 2
-    l = 1
-    v = [20,10]
-    
-    agent = straightMV(m = m, l = l, v = v, pricePrediction = pp)
-    #answer should be [15., 0.]
-    print agent.bid()
-    
-    agent2 = straightMV(m=2)
-    print 'v = {0}'.format(agent2.v)
-    print 'l = {0}'.format(agent2.l)
-    
-    print 'agent2.bid = {0}'.format(agent2.bid(pricePrediction = pp))
-    
-    agent3 = straightMV(m=2)
-    print 'v = {0}'.format(agent3.v)
-    print 'l = {0}'.format(agent3.l)
-    print 'agent3.bid = {0}'.format(agent3.bid(pricePrediction = pp))
