@@ -55,6 +55,14 @@ class jointGMM(sklearn.mixture.GMM):
                 
         return samples
     
+    def expectedValue(self):
+        
+        ev = numpy.zeros(self.means_.shape[1])
+        for m, w in zip(self.means_,self.weights_):
+            ev += m*w
+            
+        return ev
+    
 #    def aicFit(self, X, compRange = range(1,6), minCovar = 9, covarType = 'full', verbose = True):
     def aicFit(self, **kwargs):
         X               = kwargs.get('X')
