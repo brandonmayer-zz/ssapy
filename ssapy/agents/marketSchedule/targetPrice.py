@@ -8,7 +8,7 @@ class targetPrice8(msAgent):
         super(targetPrice8, self).__init__(**kwargs)
     
     def bid(self, **kwargs):
-        pricePrediction = kwargs.get('pricePrediction')
+        pricePrediction = kwargs.get('pricePrediction',self.pricePrediction)
         bundles = kwargs.get('bundles',listBundles(self.m))
         revenue = kwargs.get('revenue',listRevenue(bundles, self.v, self.l))
         verbose = kwargs.get('verbose',False)
@@ -20,7 +20,7 @@ class targetPrice64(msAgent):
         super(targetPrice64, self).__init__(**kwargs)
     
     def bid(self, **kwargs):
-        pricePrediction = kwargs.get('pricePrediction')
+        pricePrediction = kwargs.get('pricePrediction',self.pricePrediction)
         bundles = kwargs.get('bundles',listBundles(self.m))
         revenue = kwargs.get('revenue',listRevenue(bundles, self.v, self.l))
         verbose = kwargs.get('verbose',False)
@@ -32,7 +32,7 @@ class targetPrice256(msAgent):
         super(targetPrice256, self).__init__(**kwargs)
     
     def bid(self, **kwargs):
-        pricePrediction = kwargs.get('pricePrediction')
+        pricePrediction = kwargs.get('pricePrediction',self.pricePrediction)
         bundles = kwargs.get('bundles',listBundles(self.m))
         revenue = kwargs.get('revenue',listRevenue(bundles, self.v, self.l))
         verbose = kwargs.get('verbose',False)
