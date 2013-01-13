@@ -23,8 +23,8 @@ def yw2Hob(**kwargs):
     if agentType == None:
         raise ValueError("Must specify agentType.")
     
-    selfIdx      = kwargs.get('selfIdx',0)
     nAgents      = kwargs.get('nAgents',8)
+    selfIdx      = kwargs.get('selfIdx',numpy.random.randint(nAgents))
     nGames       = kwargs.get('nGames',100)
     m            = kwargs.get('m',5)
     minPrice     = int(kwargs.get('minPrice',0))

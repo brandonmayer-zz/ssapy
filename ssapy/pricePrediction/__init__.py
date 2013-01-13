@@ -16,3 +16,10 @@ def expectedCost(pricePrediction, bundles, valuation, bids, qmin = 0.5, qstep = 
         expCost += ep
         
     return expCost
+
+def highestOtherBids(bids, targetIdx):
+    otherAgents = numpy.delete(numpy.arange(bids.shape[1]),targetIdx)
+    
+    hob = numpy.max(bids[otherAgents],1)
+    
+    return hob
