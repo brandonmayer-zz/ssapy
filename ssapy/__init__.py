@@ -1,26 +1,18 @@
 import numpy
 import itertools
-#from pricePrediction.dok_hist import dok_hist
+
 from .pricePrediction.dokHist import dokHist
 
-#from ssapy.strategies import strategyDict
+from .agents.marketSchedule import listRevenue as msListRevenue
 
-from ssapy.agents.marketSchedule import listRevenue as msListRevenue
-
-from ssapy.agents.marketSchedule import \
+from .agents.marketSchedule import \
     randomValueVector as msRandomValueVector
     
-from ssapy.util import listBundles
+from .util import listBundles
 
-#from ssapy.pricePrediction.dok_hist import dokDhist
+from .agents.agentFactory import agentFactory
 
-#def getStrategy(ss):
-#    strategy = strategyDict.get(ss)
-#    
-#    if strategy == None:
-#        raise ValueError("Unknown Strategy - {0}".format(strategy))
-#    
-#    return strategy
+
     
 
 
