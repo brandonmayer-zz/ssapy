@@ -33,7 +33,15 @@ def straightMU(bundles, revenue, pricePrediction, n_samples, verbose = False):
         print "Expected Price Vector: {0}".format(expectedPrices)
     
     return straightMV( bundles, revenue, expectedPrices, verbose)
-  
+
+def straightMUa(bundles, revenue, pricePrediction, verbose = False):
+    if verbose:
+        print "straightMUa"
+        
+    expectedPrices = pricePrediction.expectedValues()
+    
+    return straightMV(bundles, revenue, expectedPrices, verbose)
+
 def straightMU8(bundles, revenue, pricePrediction, verbose = False):
     """
     Compute straight marginal value bid by sampling from a distribution
