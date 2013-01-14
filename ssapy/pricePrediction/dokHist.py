@@ -281,7 +281,7 @@ class dokHist(object):
                 plt.savefig(filename)
         else:
             raise NotImplementedError("NOT IMPLEMENTED")
-            
+                    
             
         
 def marginal_expected_cost( hob_hist, bid):
