@@ -23,3 +23,18 @@ def highestOtherBids(bids, targetIdx):
     hob = numpy.max(bids[otherAgents],1)
     
     return hob
+
+class uniformpp(object):
+    """
+    A uniform price prediction for scpp initialization
+    """
+    def __init__(self,m = 5, minPrice = 0, maxPrice = 50):
+        self.m = m
+        self.minPrice = minPrice
+        self.maxPrice = maxPrice
+        
+    def sample(self,n_samples = 1):
+        return numpy.random.rand(n_samples,self.m)*(self.maxPrice-self.minPrice)+self.minPrice
+    
+    def expectedValue(self):
+        return numpy.ones(self.m)*(self.maxPrice-self.minPrice)*0.5
