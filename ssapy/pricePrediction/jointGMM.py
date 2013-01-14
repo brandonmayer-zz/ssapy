@@ -64,7 +64,7 @@ class jointGMM(sklearn.mixture.GMM):
         return ev
     
 #    def aicFit(self, X, compRange = range(1,6), minCovar = 9, covarType = 'full', verbose = True):
-    def aicFit(self, **kwargs):
+    def aicFit(self,**kwargs):
         X               = kwargs.get('X')
         compRange       = kwargs.get('compRange',numpy.arange(1,6))
         
@@ -128,7 +128,7 @@ class jointGMM(sklearn.mixture.GMM):
         colors   = kwargs.get('colors')
         title   = kwargs.get('title', "Marginals of Joint Gaussian")
         xlabel  = kwargs.get('xlabel', "price")
-        ylabel  = kwargs.get('ylabel', r"$p(closing price)$")
+        ylabel  = kwargs.get('ylabel', r"$p(q)$")
         
         
         
