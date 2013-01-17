@@ -10,17 +10,21 @@ import itertools
 import time
 import os
 
+def expectedSurplus_( bundleRevenueDict, bidVector, samples ):
+    es = numpy.float64(0.)
+    
+    for sample in samples:
+        goodsWon = sample <= bidVector
+        rev = bundleRevenueDict[(tuple(goodsWon))]
+        cost = numpy.dot(goodsWon,sample)
+        es += rev-cost
+        
+    return es/samples.shape[0]
+        
 def expectedSurplus(bundleRevenueDict, bidVector, jointGmmPricePrediction, n_samples = 10000):
     samples = jointGmmPricePrediction.sample(n_samples = n_samples)
     
-    es = numpy.float64(0.)
-    for sample in samples:
-        goodsWon = sample <= bidVector
-        rev = bundleRevenueDict[tuple(goodsWon)]
-        cost = numpy.dot(goodsWon, sample)
-        es += rev - cost
-        
-    return es / n_samples
+    return expectedSurplus_(bundleRevenueDict, bidVector, samples)
 
 class jointGMM(sklearn.mixture.GMM):
     """
