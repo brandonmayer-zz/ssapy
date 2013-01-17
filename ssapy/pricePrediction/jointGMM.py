@@ -10,6 +10,18 @@ import itertools
 import time
 import os
 
+def expectedSurplus(bundleRevenueDict, bidVector, jointGmmPricePrediction, n_samples = 10000):
+    samples = jointGmmPricePrediction.sample(n_samples = n_samples)
+    
+    es = numpy.float64(0.)
+    for sample in samples:
+        goodsWon = sample <= bidVector
+        rev = bundleRevenueDict[tuple(goodsWon)]
+        cost = numpy.dot(goodsWon, sample)
+        es += rev - cost
+        
+    return es / n_samples
+
 class jointGMM(sklearn.mixture.GMM):
     """
     A wrapper around sklearn.mixture.GMM to add some additional functionality
@@ -53,6 +65,38 @@ class jointGMM(sklearn.mixture.GMM):
                 samples[idx,:] = s
                 idx += 1
                 
+        return samples
+    
+    def sampleMarg_(self, margIdx = None, n_samples = 1000):
+        
+        if margIdx == None:
+            raise ValueError("Must specify marginal distribution to sample from - margIdx.")
+        
+        w = numpy.atleast_1d(self.weights_)
+        samples = numpy.zeros(n_samples)
+        
+        components = numpy.random.multinomial(1,w,size=n_samples).argmax(axis=1)
+        for sIdx, component in enumerate(components):
+            done = False
+            
+            while not done:
+                sample = numpy.random.normal(loc = self.means_[component][margIdx],
+                                             scale = numpy.sqrt(self.covars_[component][margIdx][margIdx]))
+                if sample > self.minPrice and sample < self.maxPrice:
+                    samples[sIdx] = sample
+                    done = True
+                    break
+                
+            
+        return samples
+            
+        
+    def sampleMarg(self, n_samples = 1000):
+        m = self.means_.shape[1]
+        samples = numpy.zeros((n_samples,m))
+        for marginalIdx in xrange(m):
+            samples[:,marginalIdx] = self.sampleMarg_(marginalIdx, n_samples)
+            
         return samples
     
     def expectedValue(self):
@@ -119,7 +163,7 @@ class jointGMM(sklearn.mixture.GMM):
                 
         return clfList[argMinAic], aicList, compRange
     
-    def pltMargDist(self,**kwargs):
+    def pltMarg(self,**kwargs):
         
         oFile    = kwargs.get('oFile')
         nPts     = kwargs.get('nPts',1000)
@@ -152,7 +196,7 @@ class jointGMM(sklearn.mixture.GMM):
                 margCov  = cov[goodIdx,goodIdx]
                 rv = norm(loc=margMean, scale=numpy.sqrt(margCov))
                 margDist += w*rv.pdf(X)
-            plt.plot(X,margDist,color=next(colorCycle),label = 'good {0}'.format(goodIdx))
+            ax.plot(X,margDist,color=next(colorCycle),label = 'good {0}'.format(goodIdx))
             
         
         leg = ax.legend(loc = 'best',fancybox = True)
@@ -165,6 +209,8 @@ class jointGMM(sklearn.mixture.GMM):
             plt.show()
         else:
             plt.savefig(oFile)
+            
+        return ax
             
     def plt(self,**kwargs):
         minPrice = kwargs.get('minPrice',0)
@@ -229,6 +275,11 @@ class jointGMM(sklearn.mixture.GMM):
         
         return (w,m,v)
     
+    
+            
+            
+            
+    
     def margCdf(self, x, margIdx):    
                 
         if isinstance(margIdx,list) or isinstance(margIdx, numpy.ndarray):
@@ -274,9 +325,9 @@ class jointGMM(sklearn.mixture.GMM):
         for (w,mean,cov) in zip(self.weights_, self.means_, self.covars_):
             p += w*norm.pdf(x, loc = mean[margIdx], scale = numpy.sqrt(cov[margIdx,margIdx]))
             
-            if p > 1 + 1.003:
-                raise ValueError("In jointGmm.margCdf(...)\n" +\
-                                 "p = {0} > 1.0".format(p))
+#            if p > 1 + 1.003:
+#                raise ValueError("In jointGmm.margCdf(...)\n" +\
+#                                 "p = {0} > 1.0".format(p))
             
             if p < 0.0:
                 raise ValueError("In jointGmm.margCdf(...)\n" +\

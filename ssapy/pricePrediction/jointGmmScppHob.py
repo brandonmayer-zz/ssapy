@@ -14,9 +14,6 @@ from ssapy.pricePrediction.jointGMM import jointGMM
 from ssapy.util.padnums import pprint_table
 from ssapy.pricePrediction.util import aicFit, apprxJointGmmKL
 
-
-
-
 def jointGmmScppHob(**kwargs):
     kwargs['oDir']         = kwargs.get('oDir')
     if kwargs['oDir'] == None:
@@ -53,20 +50,18 @@ def jointGmmScppHob(**kwargs):
     kwargs['maxValuation'] = kwargs.get('vmax',50)
 
     kwargs['parallel']     = kwargs.get('parallel',True)
-    kwargs['nproc']        = kwargs.get('nproc', multiprocessing.cpu_count())
+    kwargs['nProc']        = kwargs.get('nProc', multiprocessing.cpu_count())
     kwargs['verbose']      = kwargs.get('verbose', True)
     kwargs['pltMarg']      = kwargs.get('pltMarg', True)
     
     if kwargs['oDir'] == None:
         raise ValueError("Must provide Directory")
-    kwargs['oDir'] = os.path.realpath(oDir)
+    kwargs['oDir'] = os.path.realpath(kwargs['oDir'])
     
     models = numpy.arange(kwargs['aicCompMin'], kwargs['aicCompMax'])
         
     timestamp = "jointGmmScpp_{0}_{1}".format(kwargs['agentType'],timestamp_())
     
-    
-        
     kwargs['oDir'] = os.path.join(kwargs['oDir'], timestamp)
     if not os.path.exists(kwargs['oDir']):
         os.makedirs(kwargs['oDir'])
@@ -122,7 +117,19 @@ def jointGmmScppHob(**kwargs):
         nextpp = jointGMM()
         temppp, aicValues, compRange = nextpp.aicFit(X=hob, compRange = models, min_covar = kwargs['aicMinCovar'], verbose = kwargs['verbose'])
         
-        del hob,temppp
+        f,ax = plt.subplots()
+        colors = ['#777777']*len(aicValues)
+        colors[numpy.argmin(aicValues)] = 'r'
+        ax.bar(compRange, aicValues, color=colors, align = 'center')
+        ax.set_ylabel('AIC score')
+        ax.set_xlabel('GMM Model (Number of Components)')
+        ax.set_title('Iteration {0}'.format(itr+1))
+        plt.ylim([0,numpy.max(aicValues) + 0.5])
+        aicFile = "aic_{0:03}.pdf".format(itr+1)
+        plt.savefig(os.path.join(kwargs['oDir'],aicFile))
+        del colors
+        
+        del hob,temppp,compRange
         
         ppFile = os.path.join(kwargs['oDir'], 'jointGmmScppHob_{0}_{1:04}.pkl'.format(kwargs['agentType'],itr+1))
         with open(ppFile,'w') as f:
@@ -130,7 +137,7 @@ def jointGmmScppHob(**kwargs):
             
         if kwargs['pltMarg']:
             oFile = os.path.join(kwargs['oDir'],'jointGmmScppHob_{0}_{1:04}.pdf'.format(kwargs['agentType'],itr+1))
-            nextpp.pltMargDist(oFile = oFile)
+            nextpp.pltMarg(oFile = oFile)
         
         with open(os.path.join(kwargs['oDir'],'aic.txt'),'a') as f:
             numpy.savetxt(f,numpy.atleast_1d(aicValues))
@@ -181,11 +188,14 @@ def jointGmmScppHob(**kwargs):
     with open(os.path.join(kwargs['oDir'],'n_components.txt'),'r') as f:
         comp = numpy.loadtxt(f)
         
-    f, ax = plt.subplots()
-    plt.plot(comp,'b-',linewidth=3)
-    plt.title("Number of Components")
-    plt.xlabel("Iteration")
-    plt.ylabel("Number of Components")
+    f,ax = plt.subplots()
+    colors = ['#0A0A2A']*len(aicValues)
+    colors[numpy.argmin(aicValues)] = 'r'
+    ax.bar(range(len(comp)), comp, color=colors, align = 'center')
+    ax.set_ylabel('GMM Model (Number of Components)')
+    ax.set_xlabel('Iteration')
+    ax.set_title('Model Selection')
+    plt.ylim([0,numpy.max(comp) + 0.5])
     plt.savefig(os.path.join(kwargs['oDir'],'n_components.pdf'))
     
     del comp
@@ -217,6 +227,37 @@ def jointGmmScppHob(**kwargs):
         
     with open(os.path.join(kwargs['oDir'],'extraHobLL.txt'),'w') as f:
         numpy.savetxt(f,numpy.atleast_1d(ll))
+        
+    # fit another model to held out data and
+    # compute the last skl between the scpp and 
+    # the extra model
+    
+    extraModel = jointGMM()
+    gmm, aicValues, compRange = extraModel.aicFit(X=extraHob, compRange = models, min_covar = kwargs['aicMinCovar'], verbose = kwargs['verbose'])
+    kld = numpy.abs(apprxJointGmmKL(kwargs['pricePrediction'], extraModel, nSamples = kwargs['nklsamples'], verbose = kwargs['verbose']))
+    
+    f,ax = plt.subplots()
+    colors = ['#777777']*len(aicValues)
+    colors[numpy.argmin(aicValues)] = 'r'
+    ax.bar(compRange, aicValues, color=colors, align = 'center')
+    ax.set_ylabel('AIC score')
+    ax.set_xlabel('GMM Model (Number of Components)')
+    ax.set_title('Iteration {0}'.format(itr+1))
+    plt.ylim([0,numpy.max(aicValues) + 0.5])
+    extraAicFile = "extraAic_{0:03}.pdf".format(itr+1)
+    plt.savefig(os.path.join(kwargs['oDir'],extraAicFile))
+    
+    del gmm,aicValues, compRange
+    
+    if kwargs['verbose']:
+        print 'SKL-D between SCPP proposal and extra model = {0}'.format(kld)
+        
+    extraSkdFile = os.path.join(kwargs['oDir'],'extraHobSkl.txt')
+    with open(extraSkdFile,'w') as f:
+        numpy.savetxt(f, numpy.atleast_1d(kld))
+    
+    
+    
     
     
 if __name__ == "__main__":
