@@ -132,7 +132,7 @@ class jointGMM(sklearn.mixture.GMM):
         if verbose:
             print 'starting aicFit(...)'
             print 'compRange = {0}'.format(compRange)
-            print 'minCovar  = {0}'.format(self.min_covar)
+            print 'minCovar  = {0}'.format(min_covar)
             start = time.time()
             
         clfList = [sklearn.mixture.GMM(n_components    = c, 
