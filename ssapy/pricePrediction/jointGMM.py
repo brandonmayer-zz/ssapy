@@ -277,12 +277,7 @@ class jointGMM(sklearn.mixture.GMM):
         m = [mean[margIdx] for mean in self.means_]
         v = [var[margIdx,margIdx] for var in self.covars_]
         
-        return (w,m,v)
-    
-    
-            
-            
-            
+        return w, m, v
     
     def margCdf(self, x, margIdx):    
                 
@@ -320,7 +315,8 @@ class jointGMM(sklearn.mixture.GMM):
                 
         return cdf
     
-    def margPdf(self, x, margIdx):
+    def margPdf(self, x, margIdx = None):
+            
         if margIdx > self.means_.shape[1]:
                 raise ValueError("In jointGmm.margPdf(...)\n" +\
                                  "margIdx = {0} > self.means_.shape[1] = {1}".format(margIdx,self.means_.shape[1]))
@@ -338,8 +334,40 @@ class jointGMM(sklearn.mixture.GMM):
                                  "p = {0} < 0.0".format(p))
                 
         return p
-                
-                
+    
+    def mutualInformation(self, n_samples=10000, verbose = True):
+        
+        samples = self.sample(n_samples = n_samples, minPrice = -numpy.float('inf'), maxPrice = numpy.float('inf'))
+        
+        jointLL, resp = self.eval(samples)
+        del resp
+        
+        n_features = self.means_.shape[1]
+        n_components = self.means_.shape[0]
+        margLL = numpy.zeros((samples.shape))
+        for i in xrange(n_features):
+            mdist = sklearn.mixture.GMM(n_components = self.n_components, covariance_type = 'diag')
+            w,m,v  = self.margParams(margIdx = i)
+            mdist.weights_ = numpy.atleast_1d(w)
+            mdist.means_ = numpy.atleast_2d(m).T
+            mdist.covars_ = numpy.zeros((n_components,1))
+            for vi, var in enumerate(v):
+                mdist.covars_[vi][0] = var
+            margLL[:,i], resp = mdist.eval(samples[:,i])
             
+        del resp
+        
+        idepLL = numpy.sum(margLL,axis=1)
+        
+        mi = numpy.sum(jointLL - idepLL,dtype='float')/n_samples
+                   
+        return mi 
+    
+    def sampleNormalizedCorrelation(self, n_samples, verbose = True):
+        samples = self.sample(n_samples = n_samples, minPrice = -numpy.float('inf'), maxPrice = numpy.float('inf'))
+        
+        corr = numpy.corrcoef(samples.T)
+        
+        return corr
         
         
