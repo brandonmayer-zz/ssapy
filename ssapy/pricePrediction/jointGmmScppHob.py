@@ -12,7 +12,7 @@ from ssapy.auctions import simulateAuction
 from ssapy.pricePrediction import uniformpp
 from ssapy.pricePrediction.jointGMM import jointGMM
 from ssapy.util.padnums import pprint_table
-from ssapy.pricePrediction.util import aicFit, apprxJointGmmKL
+from ssapy.pricePrediction.util import apprxJointGmmKL
 
 def jointGmmScppHob(**kwargs):
     kwargs['oDir']         = kwargs.get('oDir')
