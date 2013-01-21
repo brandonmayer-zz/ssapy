@@ -47,6 +47,9 @@ class jointGMM(sklearn.mixture.GMM):
                                       params          = kwargs.get('params','wmc'),
                                       init_params     = kwargs.get('init_params','wmc') )
         
+    def m(self):
+        return self.means_.shape[1]
+        
     def sample(self, **kwargs):
         
         minPrice  = kwargs.get('minPrice',self.minPrice)
