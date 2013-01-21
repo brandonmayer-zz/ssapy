@@ -138,12 +138,12 @@ def jointGmmScppHob(**kwargs):
         
         del hob,temppp,compRange
         
-        ppFile = os.path.join(kwargs['oDir'], 'jointGmmScppHob_{0}_{1:04}.pkl'.format(kwargs['agentType'],itr+1))
+        ppFile = os.path.join(kwargs['oDir'], 'jointGmmScppHob_{0}_m_{1:03}_{2:04}.pkl'.format(kwargs['agentType'],m,itr+1))
         with open(ppFile,'w') as f:
             pickle.dump(nextpp,f)
             
         if kwargs['pltMarg']:
-            oFile = os.path.join(kwargs['oDir'],'jointGmmScppHob_{0}_m_{1}_{2:04}.pdf'.format(kwargs['agentType'],kwargs['m'],itr+1))
+            oFile = os.path.join(kwargs['oDir'],'jointGmmScppHob_{0}_m_{1:03}_{2:04}.pdf'.format(kwargs['agentType'],kwargs['m'],itr+1))
             nextpp.pltMarg(oFile = oFile)
         
         with open(os.path.join(kwargs['oDir'],'aic.txt'),'a') as f:
