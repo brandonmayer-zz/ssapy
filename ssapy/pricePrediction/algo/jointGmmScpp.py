@@ -6,6 +6,11 @@ import json
 import time
 import pickle
 import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Agg')
+import argparse
+
+
 
 from ssapy import timestamp_
 from ssapy.auctions import simulateAuction
@@ -264,5 +269,16 @@ def jointGmmScppHob(**kwargs):
         print >> f, "{0}".format(mi)
     
 if __name__ == "__main__":
-    oDir = os.path.realpath("C:/Users/bm/Desktop/testdir")
-    jointGmmScppHob(oDir=oDir, m = 2, maxItr = 5, nGames = 100, parallel=True, agentType = 'msStraightMUa')
+    desc = "AIC joint Gaussian Mixture Self-Confirming price prediction algorithm."
+    parser = argparse.ArgumentParser(description=desc)
+    
+    parser.add_argument('-o', '--oDir', action = 'store', dest = 'oDir', required = True,
+                        help = "Must provide output directory." )
+    
+    parser.add_argument('-a','--agentType', action = 'store', dest = 'agentType', required = True,
+                        help = "Must provide agent type (strategy).")
+    
+    parser.add_argument('-na', '--nAgents', action = 'store', dest = 'nAgents', default = 8, type = int,
+                        help = "Number of agents participating in auction.")
+    
+    parser.add_argument('-s', '--selfIdx', action = 'store',)
