@@ -26,8 +26,9 @@ def main():
 #    parser.add_argument('-m', action = 'store', dest = 'm', required = False, default = 5,
 #                        help = "The number of goods at auction.")
     
-    parser.add_argument('-na', '--nAgents', action = 'store', dest = 'n', required = False,
-                        default = 5, help = "Number of participating agents")
+    parser.add_argument('-na', '--nAgents', action = 'store', dest = 'n', required = False, 
+                        type = int, default = 5,
+                         help = "Number of participating agents")
     
     parser.add_argument('-ng', '--nGames', action = 'store', dest = 'ng', required = False, type=int,
                         default = 10000, help = "Number of Simulations (games) to run.")
@@ -40,14 +41,14 @@ def main():
                         help = "Run simulations in parallel or serially.")
     
     parser.add_argument('-np', '--nProc', action = 'store', dest = 'nProc', required = False,
-                        default = multiprocessing.cpu_count() - 1, 
+                        default = multiprocessing.cpu_count() - 1, type = int,
                         help = "Number of processes to spawn if running in parallel mode.")
     
     parser.add_argument('-vmin', '--minValuation', action = 'store', dest = 'vmin', required = False,
-                        default = 0, help = "Minimum Valuation.")
+                        default = 0, type = float, help = "Minimum Valuation.")
     
     parser.add_argument('-vmax', '--maxValuation', action = 'store', dest = 'vmax', required = False,
-                        default = 50, help = "Maximum Valuation.")
+                        default = 50, type = float, help = "Maximum Valuation.")
     
     parser.add_argument('-v', '--verbose', action = 'store', dest = 'verbose', type = bool,
                         required = False, default = True, help = "Output runtime info to stdout.")
@@ -104,14 +105,16 @@ def main():
         numpy.savetxt(f, hob)
         
     if args.nc:
+        print 'Plotting Absolute Value of Normalized Correlation Matrix'
         nc = numpy.corrcoef(hob.T)
         
         ocorr = os.path.join(oDir, basename + "_normcorr.txt")
         numpy.savetxt(ocorr, nc)
 
+        cmap = plt.get_cmap('jet')
         ofig = os.path.join(oDir,basename + "_normcorr.pdf")
-        plt.matshow(nc)
-        plt.title('Normalized Correlation Matrix')
+        plt.matshow(numpy.abs(nc),vmin=0,vmax=1,cmap=cmap)
+        plt.title('Absolute Normalized Correlation Matrix')
         plt.colorbar()
         plt.savefig(ofig)
     
