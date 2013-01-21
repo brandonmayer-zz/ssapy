@@ -54,6 +54,8 @@ def jointGmmScppHob(**kwargs):
     kwargs['verbose']      = kwargs.get('verbose', True)
     kwargs['pltMarg']      = kwargs.get('pltMarg', True)
     
+    kwargs['misamples']    = kwargs.get('misamples', 10000)
+    
     if kwargs['oDir'] == None:
         raise ValueError("Must provide Directory")
     kwargs['oDir'] = os.path.realpath(kwargs['oDir'])
@@ -136,7 +138,7 @@ def jointGmmScppHob(**kwargs):
             pickle.dump(nextpp,f)
             
         if kwargs['pltMarg']:
-            oFile = os.path.join(kwargs['oDir'],'jointGmmScppHob_{0}_{1:04}.pdf'.format(kwargs['agentType'],itr+1))
+            oFile = os.path.join(kwargs['oDir'],'jointGmmScppHob_{0}_m_{1}_{2:04}.pdf'.format(kwargs['agentType'],kwargs['m'],itr+1))
             nextpp.pltMarg(oFile = oFile)
         
         with open(os.path.join(kwargs['oDir'],'aic.txt'),'a') as f:
@@ -255,10 +257,11 @@ def jointGmmScppHob(**kwargs):
     extraSkdFile = os.path.join(kwargs['oDir'],'extraHobSkl.txt')
     with open(extraSkdFile,'w') as f:
         numpy.savetxt(f, numpy.atleast_1d(kld))
+        
+    mi = nextpp.mutualInformation(kwargs['misamples'])
     
-    
-    
-    
+    with open(os.path.join(kwargs['oDir'], mi.txt),'w') as f:
+        print >> f, "{0}".format(mi)
     
 if __name__ == "__main__":
     oDir = os.path.realpath("C:/Users/bm/Desktop/testdir")
