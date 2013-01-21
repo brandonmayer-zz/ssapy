@@ -8,5 +8,3 @@ then
 else
     python $BASEDIR/mi.py "$@"
 fi
-
-    
