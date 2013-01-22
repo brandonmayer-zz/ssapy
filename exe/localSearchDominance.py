@@ -17,7 +17,7 @@ from ssapy import listBundles
 from ssapy.util.padnums import pprint_table
 
 def localSearchDominance(nbids = 100, n_samples = 1000, rootDir = ".",
-                         scppFile = os.path.realpath("C:/Users/bm/auctionWorkspace/scpp/jointGmm/straightMUa/trial1/jointGmmScpp_msStraightMUa_2013_01_14_00_42_25_263000/jointGmmScppHob_msStraightMUa_0024.pkl")):
+                         scppFile = None):
                          
     with open(scppFile,'r') as f:
         scpp = pickle.load(f)
