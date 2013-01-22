@@ -2,6 +2,7 @@ import argparse
 import numpy
 import os
 import pickle
+import sys
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -18,7 +19,8 @@ from ssapy.util.padnums import pprint_table
 
 def localSearchDominance(nbids = 100, n_samples = 1000, rootDir = ".",
                          scppFile = None):
-                         
+         
+    scppFile = os.path.realpath(scppFile)                
     with open(scppFile,'r') as f:
         scpp = pickle.load(f)
         
@@ -33,10 +35,16 @@ def localSearchDominance(nbids = 100, n_samples = 1000, rootDir = ".",
     if not os.path.exists(oDir):
         os.makedirs(oDir)
         
-    table = ["parameter", "value"]
+    table = [["parameter", "value"]]
     table.append(["nbids", nbids])
     table.append(["n_samples",n_samples])
     table.append(["m",m])
+    table.append(["sccpFile", scppFile])
+    
+    pprint_table(sys.stdout,table)
+    
+    with open(os.path.join(oDir,'params.txt'),'a') as f:
+        pprint_table(f,table)
     
     jointBidFile = os.path.join(oDir,"jointLocalBids.txt")
     condBidFile = os.path.join(oDir,"condLocalBids.txt")
