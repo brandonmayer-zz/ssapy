@@ -61,16 +61,18 @@ def localSearchDominance(nbids = 100, n_samples = 1000, rootDir = ".",
         useExternalValuations = True
         
     surplusSamples = scpp.sample(n_samples = n_samples)
+    numpy.savetxt(os.path.join(oDir,'ppSamples.txt'),surplusSamples)
+    
     for i in xrange(nbids):
         print 'Bid number {0}'.format(i)
         
         if useExternalValuations:
             v = vmat[i,:]
             l = lmat[i]
+            
         else:
             print 'randomizing valuation'
-            v,l = randomValueVector(m=m)
-            revenue = listRevenue(bundles, v, l)
+            v,l = randomValueVector(m=m)    
             with open(vfile,'a') as f:
                 numpy.savetxt(f, v.reshape(1,v.shape[0]))
 #                print >> f, v
@@ -80,6 +82,7 @@ def localSearchDominance(nbids = 100, n_samples = 1000, rootDir = ".",
         print 'v = {0}'.format(v)
         print 'l = {0}'.format(l)
         
+        revenue = listRevenue(bundles, v, l)
         bundleRevenueDict = {}
         for b, r in zip(bundles,revenue):
             bundleRevenueDict[tuple(b)] = r
@@ -188,10 +191,19 @@ def main():
                         required = False, default = 1000, type = int,
                         help = 'Number of samples used to estimate expected surplus of each bid.')
     
+    parser.add_argument('-v', '--vfile', action='store', dest = 'vfile',
+                        required=False, default=None,
+                        help = 'Valuation File')
+    
+    parser.add_argument('-l', '--lfile',action='store', dest='lfile',
+                        required=False, default=None,
+                        help = 'Lambda file.')
+    
     args = parser.parse_args()
     
     localSearchDominance(nbids = args.n, n_samples = args.nsamples, 
-                         rootDir = args.output, scppFile = args.input)
+                         rootDir = args.output, scppFile = args.input,
+                         vfile = args.vfile, lfile = args.lfile)
     
 if __name__ == "__main__":
     main()
