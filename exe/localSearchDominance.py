@@ -12,13 +12,13 @@ from ssapy.strategies.jointLocal import jointLocal
 from ssapy.strategies.margLocal import margLocal
 from ssapy.strategies.condLocal import condLocal
 from ssapy.strategies.straightMU import straightMUa
-from ssapy.pricePrediction.jointGMM import jointGMM, expectedSurplus
+from ssapy.pricePrediction.jointGMM import jointGMM, expectedSurplus_
 from ssapy.agents.marketSchedule import randomValueVector, listRevenue, listBundles
 from ssapy import listBundles
 from ssapy.util.padnums import pprint_table
 
 def localSearchDominance(nbids = 100, n_samples = 1000, rootDir = ".",
-                         scppFile = None):
+                         scppFile = None, vfile = None, lfile = None):
          
     scppFile = os.path.realpath(scppFile)                
     with open(scppFile,'r') as f:
@@ -50,12 +50,35 @@ def localSearchDominance(nbids = 100, n_samples = 1000, rootDir = ".",
     condBidFile = os.path.join(oDir,"condLocalBids.txt")
     margBidFile = os.path.join(oDir,"margLocalBids.txt")
     
-    
+    useExternalValuations = False
+    if vfile == None and lfile == None:
+        vfile = os.path.join(oDir,'v.txt')
+        lfile = os.path.join(oDir,'l.txt')
+    else:
+        vmat = numpy.loadtxt(vfile)
+        lmat = numpy.loadtxt(lfile)
+        nbids = lmat.shape[0]
+        useExternalValuations = True
+        
+    surplusSamples = scpp.sample(n_samples = n_samples)
     for i in xrange(nbids):
         print 'Bid number {0}'.format(i)
         
-        v,l = randomValueVector(m=m)
-        revenue = listRevenue(bundles, v, l)
+        if useExternalValuations:
+            v = vmat[i,:]
+            l = lmat[i]
+        else:
+            print 'randomizing valuation'
+            v,l = randomValueVector(m=m)
+            revenue = listRevenue(bundles, v, l)
+            with open(vfile,'a') as f:
+                numpy.savetxt(f, v.reshape(1,v.shape[0]))
+#                print >> f, v
+            with open(lfile,'a') as f:
+                numpy.savetxt(f,numpy.atleast_1d(l))
+        
+        print 'v = {0}'.format(v)
+        print 'l = {0}'.format(l)
         
         bundleRevenueDict = {}
         for b, r in zip(bundles,revenue):
@@ -79,9 +102,9 @@ def localSearchDominance(nbids = 100, n_samples = 1000, rootDir = ".",
         with open(margBidFile,'a') as f:
             numpy.savetxt(f, mbid.T)
             
-        es[i,0] = expectedSurplus(bundleRevenueDict, jbid, scpp, n_samples)
-        es[i,1] = expectedSurplus(bundleRevenueDict, cbid, scpp, n_samples)   
-        es[i,2] = expectedSurplus(bundleRevenueDict, mbid, scpp, n_samples)
+        es[i,0] = expectedSurplus_(bundleRevenueDict, jbid, surplusSamples)
+        es[i,1] = expectedSurplus_(bundleRevenueDict, cbid, surplusSamples)   
+        es[i,2] = expectedSurplus_(bundleRevenueDict, mbid, surplusSamples)
         
         with open(os.path.join(oDir,"jointLocalExpectedSurplus.txt"),'a') as f:
             numpy.savetxt(f,numpy.atleast_1d(es[i,0]))
