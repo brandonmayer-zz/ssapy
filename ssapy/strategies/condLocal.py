@@ -214,18 +214,23 @@ def plotCondLocal(bundles, revenue, initialBids, samples, maxItr,
     else:
         return obids, converged, itr, d  
     
-def condLocalGreaterUpdate(bundles, revenue, bids, j, samples, verbose = False):
+def condLocalGreaterUpdate(bundleRevenueDict, bids, j, samples, verbose = False):
     
     newBid = 0.0
     
     samplesjwon = samples[samples[:,j] < bids[j]]
     
+    if samplesjwon.shape[0] == 0:
+        return 0.0
+        
     for samplejwon in samplesjwon:
         bundleWon = samplejwon < bids
         bundleLost = bundleWon.copy()
         bundleLost[j] = False
-        jwonrev = revenue[numpy.where((bundles == bundleWon).all(axis=1))[0][0]]
-        jlostrev = revenue[numpy.where((bundles == bundleLost).all(axis=1))[0][0]]
+#        jwonrev = revenue[numpy.where((bundles == bundleWon).all(axis=1))[0][0]]
+#        jlostrev = revenue[numpy.where((bundles == bundleLost).all(axis=1))[0][0]]
+        jwonrev  = bundleRevenueDict[tuple(bundleWon)]
+        jlostrev = bundleRevenueDict[tuple(bundleLost)]
         newBid += jwonrev - jlostrev
         
     newBid /= samplesjwon.shape[0]
@@ -242,11 +247,15 @@ def condLocalGreater(bundles, revenue, initBids, samples,
     newBids   = numpy.atleast_1d(initBids).copy()
     converged = False
     
+    brd = {}
+    for b,r in zip(bundles,revenue):
+        brd[tuple(b)] = r
+    
     for itr in xrange(maxItr):
         oldBids = newBids.copy()
         
         for gIdx in xrange(m):
-            newBids[gIdx] = condLocalGreaterUpdate(bundles, revenue, 
+            newBids[gIdx] = condLocalGreaterUpdate(brd, 
                                oldBids, gIdx, samples, verbose)
             
             d = numpy.linalg.norm(oldBids - newBids)
