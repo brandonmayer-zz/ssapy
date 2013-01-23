@@ -5,7 +5,7 @@ import datetime
 from .pricePrediction.dokHist import dokHist
 
 from .agents.marketSchedule import listRevenue as msListRevenue
-
+from .agents.marketSchedule import dictRevenue as msDictRevenue
 from .agents.marketSchedule import \
     randomValueVector as msRandomValueVector
     
