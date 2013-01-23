@@ -214,3 +214,51 @@ def plotCondLocal(bundles, revenue, initialBids, samples, maxItr,
     else:
         return obids, converged, itr, d  
     
+def condLocalGreaterUpdate(bundles, revenue, bids, j, samples, verbose = False):
+    
+    newBid = 0.0
+    
+    samplesjwon = samples[samples[:,j] < bids[j]]
+    
+    for samplejwon in samplesjwon:
+        bundleWon = samplejwon < bids
+        bundleLost = bundleWon.copy()
+        bundleLost[j] = False
+        jwonrev = revenue[numpy.where((bundles == bundleWon).all(axis=1))[0][0]]
+        jlostrev = revenue[numpy.where((bundles == bundleLost).all(axis=1))[0][0]]
+        newBid += jwonrev - jlostrev
+        
+    newBid /= samplesjwon.shape[0]
+    
+    if verbose:
+        print '\tNew bid = {0}'.format(newBid)
+        
+    return newBid
+
+def condLocalGreater(bundles, revenue, initBids, samples, 
+                     maxItr = 100, tol = 1e-5, verbose = False, 
+                     ret = 'bids'):
+    m         = bundles.shape[1]
+    newBids   = numpy.atleast_1d(initBids).copy()
+    converged = False
+    
+    for itr in xrange(maxItr):
+        oldBids = newBids.copy()
+        
+        for gIdx in xrange(m):
+            newBids[gIdx] = condLocalGreaterUpdate(bundles, revenue, 
+                               oldBids, gIdx, samples, verbose)
+            
+            d = numpy.linalg.norm(oldBids - newBids)
+            
+            if d <= tol:
+                converged = True
+                break
+            
+    if ret == 'bids':
+        return newBids
+    elif ret == 'all':
+        return newBids, converged, itr + 1, d
+    else:
+        raise ValueError('Unknown Return Type {0}.'.format(ret))
+            
