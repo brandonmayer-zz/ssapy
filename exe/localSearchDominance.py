@@ -18,7 +18,8 @@ from ssapy import listBundles
 from ssapy.util.padnums import pprint_table
 
 def localSearchDominance(nbids = 100, n_samples = 1000, rootDir = ".",
-                         scppFile = None, vfile = None, lfile = None):
+                         scppFile = None, vfile = None, lfile = None,
+                         njs = 1000, nms = 1000):
          
     scppFile = os.path.realpath(scppFile)                
     with open(scppFile,'r') as f:
@@ -28,7 +29,7 @@ def localSearchDominance(nbids = 100, n_samples = 1000, rootDir = ".",
     
     bundles = listBundles(m)
     
-    es = numpy.zeros((nbids,3))
+    
     
     rootDir = os.path.realpath(rootDir)
     oDir = os.path.join(rootDir,timestamp_())
@@ -39,7 +40,13 @@ def localSearchDominance(nbids = 100, n_samples = 1000, rootDir = ".",
     table.append(["nbids", nbids])
     table.append(["n_samples",n_samples])
     table.append(["m",m])
+    table.append(["njs",njs])
+    table.append(["nms",nms])
+    table.append(["vfile",vfile])
+    table.append(["lfile",lfile])
     table.append(["sccpFile", scppFile])
+    
+    
     
     pprint_table(sys.stdout,table)
     
@@ -63,6 +70,15 @@ def localSearchDominance(nbids = 100, n_samples = 1000, rootDir = ".",
     surplusSamples = scpp.sample(n_samples = n_samples)
     numpy.savetxt(os.path.join(oDir,'ppSamples.txt'),surplusSamples)
     
+    jsdir = os.path.join(oDir,'jointSamples')
+    if not os.path.exists(jsdir):
+        os.makedirs(jsdir)
+        
+    msdir = os.path.join(oDir,'margSamples')
+    if not os.path.exists(msdir):
+        os.makedirs(msdir)
+    
+    es = numpy.zeros((nbids,3))
     for i in xrange(nbids):
         print 'Bid number {0}'.format(i)
         
@@ -87,8 +103,16 @@ def localSearchDominance(nbids = 100, n_samples = 1000, rootDir = ".",
         for b, r in zip(bundles,revenue):
             bundleRevenueDict[tuple(b)] = r
         
-        jointSamples = scpp.sample(n_samples = n_samples)
-        margSamples = scpp.sampleMarg(n_samples = n_samples)
+        jointSamples = scpp.sample(n_samples = njs)
+        margSamples = scpp.sampleMarg(n_samples = nms)
+        
+        numpy.savetxt(
+            os.path.join(jsdir,'jointSamples_{0:04}.txt'.format(i)),
+                jointSamples)
+        
+        numpy.savetxt(
+            os.path.join(msdir,'margSamples_{0:04}.txt'.format(i)),
+                margSamples)
         
         initBid = straightMUa(bundles, revenue, scpp)
     
@@ -191,6 +215,14 @@ def main():
                         required = False, default = 1000, type = int,
                         help = 'Number of samples used to estimate expected surplus of each bid.')
     
+    parser.add_argument('-njs','--njointsamples',action='store', dest='njs',
+                        required = False, default = 1000, type = int,
+                        help = 'Number of samples used for joint local bidders.')
+    
+    parser.add_argument('-nms','-nmargsamples',action='store',dest='nms',
+                        required=False, default = 1000, type = int,
+                        help = 'Number of samples used for marginal local bidders.')
+    
     parser.add_argument('-v', '--vfile', action='store', dest = 'vfile',
                         required=False, default=None,
                         help = 'Valuation File')
@@ -203,7 +235,8 @@ def main():
     
     localSearchDominance(nbids = args.n, n_samples = args.nsamples, 
                          rootDir = args.output, scppFile = args.input,
-                         vfile = args.vfile, lfile = args.lfile)
+                         vfile = args.vfile, lfile = args.lfile,
+                         njs=args.njs, nms=args.nms)
     
 if __name__ == "__main__":
     main()
