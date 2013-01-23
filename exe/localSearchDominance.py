@@ -115,8 +115,6 @@ def localSearchDominance(nbids = 100, n_samples = 1000, rootDir = ".",
         with open(os.path.join(oDir,"margLocalExpectedSurplus.txt"),'a') as f:
             numpy.savetxt(f,numpy.atleast_1d(es[i,2])) 
         
-    bins = range(int(es.min())-1, int(es.max())+1)
-    
     jmean = numpy.mean(es[:,0])
     jvar  = numpy.var(es[:,0])
     cmean = numpy.mean(es[:,1])
@@ -135,15 +133,24 @@ def localSearchDominance(nbids = 100, n_samples = 1000, rootDir = ".",
         print >> f, 'mean ', jmean
         print >> f, 'var ', jvar
         
-    with open(os.path.join(oDir,'cmeanExpectedSurplus.txt'),'a') as f:
+    with open(os.path.join(oDir,'condLocalStats.txt'),'a') as f:
         print >> f, 'mean ', cmean
         print >> f, 'var ', cvar
         
-    with open(os.path.join(oDir,'mmeanExpectedSurplus.txt'),'a') as f:
+    with open(os.path.join(oDir,'margLocalStats.txt'),'a') as f:
         print >> f, 'mean ', mmean
         print >> f, 'var ', mvar
         
+    with open(os.path.join(oDir,'stats.txt'),'a') as f:
+        print >> f, 'jointLocal expected surplus mean: {0}'.format(jmean)
+        print >> f, 'jointLocal expected surplus variation: {0}'.format(jvar)
+        print >> f, 'condLocal expected surplus mean: {0}'.format(cmean)
+        print >> f, 'condLocal expected surplus variation: {0}'.format(cvar)
+        print >> f, 'margLocal expected surplus mean: {0}'.format(mmean)
+        print >> f, 'margLocal expected surplus variation: {0}'.format(mvar)
         
+        
+    bins = range(int(es.min())-1, int(es.max())+1)
     
     jhist, jbins = numpy.histogram(es[:,0], bins, normed = True)
     chist, cbins = numpy.histogram(es[:,1], bins, normed = True)
