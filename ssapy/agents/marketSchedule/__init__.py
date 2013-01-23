@@ -80,14 +80,11 @@ def dictRevenue(v, l):
     
     m = numpy.asarray(v).shape[0]
     
-    rev = {}
+    bundles = listBundles(m)
+    revenue = listRevenue(bundles, v, l)
     
-    for bundle in listBundles(m):
-        cs = numpy.cumsum(bundle)
-        if cs[-1] < l:
-            rev[tuple(bundle)] = 0
-        else:
-            t = numpy.nonzero(bundle >= l)[0][0]
-            rev[tuple(bundle)] = v[t]
+    d = {}
+    for b,r in zip(bundles,revenue):
+        d[tuple(b)] = r
             
-    return rev
+    return d
