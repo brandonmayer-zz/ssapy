@@ -1,7 +1,7 @@
 from ..marketSchedule import listRevenue
 from .msAgent import msAgent
 from ...strategies import straightMU as strategies
-from ...strategies.condLocal import condLocalGreater
+from ...strategies.condLocal import condLocalGreater as clg
 
 from ...strategies.strategyFactory import strategyFactory
 
@@ -20,9 +20,9 @@ class condLocalGreater(msAgent):
         
         verbose = kwargs.get('verbose', False)
         
-        nsamples = kwargs.get('nsamples',10000)
+        nsamples = kwargs.get('nsamples',1000)
         
-        samples = kwargs.get('samples',pricePrediction.sample(nsamples))
+        samples = kwargs.get('samples',pricePrediction.sample(n_samples = nsamples))
         
         maxItr = kwargs.get('maxItr',100)
         
@@ -37,7 +37,7 @@ class condLocalGreater(msAgent):
         
         ret = kwargs.get('ret','bids')
             
-        bids = condLocalGreater(bundles, revenue, initbids, samples, maxItr, tol, verbose, ret)
+        bids = clg(bundles, revenue, initbids, samples, maxItr, tol, verbose, ret)
         
         return bids 
                              
