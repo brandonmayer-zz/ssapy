@@ -4,6 +4,7 @@ from ssapy.agents.marketSchedule.targetPrice import targetPrice8, targetPrice64,
 from .marketSchedule import straightMU as msStraightMU
 from .marketSchedule import straightMV as msStraightMV
 from .marketSchedule import targetPrice as msTargetPrice
+from .marketSchedule.condLocalGreater import condLocalGreater as msCondLocalGreater
 
 
 
@@ -27,6 +28,8 @@ def agentFactory(**kwargs):
         return msTargetPrice.targetPrice64(**kwargs)
     elif agentType == "msTargetPrice256":
         return msTargetPrice.targetPrice256(**kwargs)
+    elif agentType == "msCondLocalGreater" or agentType == "condLocalGreater":
+        return msCondLocalGreater(**kwargs)
     else:
         raise ValueError("Unknown Agent Type {0}".format(agentType))
     
