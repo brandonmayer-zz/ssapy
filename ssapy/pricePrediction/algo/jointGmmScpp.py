@@ -1,3 +1,6 @@
+import matplotlib
+matplotlib.use('Agg')
+
 import numpy
 import multiprocessing
 import os
@@ -6,8 +9,6 @@ import json
 import time
 import pickle
 import matplotlib.pyplot as plt
-import matplotlib
-matplotlib.use('Agg')
 import argparse
 
 
@@ -19,7 +20,7 @@ from ssapy.pricePrediction.jointGMM import jointGMM
 from ssapy.util.padnums import pprint_table
 from ssapy.pricePrediction.util import apprxJointGmmKL
 
-def jointGmmScppHob(**kwargs):
+def jointGmmScpp(**kwargs):
     kwargs['oDir']         = kwargs.get('oDir')
     if kwargs['oDir'] == None:
         raise ValueError("Must specify output directory - oDir.")
@@ -138,7 +139,7 @@ def jointGmmScppHob(**kwargs):
         
         del hob,temppp,compRange
         
-        ppFile = os.path.join(kwargs['oDir'], 'jointGmmScppHob_{0}_m_{1:03}_{2:04}.pkl'.format(kwargs['agentType'],m,itr+1))
+        ppFile = os.path.join(kwargs['oDir'], 'jointGmmScppHob_{0}_m_{1:03}_{2:04}.pkl'.format(kwargs['agentType'],kwargs['m'],itr+1))
         with open(ppFile,'w') as f:
             pickle.dump(nextpp,f)
             
