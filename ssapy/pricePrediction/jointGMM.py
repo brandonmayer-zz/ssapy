@@ -248,8 +248,9 @@ class jointGMM(sklearn.mixture.GMM):
 
             Z = numpy.exp(self.eval(s)[0].reshape(xx.shape))
             
-            surf = ax.plot_surface(xx, yy, Z, rstride=1, cstride=1, cmap=cm.jet,
-                                   linewidth=0, antialiased=True)
+            surf = ax.plot_surface(xx, yy, Z, rstride=1, cstride=1, 
+                cmap=plt.get_cmap('jet'), linewidth=0, antialiased=True)
+                                   
             
             ax.set_title(title)
             ax.set_xlabel(xlabel)
