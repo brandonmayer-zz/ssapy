@@ -27,7 +27,6 @@ def expectedSurplus(bundleRevenueDict, bidVector, jointGmmPricePrediction, n_sam
     
     return expectedSurplus_(bundleRevenueDict, bidVector, samples)
 
-
 class jointGMM(sklearn.mixture.GMM):
     """
     A wrapper around sklearn.mixture.GMM to add some additional functionality
@@ -340,7 +339,7 @@ class jointGMM(sklearn.mixture.GMM):
                                  "p = {0} < 0.0".format(p))
                 
         return p
-    
+        
     def totalCorrelationMC(self, nsamples=10000, ntrials = 20, verbose = True):
         
         if verbose:
