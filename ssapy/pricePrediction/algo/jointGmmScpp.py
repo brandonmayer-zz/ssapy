@@ -202,7 +202,6 @@ def jointGmmScpp(**kwargs):
         
     f,ax = plt.subplots()
     colors = ['#0A0A2A']*len(aicValues)
-    colors[numpy.argmin(aicValues)] = 'r'
     ax.bar(range(len(comp)), comp, color=colors, align = 'center')
     ax.set_ylabel('GMM Model (Number of Components)')
     ax.set_xlabel('Iteration')
