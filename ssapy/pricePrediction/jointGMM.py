@@ -9,6 +9,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import itertools
 import time
 import os
+import multiprocessing
 
 def expectedSurplus_( bundleRevenueDict, bidVector, samples ):
     es = numpy.float64(0.)
@@ -25,6 +26,7 @@ def expectedSurplus(bundleRevenueDict, bidVector, jointGmmPricePrediction, n_sam
     samples = jointGmmPricePrediction.sample(n_samples = n_samples)
     
     return expectedSurplus_(bundleRevenueDict, bidVector, samples)
+
 
 class jointGMM(sklearn.mixture.GMM):
     """
@@ -338,33 +340,41 @@ class jointGMM(sklearn.mixture.GMM):
                 
         return p
     
-    def mutualInformation(self, n_samples=10000, verbose = True):
+    def totalCorrelationMC(self, nsamples=10000, ntrials = 20, verbose = True):
         
-        samples = self.sample(n_samples = n_samples, minPrice = -numpy.float('inf'), maxPrice = numpy.float('inf'))
-        
-        jointLL, resp = self.eval(samples)
-        del resp
+        if verbose:
+            print 'jointGMM.totalCorrelationMC'
+            print 'n_samples = {0}'.format(nsamples)
+            print 'ntrials = {0}'.format(ntrials)
         
         n_features = self.means_.shape[1]
         n_components = self.means_.shape[0]
-        margLL = numpy.zeros((samples.shape))
-        for i in xrange(n_features):
-            mdist = sklearn.mixture.GMM(n_components = self.n_components, covariance_type = 'diag')
-            w,m,v  = self.margParams(margIdx = i)
-            mdist.weights_ = numpy.atleast_1d(w)
-            mdist.means_ = numpy.atleast_2d(m).T
-            mdist.covars_ = numpy.zeros((n_components,1))
-            for vi, var in enumerate(v):
-                mdist.covars_[vi][0] = var
-            margLL[:,i], resp = mdist.eval(samples[:,i])
+        milist = numpy.zeros(ntrials)
+        
+        for trial in xrange(ntrials):
+            print trial
+            samples = self.sample(n_samples = nsamples, 
+                minPrice = -numpy.float('inf'), maxPrice = numpy.float('inf'))
+            jointLL, resp = self.eval(samples)
+            del resp
+            margLL = numpy.zeros((samples.shape))
+            for i in xrange(n_features):
+                mdist = sklearn.mixture.GMM(n_components = self.n_components, covariance_type = 'diag')
+                w,m,v  = self.margParams(margIdx = i)
+                mdist.weights_ = numpy.atleast_1d(w)
+                mdist.means_ = numpy.atleast_2d(m).T
+                mdist.covars_ = numpy.zeros((n_components,1))
+                for vi, var in enumerate(v):
+                    mdist.covars_[vi][0] = var
+                margLL[:,i], resp = mdist.eval(samples[:,i])
+                
+            del resp
             
-        del resp
-        
-        idepLL = numpy.sum(margLL,axis=1)
-        
-        mi = numpy.sum(jointLL - idepLL,dtype='float')/n_samples
-                   
-        return mi 
+            idepLL = numpy.sum(margLL,axis=1)
+            
+            milist[trial] = numpy.sum(jointLL - idepLL,dtype='float')/nsamples
+                       
+        return milist, numpy.mean(milist), numpy.var(milist) 
     
     def sampleNormalizedCorrelation(self, n_samples, verbose = True):
         samples = self.sample(n_samples = n_samples, minPrice = -numpy.float('inf'), maxPrice = numpy.float('inf'))
