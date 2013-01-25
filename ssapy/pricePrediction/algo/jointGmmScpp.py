@@ -1,5 +1,8 @@
 import matplotlib
 matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
+import argparse
 
 import numpy
 import multiprocessing
@@ -8,8 +11,8 @@ import sys
 import json
 import time
 import pickle
-import matplotlib.pyplot as plt
-import argparse
+
+
 
 
 
@@ -269,7 +272,7 @@ def jointGmmScpp(**kwargs):
     with open(os.path.join(kwargs['oDir'], mi.txt),'w') as f:
         print >> f, "{0}".format(mi)
     
-if __name__ == "__main__":
+def main():
     desc = "AIC joint Gaussian Mixture Self-Confirming price prediction algorithm."
     parser = argparse.ArgumentParser(description=desc)
     
