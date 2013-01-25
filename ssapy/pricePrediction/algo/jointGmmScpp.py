@@ -75,9 +75,9 @@ def jointGmmScpp(**kwargs):
     
     kwargs['pltMarg']      = kwargs.get('pltMarg', True)
     
-    kwargs['tcsamples']    = kwargs.get('tcsamples', 10000)
-    
-    kwargs['tctrials']     = kwargs.get('tctrials', 20)
+#    kwargs['tcsamples']    = kwargs.get('tcsamples', 10000)
+#    
+#    kwargs['tctrials']     = kwargs.get('tctrials', 20)
     
     if kwargs['oDir'] == None:
         raise ValueError("Must provide Directory")
@@ -281,12 +281,20 @@ def jointGmmScpp(**kwargs):
     with open(extraSkdFile,'w') as f:
         numpy.savetxt(f, numpy.atleast_1d(kld))
         
-    tclist, tcmean, tcvar = nextpp.totalCorrelationMC(kwargs['misamples'], kwargs['tctrials'], False)
-    
-    with open(os.path.join(kwargs['oDir'], 'mi.txt'),'w') as f:
-        print >> f, "{0}".format(tclist)
-        print >> f, "{0}".format(tcmean)
-        print >> f, "{0}".format(tcvar)
+#    print 'Computing {0} trials of total correlation Monte Carlo Estimate.'.format(kwargs['tctrials'])
+#    
+#    tclist, tcmean, tcvar = nextpp.totalCorrelationMC(kwargs['tcsamples'], kwargs['tctrials'], False)
+#
+#    print "total correlation = {0}".format(tclist)
+#    print "total correlation mean = {0}".format(tcmean)
+#    print "total correlation variance = {0}".format(tcvar)
+#    
+#    with open(os.path.join(kwargs['oDir'], 'tclist.txt'),'w') as f:
+#        numpy.savetxt(f,tclist)
+#    
+#    with open(os.path.join(kwargs['oDir'],'tcstats.txt'),'w') as f:
+#        print >> f, "mean {0}".format(tcmean)
+#        print >> f, "var {0}".format(tcvar)
     
 def main():
     desc = "AIC joint Gaussian Mixture Self-Confirming price prediction algorithm."
