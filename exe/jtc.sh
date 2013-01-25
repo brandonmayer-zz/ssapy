@@ -4,7 +4,7 @@ BASEDIR=$(dirname $0)
 
 if [ `uname -o` = "Cygwin" ]
 then
-    python `cygpath -m $BASEDIR`/mi.py "$@"
+    python `cygpath -m $BASEDIR`/jtc.py "$@"
 else
-    python $BASEDIR/mi.py "$@"
+    python $BASEDIR/jtc.py "$@"
 fi
