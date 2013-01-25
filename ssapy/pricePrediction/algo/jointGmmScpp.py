@@ -21,10 +21,11 @@ from ssapy.util.padnums import pprint_table
 from ssapy.pricePrediction.util import apprxJointGmmKL
 
 def outputDir(**kwargs):
-    ss = '{0}_{1}_{2}_{3}_{4}_{5}_{6}_{7}_{8}_{9}_{10}_{11}'.format(kwargs['agentType'], kwargs['m'],kwargs['nAgents'], 
+    ss = '{0}_{1}_{2}_{3}_{4}_{5}_{6}_{7}_{8}_{9}_{10}'.format(kwargs['agentType'], kwargs['m'],kwargs['nAgents'], 
                 kwargs['nGames'], kwargs['maxItr'], kwargs['tol'], kwargs['aicMinCovar'],
-                kwargs['aicCompMin'], kwargs['aicCompMax'], kwargs['vmin'], kwargs['vmax'])
+                kwargs['aicCompMin'], kwargs['aicCompMax'], kwargs['minValuation'], kwargs['maxValuation'])
     
+    ss = ss + timestamp_()
     oDir = os.path.join(kwargs['oDir'],ss)
     if not os.path.exists(oDir):
         os.makedirs(oDir)
@@ -80,11 +81,11 @@ def jointGmmScpp(**kwargs):
     
     models = numpy.arange(kwargs['aicCompMin'], kwargs['aicCompMax'])
         
-    timestamp = "jointGmmScpp_{0}_{1}".format(kwargs['agentType'],timestamp_())
-    
-    kwargs['oDir'] = os.path.join(kwargs['oDir'], timestamp)
-    if not os.path.exists(kwargs['oDir']):
-        os.makedirs(kwargs['oDir'])
+#    timestamp = "jointGmmScpp_{0}_{1}".format(kwargs['agentType'],timestamp_())
+#    
+#    kwargs['oDir'] = os.path.join(kwargs['oDir'], timestamp)
+#    if not os.path.exists(kwargs['oDir']):
+#        os.makedirs(kwargs['oDir'])
     
     if kwargs['verbose']:    
         table = []
