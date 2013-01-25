@@ -1,5 +1,6 @@
 import matplotlib
-matplotlib.use('Agg')
+matplotlib.use('Agg',warn=False)
+
 import matplotlib.pyplot as plt
 
 import argparse
@@ -96,7 +97,7 @@ def jointGmmScpp(**kwargs):
     idx2keep = numpy.arange(kwargs['nAgents'])
     idx2keep = numpy.delete(idx2keep, kwargs['selfIdx'])
     if kwargs['verbose']:
-        print idx2keep
+        print 'indicies to keep = {0}'.format(idx2keep)
     
     for itr in xrange(kwargs['maxItr']):
         itrStart = time.time()
