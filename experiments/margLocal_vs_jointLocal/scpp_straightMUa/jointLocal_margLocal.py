@@ -12,10 +12,10 @@ from ssapy import listBundles
 from ssapy.util.padnums import pprint_table
 
 def main():
-    nbids = 10
-    n_samples = 10
+    nrev = 1000
+    n_samples = 10000
     m = 5
-    es = numpy.zeros((nbids,2))
+    es = numpy.zeros((nrev,2))
     
     rootDir = os.path.realpath(".")
     oDir = os.path.join(rootDir,timestamp_())
@@ -23,7 +23,7 @@ def main():
         os.makedirs(oDir)
         
     table = [["parameter", "value"]]
-    table.append(["nbids", nbids])
+    table.append(["nrev", nrev])
     table.append(["n_samples",n_samples])
     table.append(["m",m])
     
@@ -38,7 +38,7 @@ def main():
         
     bundles = listBundles(m)
         
-    for i in xrange(nbids):
+    for i in xrange(nrev):
         print 'iteration {0}'.format(i)
         
         v,l = randomValueVector(m=m)
@@ -49,7 +49,9 @@ def main():
             
         jointSamples = scpp.sample(n_samples = n_samples)
         margSamples = scpp.sampleMarg(n_samples = n_samples)
+        
         initBid = numpy.random.rand(m)*50
+        
         jbid = jointLocal(bundles,revenue,initBid,jointSamples)
         with open(os.path.join(oDir,"jointLocalBids"),'a') as f:
             numpy.savetxt(f, jbid.T)
