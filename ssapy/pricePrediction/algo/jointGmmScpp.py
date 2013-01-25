@@ -68,11 +68,16 @@ def jointGmmScpp(**kwargs):
     kwargs['maxValuation'] = kwargs.get('vmax',50)
 
     kwargs['parallel']     = kwargs.get('parallel',True)
+    
     kwargs['nProc']        = kwargs.get('nProc', multiprocessing.cpu_count())
+    
     kwargs['verbose']      = kwargs.get('verbose', True)
+    
     kwargs['pltMarg']      = kwargs.get('pltMarg', True)
     
-    kwargs['misamples']    = kwargs.get('misamples', 10000)
+    kwargs['tcsamples']    = kwargs.get('tcsamples', 10000)
+    
+    kwargs['tctrials']     = kwargs.get('tctrials', 20)
     
     if kwargs['oDir'] == None:
         raise ValueError("Must provide Directory")
@@ -276,10 +281,12 @@ def jointGmmScpp(**kwargs):
     with open(extraSkdFile,'w') as f:
         numpy.savetxt(f, numpy.atleast_1d(kld))
         
-    mi = nextpp.mutualInformation(kwargs['misamples'])
+    tclist, tcmean, tcvar = nextpp.totalCorrelationMC(kwargs['misamples'], kwargs['tctrials'], False)
     
     with open(os.path.join(kwargs['oDir'], 'mi.txt'),'w') as f:
-        print >> f, "{0}".format(mi)
+        print >> f, "{0}".format(tclist)
+        print >> f, "{0}".format(tcmean)
+        print >> f, "{0}".format(tcvar)
     
 def main():
     desc = "AIC joint Gaussian Mixture Self-Confirming price prediction algorithm."
