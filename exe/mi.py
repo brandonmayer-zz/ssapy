@@ -15,6 +15,9 @@ def main():
     parser.add_argument('-n', '--n_samples', action = 'store', dest = 'n_samples', default = 10000, 
                         required = False, help = "Number of samples used in Mutual Information approximation.")
     
+    parser.add_argument('-nt','--ntrials', action='store', dest='nt',default = 100,
+                        required = False, help = "Number of trials to sample Mutual Information.")
+    
 
     args = parser.parse_args()
     with open(args.inFile,'r') as f:
