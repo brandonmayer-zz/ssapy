@@ -277,7 +277,7 @@ def jointGmmScpp(**kwargs):
         
     mi = nextpp.mutualInformation(kwargs['misamples'])
     
-    with open(os.path.join(kwargs['oDir'], mi.txt),'w') as f:
+    with open(os.path.join(kwargs['oDir'], 'mi.txt'),'w') as f:
         print >> f, "{0}".format(mi)
     
 def main():
