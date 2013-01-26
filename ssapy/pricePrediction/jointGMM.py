@@ -352,7 +352,8 @@ class jointGMM(sklearn.mixture.GMM):
         milist = numpy.zeros(ntrials)
         
         for trial in xrange(ntrials):
-            print trial
+            if verbose:
+                print 'Computing Total Correlation Trial {0}'.format(trial)
             samples = self.sample(n_samples = nsamples, 
                 minPrice = -numpy.float('inf'), maxPrice = numpy.float('inf'))
             jointLL, resp = self.eval(samples)
