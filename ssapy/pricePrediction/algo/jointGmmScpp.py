@@ -20,12 +20,18 @@ from ssapy.pricePrediction.jointGMM import jointGMM
 from ssapy.util.padnums import pprint_table
 from ssapy.pricePrediction.util import apprxJointGmmKL
 
-def outputDir(**kwargs):
-    ss = 'jointGmmScpp_{0}_{1:03}_{2:03}_{3:08}_{4:04}_{5}_{6}_{7}_{8}_{9}_{10}_'.format(kwargs['agentType'], kwargs['m'],kwargs['nAgents'], 
+def paramString(**kwargs):
+    ss = 'jointGmmScpp_{0}_{1:03}_{2:03}_{3:08}_{4:04}_{5}_{6}_{7}_{8}_{9}_{10}'.format(kwargs['agentType'], kwargs['m'],kwargs['nAgents'], 
                 kwargs['nGames'], kwargs['maxItr'], kwargs['tol'], kwargs['aicMinCovar'],
                 kwargs['aicCompMin'], kwargs['aicCompMax'], kwargs['minValuation'], kwargs['maxValuation'])
     
-    ss = ss + timestamp_()
+    return ss
+
+def outputDir(**kwargs):
+    ss = paramString(**kwargs)
+    
+    ss = ss + '_' + timestamp_()
+    
     oDir = os.path.join(kwargs['oDir'],ss)
     if not os.path.exists(oDir):
         os.makedirs(oDir)
@@ -113,6 +119,8 @@ def jointGmmScpp(**kwargs):
     if kwargs['verbose']:
         print 'indicies to keep = {0}'.format(idx2keep)
     
+    ps = paramString(**kwargs)
+    
     for itr in xrange(kwargs['maxItr']):
         itrStart = time.time()
         if kwargs['verbose']:
@@ -157,12 +165,14 @@ def jointGmmScpp(**kwargs):
         
         del hob,temppp,compRange
         
-        ppFile = os.path.join(kwargs['oDir'], 'jointGmmScppHob_{0}_m_{1:03}_{2:04}.pkl'.format(kwargs['agentType'],kwargs['m'],itr+1))
+        
+        baseFileName = '{0}_{1:04}'.format(ps,itr)
+        ppFile = os.path.join(kwargs['oDir'], '{0}.pkl'.format(baseFileName))
         with open(ppFile,'w') as f:
             pickle.dump(nextpp,f)
             
         if kwargs['pltMarg']:
-            oFile = os.path.join(kwargs['oDir'],'jointGmmScppHob_{0}_m_{1:03}_{2:04}.pdf'.format(kwargs['agentType'],kwargs['m'],itr+1))
+            oFile = os.path.join(kwargs['oDir'],'{0}.pdf'.format(baseFileName))
             nextpp.pltMarg(oFile = oFile)
         
         with open(os.path.join(kwargs['oDir'],'aic.txt'),'a') as f:
