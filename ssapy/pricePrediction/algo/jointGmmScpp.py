@@ -21,7 +21,7 @@ from ssapy.util.padnums import pprint_table
 from ssapy.pricePrediction.util import apprxJointGmmKL
 
 def outputDir(**kwargs):
-    ss = '{0}_{1}_{2}_{3}_{4}_{5}_{6}_{7}_{8}_{9}_{10}_'.format(kwargs['agentType'], kwargs['m'],kwargs['nAgents'], 
+    ss = 'jointGmmScpp_{0}_{1:03}_{2:03}_{3:08}_{4:04}_{5}_{6}_{7}_{8}_{9}_{10}_'.format(kwargs['agentType'], kwargs['m'],kwargs['nAgents'], 
                 kwargs['nGames'], kwargs['maxItr'], kwargs['tol'], kwargs['aicMinCovar'],
                 kwargs['aicCompMin'], kwargs['aicCompMax'], kwargs['minValuation'], kwargs['maxValuation'])
     
