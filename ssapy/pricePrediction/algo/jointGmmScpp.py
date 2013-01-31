@@ -21,9 +21,11 @@ from ssapy.util.padnums import pprint_table
 from ssapy.pricePrediction.util import apprxJointGmmKL
 
 def paramString(**kwargs):
-    ss = 'jointGmmScpp_{0}_{1:03}_{2:03}_{3:08}_{4:04}_{5}_{6}_{7}_{8}_{9}_{10}'.format(kwargs['agentType'], kwargs['m'],kwargs['nAgents'], 
-                kwargs['nGames'], kwargs['maxItr'], kwargs['tol'], kwargs['aicMinCovar'],
-                kwargs['aicCompMin'], kwargs['aicCompMax'], kwargs['minValuation'], kwargs['maxValuation'])
+    ss = 'jointGmmScpp_{0}_{1:03}_{2:03}_{3:08}_{4:04}_{5}_{6}_{7}_{8}_{9}_{10}_{11}_{12}'.\
+            format(kwargs['agentType'], kwargs['m'],kwargs['nAgents'], 
+            kwargs['nGames'], kwargs['maxItr'], kwargs['tol'], kwargs['aicMinCovar'],
+            kwargs['aicCompMin'], kwargs['aicCompMax'], kwargs['minValuation'], 
+            kwargs['maxValuation'], kwargs['l'], kwargs['timeStamp'])
     
     return ss
 
@@ -37,6 +39,17 @@ def outputDir(**kwargs):
         os.makedirs(oDir)
         
     return oDir
+
+def pltAic(compRange, aicValues, itr, filename):
+    f,ax = plt.subplots()
+    colors = ['#777777']*len(aicValues)
+    colors[numpy.argmin(aicValues)] = 'r'
+    ax.bar(compRange, aicValues, color=colors, align = 'center')
+    ax.set_ylabel('AIC score')
+    ax.set_xlabel('GMM Model (Number of Components)')
+    ax.set_title('Iteration {0}'.format(itr+1))
+    plt.ylim([0,numpy.max(aicValues) + 0.5])
+    plt.savefig(filename)
 
 def jointGmmScpp(**kwargs):
     kwargs['oDir']         = kwargs.get('oDir')
@@ -81,23 +94,18 @@ def jointGmmScpp(**kwargs):
     
     kwargs['pltMarg']      = kwargs.get('pltMarg', True)
     
-#    kwargs['tcsamples']    = kwargs.get('tcsamples', 10000)
-#    
-#    kwargs['tctrials']     = kwargs.get('tctrials', 20)
+    kwargs['l']            = kwargs.get('l')
     
-    if kwargs['oDir'] == None:
-        raise ValueError("Must provide Directory")
-#    kwargs['oDir'] = os.path.realpath(kwargs['oDir'])
-    kwargs['oDir'] = outputDir(**kwargs)
+    kwargs['timeStamp']    = timestamp_()
+
+    ps = paramString(**kwargs)
+            
+    kwargs['oDir'] = os.path.join(kwargs['oDir'],ps)
+    if not os.path.exists(kwargs['oDir']):
+        os.makedirs(kwargs['oDir'])
     
     models = numpy.arange(kwargs['aicCompMin'], kwargs['aicCompMax'])
-        
-#    timestamp = "jointGmmScpp_{0}_{1}".format(kwargs['agentType'],timestamp_())
-#    
-#    kwargs['oDir'] = os.path.join(kwargs['oDir'], timestamp)
-#    if not os.path.exists(kwargs['oDir']):
-#        os.makedirs(kwargs['oDir'])
-    
+            
     if kwargs['verbose']:    
         table = []
         
@@ -119,7 +127,7 @@ def jointGmmScpp(**kwargs):
     if kwargs['verbose']:
         print 'indicies to keep = {0}'.format(idx2keep)
     
-    ps = paramString(**kwargs)
+    
     
     for itr in xrange(kwargs['maxItr']):
         itrStart = time.time()
@@ -129,7 +137,7 @@ def jointGmmScpp(**kwargs):
         simStart = time.time()
         bids = simulateAuction(**kwargs)
         simEnd = time.time()
-        with open(os.path.join(kwargs['oDir'],"simulationTime.txt"),'a') as f:
+        with open(os.path.join(kwargs['oDir'],"simulationTime_{0}.txt".format(ps)),'a') as f:
             numpy.savetxt(f, numpy.atleast_1d(simEnd-simStart)) 
             
         if kwargs['verbose']:
@@ -137,12 +145,12 @@ def jointGmmScpp(**kwargs):
             
         del simStart, simEnd
         
-        bidsFile = 'bids_{0:04}.npy'.format(itr)
+        bidsFile = 'bids_{0:04}_{1}.npy'.format(itr,ps)
         with open(os.path.join(kwargs['oDir'], bidsFile),'w') as f:
             numpy.save(f, bids)
             
         hob = numpy.max(bids[:,idx2keep,:],1)
-        hobFile = os.path.join(kwargs['oDir'],'hob_{0:04}.txt'.format(itr))
+        hobFile = os.path.join(kwargs['oDir'],'hob_{0:04}_{1}.txt'.format(itr,ps))
         with open(hobFile,'w') as f:
             numpy.savetxt(f,hob)
         
@@ -151,50 +159,41 @@ def jointGmmScpp(**kwargs):
         nextpp = jointGMM()
         temppp, aicValues, compRange = nextpp.aicFit(X=hob, compRange = models, min_covar = kwargs['aicMinCovar'], verbose = kwargs['verbose'])
         
-        f,ax = plt.subplots()
-        colors = ['#777777']*len(aicValues)
-        colors[numpy.argmin(aicValues)] = 'r'
-        ax.bar(compRange, aicValues, color=colors, align = 'center')
-        ax.set_ylabel('AIC score')
-        ax.set_xlabel('GMM Model (Number of Components)')
-        ax.set_title('Iteration {0}'.format(itr+1))
-        plt.ylim([0,numpy.max(aicValues) + 0.5])
-        aicFile = "aic_{0:03}.pdf".format(itr+1)
-        plt.savefig(os.path.join(kwargs['oDir'],aicFile))
-        del colors
+        aicFile = os.path.join(kwargs['oDir'],'aic_{0:03}_{1}.pdf'.format(itr+1,ps))
+        
+        pltAic(compRange,aicValues,itr,aicFile)
         
         del hob,temppp,compRange
         
-        
-        baseFileName = '{0}_{1:04}'.format(ps,itr)
-        ppFile = os.path.join(kwargs['oDir'], '{0}.pkl'.format(baseFileName))
+        ppFile = os.path.join(kwargs['oDir'], '{0}_{1:04}.pkl'.format(ps,itr))
         with open(ppFile,'w') as f:
             pickle.dump(nextpp,f)
             
         if kwargs['pltMarg']:
-            oFile = os.path.join(kwargs['oDir'],'{0}.pdf'.format(baseFileName))
+            oFile = os.path.join(kwargs['oDir'],'{0}_{1:04}.pdf'.format(ps,itr))
             nextpp.pltMarg(oFile = oFile)
         
-        with open(os.path.join(kwargs['oDir'],'aic.txt'),'a') as f:
-            numpy.savetxt(f,numpy.atleast_1d(aicValues))
+        with open(os.path.join(kwargs['oDir'],'aic_{0}_{1:04}.txt'.format(ps,itr)),'a') as f:
+            numpy.savetxt(f,numpy.atleast_1d(aicValues).T)
         
         if kwargs['verbose']:
             print 'AIC Fit: number of components = {0}'.format(nextpp.n_components)
             
-        with open(os.path.join(kwargs['oDir'],'n_components.txt'), 'a') as f:
+        with open(os.path.join(kwargs['oDir'],'n_components_{0}.txt'.format(ps)), 'a') as f:
             numpy.savetxt(f,numpy.atleast_1d(nextpp.n_components))
             
         if itr > 0:
-            kld = numpy.abs(apprxJointGmmKL(kwargs['pricePrediction'], nextpp, nSamples = kwargs['nklsamples'], verbose = kwargs['verbose']))
+            kld = numpy.abs(apprxJointGmmKL(kwargs['pricePrediction'], nextpp, 
+                            nSamples = kwargs['nklsamples'], verbose = kwargs['verbose']))
             
-            with open(os.path.join(kwargs['oDir'],'kld.txt'),'a') as f:
+            with open(os.path.join(kwargs['oDir'],'kld_{0}.txt'.format(ps)),'a') as f:
                 numpy.savetxt(f,numpy.atleast_1d(kld))
                 
             if kwargs['verbose']:
                 print 'Symmetric KL Distance = {0}'.format(kld)
         
         itrEnd = time.time()
-        with open(os.path.join(kwargs['oDir'], "itrTime.txt"),'a') as f:
+        with open(os.path.join(kwargs['oDir'], "itrTime_{0}.txt".format(ps)),'a') as f:
             numpy.savetxt(f, numpy.atleast_1d(itrEnd-itrStart))
             
         kwargs['pricePrediction'] = nextpp
@@ -209,7 +208,7 @@ def jointGmmScpp(**kwargs):
         else:
             print ''
             
-    with open(os.path.join(kwargs['oDir'],'kld.txt'),'r') as f:
+    with open(os.path.join(kwargs['oDir'],'kld_{0}.txt'.format(ps)),'r') as f:
         kld = numpy.loadtxt(f, 'float')
      
     f, ax = plt.subplots()
@@ -217,11 +216,11 @@ def jointGmmScpp(**kwargs):
     plt.title("Absolute Symmetric K-L Divergence")
     plt.xlabel("Iteration")
     plt.ylabel(r"|kld|")
-    plt.savefig(os.path.join(kwargs['oDir'],'kld.pdf'))
+    plt.savefig(os.path.join(kwargs['oDir'],'kld_{0}.pdf'.format(ps)))
     
     del kld
     
-    with open(os.path.join(kwargs['oDir'],'n_components.txt'),'r') as f:
+    with open(os.path.join(kwargs['oDir'],'n_components_{0}.txt'.format(ps)),'r') as f:
         comp = numpy.loadtxt(f)
         
     f,ax = plt.subplots()
@@ -231,7 +230,7 @@ def jointGmmScpp(**kwargs):
     ax.set_xlabel('Iteration')
     ax.set_title('Model Selection')
     plt.ylim([0,numpy.max(comp) + 0.5])
-    plt.savefig(os.path.join(kwargs['oDir'],'n_components.pdf'))
+    plt.savefig(os.path.join(kwargs['oDir'],'n_components_{0}.pdf'.format(ps)))
     
     del comp
     
@@ -245,14 +244,14 @@ def jointGmmScpp(**kwargs):
     extraBids = simulateAuction(**kwargs)
     end = time.time()
     
-    with open(os.path.join(kwargs['oDir'],'extraBids.npy'), 'w') as f:
+    with open(os.path.join(kwargs['oDir'],'extraBids_{0}.npy'.format(ps)), 'w') as f:
         numpy.save(f, extraBids)
     
     if kwargs['verbose']:
         print 'Simulated {0} holdout auctions in {1} seconds'.format(kwargs['nGames'],end-start)
         
     extraHob = numpy.max(extraBids[:,idx2keep,:],1)
-    with open(os.path.join(kwargs['oDir'],'extraHob.txt'),'w') as f:
+    with open(os.path.join(kwargs['oDir'],'extraHob_{0}.txt'.format(ps)),'w') as f:
         numpy.savetxt(f, extraHob)
     
     ll = numpy.sum(kwargs['pricePrediction'].eval(extraHob)[0])
@@ -260,7 +259,7 @@ def jointGmmScpp(**kwargs):
     if kwargs['verbose']:
         print 'log-likelihood hold out = {0}'.format(ll)
         
-    with open(os.path.join(kwargs['oDir'],'extraHobLL.txt'),'w') as f:
+    with open(os.path.join(kwargs['oDir'],'extraHobLL_{0}.txt'.format(ps)),'w') as f:
         numpy.savetxt(f,numpy.atleast_1d(ll))
         
     # fit another model to held out data and
@@ -279,7 +278,7 @@ def jointGmmScpp(**kwargs):
     ax.set_xlabel('GMM Model (Number of Components)')
     ax.set_title('Iteration {0}'.format(itr+1))
     plt.ylim([0,numpy.max(aicValues) + 0.5])
-    extraAicFile = "extraAic_{0:03}.pdf".format(itr+1)
+    extraAicFile = "extraAic_{0:04}_{1}.pdf".format(itr+1,ps)
     plt.savefig(os.path.join(kwargs['oDir'],extraAicFile))
     
     del gmm,aicValues, compRange
@@ -287,36 +286,6 @@ def jointGmmScpp(**kwargs):
     if kwargs['verbose']:
         print 'SKL-D between SCPP proposal and extra model = {0}'.format(kld)
         
-    extraSkdFile = os.path.join(kwargs['oDir'],'extraHobSkl.txt')
+    extraSkdFile = os.path.join(kwargs['oDir'],'extraHobSkl_{0}.txt'.format(ps))
     with open(extraSkdFile,'w') as f:
         numpy.savetxt(f, numpy.atleast_1d(kld))
-        
-#    print 'Computing {0} trials of total correlation Monte Carlo Estimate.'.format(kwargs['tctrials'])
-#    
-#    tclist, tcmean, tcvar = nextpp.totalCorrelationMC(kwargs['tcsamples'], kwargs['tctrials'], False)
-#
-#    print "total correlation = {0}".format(tclist)
-#    print "total correlation mean = {0}".format(tcmean)
-#    print "total correlation variance = {0}".format(tcvar)
-#    
-#    with open(os.path.join(kwargs['oDir'], 'tclist.txt'),'w') as f:
-#        numpy.savetxt(f,tclist)
-#    
-#    with open(os.path.join(kwargs['oDir'],'tcstats.txt'),'w') as f:
-#        print >> f, "mean {0}".format(tcmean)
-#        print >> f, "var {0}".format(tcvar)
-    
-def main():
-    desc = "AIC joint Gaussian Mixture Self-Confirming price prediction algorithm."
-    parser = argparse.ArgumentParser(description=desc)
-    
-    parser.add_argument('-o', '--oDir', action = 'store', dest = 'oDir', required = True,
-                        help = "Must provide output directory." )
-    
-    parser.add_argument('-a','--agentType', action = 'store', dest = 'agentType', required = True,
-                        help = "Must provide agent type (strategy).")
-    
-    parser.add_argument('-na', '--nAgents', action = 'store', dest = 'nAgents', default = 8, type = int,
-                        help = "Number of agents participating in auction.")
-    
-    parser.add_argument('-s', '--selfIdx', action = 'store',)

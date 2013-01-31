@@ -32,6 +32,8 @@ def simAuctionHelper(**kwargs):
 
     retType      = kwargs.get('retType','bids')
     
+    l            = kwargs.get('l')
+    
     if retType == 'hob':
         selfIdx  = kwargs.get('selfIdx')
         if selfIdx == None:
@@ -67,7 +69,7 @@ def simAuctionHelper(**kwargs):
              
             for agentIdx, agent, pp in zip(numpy.arange(nAgents),agents,pricePrediction):
                 
-                agent.randomValuation()     
+                agent.randomValuation(l = l)     
                     
                 if retType == 'bids':
                     ret[itr, agentIdx, :] = agent.bid(pricePrediction = pp)
@@ -185,6 +187,9 @@ def simulateAuction(**kwargs):
 
     retType      = kwargs.get('retType','bids')
     
+    #can specify lambad (1 = perfect substitutes, 5 = perfect complements)
+    l            = kwargs.get('l') 
+    
     if retType == 'hob':
         selfIdx  = kwargs.get('selfIdx')
         if selfIdx == None:
@@ -202,6 +207,7 @@ def simulateAuction(**kwargs):
         print 'minValuation = {0}'.format(minValuation)
         print 'maxValuation = {0}'.format(maxValuation)
         print 'retType      = {0}'.format(retType)
+        print 'l            = {0}'.format(l)
         
     
     ret = []
