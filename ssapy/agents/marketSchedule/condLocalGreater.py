@@ -1,13 +1,13 @@
 from ..marketSchedule import listRevenue
 from .msAgent import msAgent
 from ...strategies import straightMU as strategies
-from ...strategies.condLocal import condLocalGreater as clg
+from ...strategies.condLocal import condMVLocal as cmv
 
 from ...strategies.strategyFactory import strategyFactory
 
-class condLocalGreater(msAgent):
+class condMVLocal(msAgent):
     def __init__(self,**kwargs):
-        super(condLocalGreater, self).__init__(**kwargs)
+        super(condMVLocal, self).__init__(**kwargs)
         
     def bid(self, **kwargs):
         pricePrediction = kwargs.get('pricePrediction', self.pricePrediction)
@@ -37,8 +37,6 @@ class condLocalGreater(msAgent):
         
         ret = kwargs.get('ret','bids')
             
-        bids = clg(bundles, revenue, initbids, samples, maxItr, tol, verbose, ret)
+        bids = cmv(bundles, revenue, initbids, samples, maxItr, tol, verbose, ret)
         
         return bids 
-                             
-                             
