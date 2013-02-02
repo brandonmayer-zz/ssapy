@@ -2,7 +2,7 @@ import unittest
 import numpy
 
 from ssapy.strategies.condLocal import condLocalUpdate, condLocal,\
-    condLocalGreaterUpdate
+    condMVLocal, condMVLocalUpdate, condLocalMc, condLocalMcUpdate
 from ssapy import listBundles, msListRevenue
 
 
@@ -75,7 +75,7 @@ class test_condLocalBid(unittest.TestCase):
 #        
 #        numpy.testing.assert_equal(ret[1], True, "condLocal - test_ericCounterExample Failed" )
         
-    def test_condLocalGreater(self):
+    def test_condMVLocal(self):
         nsamples = 5
         m=2
         initbids = [3,3]
@@ -89,15 +89,19 @@ class test_condLocalBid(unittest.TestCase):
         
         print bundles
         print revenue
-        
-        newbid = condLocalGreaterUpdate(bundles, revenue, 
-                                         initbids, 0, samples, True)
+        brd = {}
+        for b,r in zip(bundles,revenue):
+            brd[tuple(b)] = r
+        newbid = condMVLocalUpdate(brd, initbids, 0, samples, True) 
+                                         
         
         print newbid
         
+        bids = condMVLocal(bundles,revenue, initbids, samples)
         
+        print bids
         
-        
+       
 #    def test_condLocal1(self):
 #        samples = numpy.zeros((1000,2))
 #        samples[:100,:] = numpy.asarray([20,15])

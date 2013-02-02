@@ -6,7 +6,7 @@ from .targetMV import targetMV
 from .targetMVS import targetMVS
 from .targetPrice import targetPrice8, targetPrice64, targetPrice256
 from .jointLocal import jointLocal, jointLocalMc
-from .condLocal import condLocal, condLocalGreater
+from .condLocal import condLocal, condMVLocal
 from .margLocal import margLocal
 
 def strategyFactory(ss = None):
@@ -53,7 +53,7 @@ def strategyFactory(ss = None):
     elif ss == 'condLocal':
         return condLocal
     elif ss == 'condLocalGreater':
-        return condLocalGreater
+        return condMVLocal
     elif ss == 'margLocal':
         return margLocal
     else:

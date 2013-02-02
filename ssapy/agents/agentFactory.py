@@ -4,7 +4,7 @@ from .marketSchedule.targetPrice import targetPrice8, targetPrice64, targetPrice
 from .marketSchedule import straightMU as msStraightMU
 from .marketSchedule import straightMV as msStraightMV
 from .marketSchedule import targetPrice as msTargetPrice
-from .marketSchedule.condLocalGreater import condLocalGreater as msCondLocalGreater
+from .marketSchedule.condLocalGreater import condMVLocal as msCondMVLocal
 from .marketSchedule.jointLocal import jointLocal
 
 
@@ -30,7 +30,7 @@ def agentFactory(**kwargs):
     elif agentType == "msTargetPrice256":
         return msTargetPrice.targetPrice256(**kwargs)
     elif agentType == "msCondLocalGreater" or agentType == "condLocalGreater":
-        return msCondLocalGreater(**kwargs)
+        return msCondMVLocal(**kwargs)
     elif agentType == "jointLocal":
         return jointLocal(**kwargs)
     else:
