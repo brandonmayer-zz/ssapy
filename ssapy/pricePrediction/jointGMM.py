@@ -25,7 +25,7 @@ def expectedSurplus_( bundleRevenueDict, bidVector, samples ):
 def expectedSurplus(bundleRevenueDict, bidVector, jointGmmPricePrediction, n_samples = 10000):
     samples = jointGmmPricePrediction.sample(n_samples = n_samples)
     
-    return expectedSurplus_(bundleRevenueDict, bidVector, samples)
+    return expectedSurplus_(bundleRevenueDict, bidVector, samples)   
 
 class jointGMM(sklearn.mixture.GMM):
     """
