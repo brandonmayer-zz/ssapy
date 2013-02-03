@@ -4,7 +4,7 @@ from .marketSchedule.targetPrice import targetPrice8, targetPrice64, targetPrice
 from .marketSchedule import straightMU as msStraightMU
 from .marketSchedule import straightMV as msStraightMV
 from .marketSchedule import targetPrice as msTargetPrice
-from .marketSchedule.condLocalGreater import condMVLocal as msCondMVLocal
+from .marketSchedule.condMVLocal import condMVLocal as msCondMVLocal
 from .marketSchedule.jointLocal import jointLocal
 
 
