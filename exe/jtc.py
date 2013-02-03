@@ -29,7 +29,7 @@ def main():
     
 
     args = parser.parse_args()
-    with open(args.inFile,'rb') as f:
+    with open(args.inFile,'r') as f:
         gmm = pickle.load(f)
         
     tclist, tcmean, tcvar = \
