@@ -11,7 +11,7 @@ def main():
     parser = argparse.ArgumentParser(description=desc)
     
     parser.add_argument('-i', '--inFile', action = 'store', dest = 'inFile', required = True,
-                        help = "Must specify an input .pkl file.")
+                        type = str, help = "Must specify an input .pkl file.")
     
     parser.add_argument('-n', '--nsamples', action = 'store', dest = 'nsamples', default = 10000, 
                         type = int, required = False, help = "Number of samples used in Mutual Information approximation.")
