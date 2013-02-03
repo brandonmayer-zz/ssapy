@@ -14,7 +14,7 @@ def main():
                         help = "Must specify an input .pkl file.")
     
     parser.add_argument('-n', '--nsamples', action = 'store', dest = 'nsamples', default = 10000, 
-                        required = False, help = "Number of samples used in Mutual Information approximation.")
+                        type = int, required = False, help = "Number of samples used in Mutual Information approximation.")
     
     parser.add_argument('-nt','--ntrials', action='store', dest='nt',default = 100,
                         type = int, required = False, 
