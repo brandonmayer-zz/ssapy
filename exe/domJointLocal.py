@@ -64,7 +64,7 @@ def main():
     bids = numpy.zeros(initBids.shape)
     es   = numpy.zeros(initBids.shape[0])
     
-    for itr, initBid, v, l in zip(xrange(vmat.shape[1]),initBids,vmat,lmat):
+    for itr, initBid, v, l in zip(xrange(vmat.shape[0]),initBids,vmat,lmat):
         revenue = msListRevenue(bundles,v,l)
         
         bids[itr,:] = jointLocal(bundles,revenue,initBid,jointSamples,
