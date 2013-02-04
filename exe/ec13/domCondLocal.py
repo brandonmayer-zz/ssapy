@@ -88,10 +88,10 @@ def main():
         
         es[itr] = expectedSurplus_(brd, bids[itr,:], evalSamples)
         
-    numpy.savetxt(os.path.join(args.odir,'condMVLocalBids.txt'), bids)
-    numpy.savetxt(os.path.join(args.odir,'condMVLocalExpectedSurplus.txt'),es)
+    numpy.savetxt(os.path.join(args.odir,'condLocalBids.txt'), bids)
+    numpy.savetxt(os.path.join(args.odir,'condLocalExpectedSurplus.txt'),es)
     
-    with open(os.path.join(args.odir,'condMVLocalStats.txt'),'w') as f:
+    with open(os.path.join(args.odir,'condLocalStats.txt'),'w') as f:
         print >> f, numpy.mean(es)
         print >> f, numpy.var(es)
 
