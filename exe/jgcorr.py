@@ -24,7 +24,7 @@ def main():
                         help = "Must specify an input .pkl file.")
     
     parser.add_argument('-n', '--n_samples', action = 'store', dest = 'n_samples',
-                        default = 10000, required = False,
+                        default = 10000, required = False, type=int,
                         help = "Number of samples used to estimate normalized correlation matrix.")
     
     parser.add_argument('-o', '--output', action = 'store', dest = 'output',
@@ -45,9 +45,13 @@ def main():
     otxt = 'out.txt'
     
     if not args.output == None:
-        basename = args.output.split('.')[0]
-        opdf = os.path.realpath(basename) + '.pdf'
-        otxt = os.path.realpath(basename) + '.txt'
+        d,basename=os.path.split(args.output)
+        fname = os.path.splitext(basename)[0]
+        opdf = os.path.join(d,'norm_corr_' + fname + '.pdf')
+        otxt = os.path.join(d,'norm_corr_' + fname + '.txt')
+        
+        print 'opdf = {0}'.format(opdf)
+        print 'otxt = {0}'.format(otxt)
     else:
         filename = os.path.basename(args.input).split('.')[0]
         basepath = os.path.dirname(args.input)
