@@ -3,6 +3,9 @@ import itertools
 import datetime
 
 from .pricePrediction.dokHist import dokHist
+from .pricePrediction.jointGMM import jointGMM as jointGMM
+from .pricePrediction.jointGMM import jointGMM as jointGmm
+from .pricePrediction.jointGMM import jointGMM as gmm
 
 from .agents.marketSchedule import listRevenue as msListRevenue
 from .agents.marketSchedule import dictRevenue as msDictRevenue
