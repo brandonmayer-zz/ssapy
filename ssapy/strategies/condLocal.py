@@ -245,7 +245,7 @@ def condLocalUpdate(bundles, revenue, bids,
             
         p0 = numpy.float(p0) / ( normLost +  2*eps )
 
-        p0 = numpy.float(numpy.count_nonzero( numpy.all(goodsWon == negBundle, 1) ))
+#        p0 = numpy.float(numpy.count_nonzero( numpy.all(goodsWon == negBundle, 1) ))
         
                 
         if verbose:
