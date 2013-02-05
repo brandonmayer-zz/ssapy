@@ -89,9 +89,9 @@ def main():
         es[itr] = expectedSurplus_(brd, bids[itr,:], evalSamples)
         
     numpy.savetxt(os.path.join(args.odir,'margLocalBids.txt'), bids)
-    numpy.savetxt(os.path.join(args.odir,'margLocalBidsExpectedSurplus.txt'),es)
+    numpy.savetxt(os.path.join(args.odir,'margLocalExpectedSurplus.txt'),es)
     
-    with open(os.path.join(args.odir,'margLocalBidsStats.txt'),'w') as f:
+    with open(os.path.join(args.odir,'margLocalStats.txt'),'w') as f:
         print >> f, numpy.mean(es)
         print >> f, numpy.var(es)
 
