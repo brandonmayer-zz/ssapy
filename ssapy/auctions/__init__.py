@@ -80,7 +80,7 @@ def simAuctionHelper(**kwargs):
         else:
             for agentIdx, agent in enumerate(agents):
                 
-                agent.randomValuation()
+                agent.randomValuation(l=l)
                 
                 if retType == 'bids':
                     ret[itr, agentIdx, :] = agent.bid(pricePrediction = pricePrediction)
