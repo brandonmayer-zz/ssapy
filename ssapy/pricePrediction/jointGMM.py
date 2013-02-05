@@ -267,6 +267,55 @@ class jointGMM(sklearn.mixture.GMM):
         else:
             print 'Cannot plot joint distribution surface with dimension greater than 2.'
             
+    def heatMap(self,nsamples=10000, cmap='jet', 
+                title = None,
+                interpolation=None, 
+                fname = None,
+                edgecolors=None,
+                alphablend = 1.0):
+#        if self.m != 2L:
+#            raise ValueError('Can only generate heatmap for m = 2.')
+        
+        samples = self.sample(n_samples = nsamples, 
+                              minPrice = 0,
+                              maxPrice = numpy.float('inf'))
+        
+        smin = samples.min()
+        smax = samples.max()
+        extent = [[smin,smax],[smin,smax]]
+        xx = numpy.arange(int(smin),int(smax)+1)
+        hist, xedges, yedges = \
+            numpy.histogram2d(samples[:,0],
+                              samples[:,1],
+                              bins = [xx, xx],
+                              range = extent,
+                              normed = True)
+            
+#        imgplot = plt.imshow(hist, extent=[smin,smax,smin,smax], 
+#                             interpolation=interpolation)
+#        imgplot.set_cmap(cmap)
+
+        f,ax = plt.subplots()
+        ax.pcolor(hist,
+                  cmap       = cmap,
+                  edgecolors = edgecolors,
+                  alpha      = alphablend)
+        
+#        plt.colorbar()
+        ax.set_xlim(int(smin),int(smax))
+        ax.set_ylim(int(smin),int(smax))
+        
+        ax.set_ylabel(r'$q_1$')
+        ax.set_xlabel(r'$q_2$')
+        
+        if title != None:
+            ax.set_title(title)
+        
+        if fname == None:
+            plt.show()
+        else:
+            plt.savefig(fname)
+            
 
     def margParams(self,**kwargs):
         margIdx = kwargs.get('margIdx')
