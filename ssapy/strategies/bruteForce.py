@@ -2,7 +2,7 @@ from ssapy.pricePrediction.jointGMM import expectedSurplus_
 import numpy
 import itertools
 
-def bruteForceSamples( bundleRevenueDict,  evalSamples = None, min=0.0, max=50.0, step=1.0, ret='bid'):
+def bruteForceS( bundleRevenueDict,  evalSamples = None, min=0.0, max=50.0, step=1.0, ret='bid'):
     m = evalSamples.shape[1]
     
     xx = numpy.arange(min,max+1.0,step)
