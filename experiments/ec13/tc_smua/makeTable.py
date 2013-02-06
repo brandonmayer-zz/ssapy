@@ -38,11 +38,11 @@ def main():
         
         row = []
         if l == 'None':
-            row.append('U[{0},{1}] &'.format(m,n))
+            row.append('U[{0},{1}] &'.format(int(m),int(n)))
 #            row = ['U[{0},{1}] &'.format(m,n), tc_mean + '&', tc_var + '\\']
         else:
 #            row = [r"\lambda_{1}[%s,%s] &'%(m,n)", '{0} &'.format(tc_mean), '{0} \\'.format(tc_var)]
-            row.append("$\lambda_{1}[%s,%s]$ &" % (m,n))
+            row.append("$\lambda_{1}[%s,%s]$ &" % (int(m),int(n)))
             
         row.append(tc_mean + '&')
         row.append(tc_var  + "\\\\")
