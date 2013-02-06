@@ -2,7 +2,6 @@ import argparse
 import numpy
 import os
 
-from ssapy.strategies.condLocal import condLocal
 from ssapy.strategies.bidEval import bidEvalS
 
 from ssapy import listBundles, msListRevenue, msDictRevenue
@@ -75,6 +74,9 @@ def main():
     for itr, v, l in zip(xrange(vmat.shape[0]),vmat,lmat):
         print 'iteration {0}'.format(itr)
         bundleRevenueDict = msDictRevenue(v,l)
+        
+        THIS IS WONG! NEED TO SPLIT JOINT INTO CANDIDATES
+        AND EVALS! NOT EVAL ON THE GT SET
         
         bid,expectedSurplus = \
             bidEvalS(bundleRevenueDict,
