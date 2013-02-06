@@ -25,10 +25,6 @@ def main():
                         required=True,type=str,
                         help='Valuation lambda txt file.')
     
-#    parser.add_argument('-ib','--initBidFile',dest='initBidFile',
-#                        required=True,type=str,
-#                        help='Initial Bids txt file.')
-    
     parser.add_argument('-es','--evalSamples',dest='evalFile',
                         required=True,type=str,
                         help='Evaluation samples file.')
@@ -37,32 +33,22 @@ def main():
                         required=True,type=str,
                         help='Output directory.')
     
-    parser.add_argument('-eps','--eps',dest='eps',
-                        required=False,default=1,type=float,
-                        help='Eps condLocal parameter')
-    
-    parser.add_argument('-mi','--maxitr', dest='maxitr',
-                        required=False, default=100, type=int,
-                        help='Maximum Update Iterations')
-    
-    parser.add_argument('-t','--tol',dest='tol',
-                        required=False, default=1e-5,
-                        type=float,help='L2 Update Stopping Tolerance')
+    parser.add_argument('-mcs','--maxCandidateSamples', dest='maxCandidateSamples',
+                        required=False, default=-1, type=int,
+                        help='Limit the number of samples used as candidates.')
     
     parser.add_argument('--verbose',dest='verbose',
                         required=False,default=False,
                         type=bool,help='Output debugg information')
     
-    parser.add_argument('-mcs','--maxCandidateSamples', dest='maxCandidateSamples',
-                        required=False, default=-1, type=int,
-                        help='Limit the number of samples used as candidates.')
+    
     
     args = parser.parse_args()
     
     args.odir = os.path.realpath(args.odir)
     
     jointSamples = numpy.loadtxt(os.path.realpath(args.samplesFile))
-#    initBids     = numpy.loadtxt(os.path.realpath(args.initBidFile))
+
     vmat         = numpy.loadtxt(os.path.realpath(args.vfile))
     lmat         = numpy.loadtxt(os.path.realpath(args.lfile))
     evalSamples  = numpy.loadtxt(os.path.realpath(args.evalFile))
