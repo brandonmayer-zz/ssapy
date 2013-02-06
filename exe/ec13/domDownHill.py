@@ -86,6 +86,8 @@ def main():
         bids[itr,:] = bid
         es[itr] = expectedSurplus_(bundleRevenueDict, bid, evalSamples)
         
+        print '\t Expected Surplus = {0}'.format(es[itr])
+        
     numpy.savetxt(os.path.join(args.odir,'downHillBids.txt'), bids)
     numpy.savetxt(os.path.join(args.odir,'downHillExpectedSurplus.txt'),es)
     
