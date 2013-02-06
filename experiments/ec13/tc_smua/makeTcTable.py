@@ -8,7 +8,7 @@ def main():
     
     tcFiles = glob.glob(os.path.join(rootDir, "tc_*.txt"))
 
-    tableFile = os.path.join(rootDir,'table.tex')
+    tableFile = os.path.join(rootDir,'tcTable.tex')
     if os.path.exists(tableFile):
         os.remove(tableFile)
     
@@ -16,6 +16,7 @@ def main():
     
     with open(tableFile,'a+') as f:
         print >> f, "\\begin{table}[ht!]"
+        print >> f, "\\centering"
         print >> f, "\\begin{tabular}{|c|c|c|}"
         print >> f, "\\hline"
         print >> f, "Environment & Total Correlation Mean& Total Correlation Variance\\\\"
@@ -33,8 +34,8 @@ def main():
         with open(fyle,'r') as f:
             lynes = f.readlines()
             
-        tc_mean = lynes[1].strip()
-        tc_var  = lynes[2].strip()
+        tc_mean = float(lynes[1].strip())
+        tc_var  = float(lynes[2].strip())
         
         row = []
         if l == 'None':
@@ -44,8 +45,8 @@ def main():
 #            row = [r"\lambda_{1}[%s,%s] &'%(m,n)", '{0} &'.format(tc_mean), '{0} \\'.format(tc_var)]
             row.append("$\lambda_{1}$[%s,%s] &" % (int(m),int(n)))
             
-        row.append(tc_mean + '&')
-        row.append(tc_var  + "\\\\")
+        row.append('{0:.4}&'.format(tc_mean))
+        row.append('{0:.4}\\\\'.format(tc_var))
             
 #        print row
         
