@@ -70,10 +70,6 @@ def main():
     numSamples = jointSamples.shape[0]
     m = jointSamples.shape[1]
     
-    
-    
-    
-    
     if args.maxCandidateSamples > 0:
         if args.maxCandidateSamples < jointSamples.shape[0]:
             jointSamples = jointSamples[:args.maxCandidateSamples,:]
