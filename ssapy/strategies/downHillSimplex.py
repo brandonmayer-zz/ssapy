@@ -1,7 +1,7 @@
 from scipy.optimize import fmin
 import numpy
 
-def expectedSurplusSamples(bid, bundleRevenueDict, evalSamples):
+def NegExpectedSurplusSamples(bid, bundleRevenueDict, evalSamples):
     es = numpy.float64(0.)
     
     for sample in evalSamples:
@@ -10,14 +10,14 @@ def expectedSurplusSamples(bid, bundleRevenueDict, evalSamples):
         cost = numpy.dot(goodsWon,sample)
         es += rev-cost
         
-    return es/evalSamples.shape[0]
+    return -(es/evalSamples.shape[0])
 
 def downHillSS(bundleRevenueDict, initBid, evalSamples, 
                     maxiter = 100, disp = True,
                     clip = True, ret = 1):
     
     bid, expectedSurplus, nItr, nFncCalls, warnFlag = \
-        fmin(expectedSurplusSamples, x0 = initBid, 
+        fmin(NegExpectedSurplusSamples, x0 = initBid, 
              args = (bundleRevenueDict,evalSamples), 
              maxiter = maxiter, disp = disp,
              full_output = True, retall = False )
