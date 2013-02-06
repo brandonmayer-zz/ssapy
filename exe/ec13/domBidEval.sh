@@ -1,11 +1,10 @@
 #!/bin/bash
 
-# BASEDIR=$(dirname `which domBidEval.sh`)
-SCRIPT=$(which domBidEval.sh)
+BASEDIR=$(dirname `which domBidEval.sh`)
 
 if [ `uname -o` = "Cygwin" ]
 then
-    python $(cygpath -m ${SCRIPT}) "$@"
+    python `cygpath -m ${BASEDIR}`/domBidEval.py "$@"
 else
-    python ${SCRIPT} "$@"
+    python ${BASEDIR}/domBidEval.py "$@"
 fi
