@@ -13,6 +13,53 @@ initStrategies = {'straightMU8': straightMU8,
                   'straightMU64': straightMU64,
                   'straightMU256':straightMU256}
 
+def margLocalMcUpdate(bundleRevenueDict, bids, j, 
+                      samples, verbose = False):
+    newBid = 0.0
+    
+    for sample in samples:
+        bundleWon = sample < bids
+        bundleWon[j] = True
+        
+        bundleLost = bundleWon.copy()
+        bundleLost[j] = False
+        
+        newBid += bundleRevenueDict[tuple(bundleWon)] - bundleRevenueDict[tuple(bundleLost)] 
+        
+    newBid /= samples.shape[0]
+    
+    if verbose:
+        print '\tNew bid = {0}'.format(newBid)
+        
+    return newBid
+
+def margLocalMc(bundleRevenueDict, initialBids, samples, maxItr = 100, 
+                tol= 1e-5, verbose = False, ret = 'bids'):
+    
+    m         = samples.shape[1]
+    newBids   = numpy.atleast_1d(initialBids).copy()
+    converged = False
+        
+    for itr in xrange(maxItr):
+        oldBids = newBids.copy()
+        
+        for gIdx in xrange(m):
+            newBids[gIdx] = margLocalMcUpdate(bundleRevenueDict, 
+                               oldBids, gIdx, samples, verbose)
+            
+        d = numpy.linalg.norm(oldBids - newBids)
+        
+        if d <= tol:
+            converged = True
+            break
+            
+    if ret == 'bids':
+        return newBids
+    elif ret == 'all':
+        return newBids, converged, itr + 1, d
+    else:
+        raise ValueError('Unknown Return Type {0}.'.format(ret))
+
 def margLocalUpdate(bundles, revenue, bids, targetBidIdx, samples, verbose = False):
     """
     Update a single bid index, targetBidIdx, of bids given a set of samples and a 
