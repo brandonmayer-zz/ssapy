@@ -76,15 +76,15 @@ def main():
     bids = numpy.zeros(initBids.shape)
     es   = numpy.zeros(initBids.shape[0])
     
-    bidsFile   = args.name + 'Bids.txt'
+    bidsFile   = os.path.join(args.odir, args.name + 'Bids.txt')
     if os.path.exists(bidsFile):
         os.remove(bidsFile)
         
-    esFile    = args.name + 'ExpectedSurplus.txt'
+    esFile    = os.path.join(args.odir, args.name + 'ExpectedSurplus.txt')
     if os.path.exists(esFile):
         os.remove(esFile)
         
-    statsFile = args.name + 'Stats.txt'
+    statsFile = os.path.join(args.odir, args.name + 'Stats.txt')
     if os.path.exists(statsFile):
         os.remove(statsFile)
     
