@@ -34,8 +34,17 @@ def jointLocalUpdateMc(bundles, revenue, bids, targetBid, samples, verbose = Fal
 
 def jointLocalUpdateMcDict(bundleRevenueDict, bids, targetBid, samples, verbose = False):
     muj = numpy.float64(0.0)
+    
     for sample in samples:
-        muj += marginalUtilityDict_(bundleRevenueDict, bids, targetBid, sample)
+#        muj += marginalUtilityDict_(bundleRevenueDict, bids, targetBid, sample)
+        bundleWon = sample <= bids
+    
+        posBundle = bundleWon.copy()
+        negBundle = bundleWon.copy()
+        posBundle[targetBid] = True
+        negBundle[targetBid] = False
+        
+        muj += (bundleRevenueDict[tuple(posBundle)] - bundleRevenueDict[tuple(negBundle)])
         
     if verbose:
         print muj / samples.shape[0]
@@ -65,6 +74,7 @@ def jointLocalMc(bundles, revenue, initialBids, samples, maxItr = 100, tol = 1e-
         
         if verbose:
             print 'd = {0}'.format(d)
+            
         if d <= tol:
             converged = True
             
