@@ -65,6 +65,7 @@ def main():
     es   = numpy.zeros(initBids.shape[0])
     
     for itr, initBid, v, l in zip(xrange(vmat.shape[0]),initBids,vmat,lmat):
+        print 'Iteration = {0}'.format(itr)
         revenue = msListRevenue(bundles,v,l)
         
         bids[itr,:] = jointLocal(bundles,revenue,initBid,jointSamples,
@@ -75,6 +76,9 @@ def main():
             brd[tuple(b)] = r
         
         es[itr] = expectedSurplus_(brd, bids[itr,:], evalSamples)
+        
+        print '\t bid = {0}'.format(bids[itr,:])
+        print '\t Expected Surplus = {0}'.format(es[itr])
         
     numpy.savetxt(os.path.join(args.odir,'jointLocalBids.txt'), bids)
     numpy.savetxt(os.path.join(args.odir,'jointLocalExpectedSurplus.txt'),es)
