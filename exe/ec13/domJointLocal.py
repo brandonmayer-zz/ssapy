@@ -31,6 +31,11 @@ def main():
                         required=True,type=str,
                         help='Evaluation samples file.')
     
+    parser.add_argument('-n','--name',dest='name',
+                        required=False,type=str,
+                        default='local',
+                        help='output file name prefix.')
+    
     parser.add_argument('-o','--odir',dest='odir',
                         required=True,type=str,
                         help='Output directory.')
@@ -68,8 +73,9 @@ def main():
         print 'Iteration = {0}'.format(itr)
         revenue = msListRevenue(bundles,v,l)
         
-        bids[itr,:] = jointLocal(bundles,revenue,initBid,jointSamples,
-                                 args.maxitr,args.tol,args.verbose,'bids')
+        bids[itr,:], converged, nItr, d = \
+            jointLocal(bundles,revenue,initBid,jointSamples,
+                       args.maxitr,args.tol,args.verbose,'all')
         
         brd = {}
         for b,r in zip(bundles,revenue):
@@ -78,12 +84,16 @@ def main():
         es[itr] = expectedSurplus_(brd, bids[itr,:], evalSamples)
         
         print '\t bid = {0}'.format(bids[itr,:])
+        print '\t converged = {0}'.format(converged)
+        print '\t Num. Iterations = {0}'.format(nItr)
+        print '\t d = {0}'.format(d)
         print '\t Expected Surplus = {0}'.format(es[itr])
         
-    numpy.savetxt(os.path.join(args.odir,'jointLocalBids.txt'), bids)
-    numpy.savetxt(os.path.join(args.odir,'jointLocalExpectedSurplus.txt'),es)
+        
+    numpy.savetxt(os.path.join(args.odir, args.name + '_bids.txt'), bids)
+    numpy.savetxt(os.path.join(args.odir, args.name + '_expectedSurplus.txt'),es)
     
-    with open(os.path.join(args.odir,'jointLocalStats.txt'),'w') as f:
+    with open(os.path.join(args.odir,args.name + '_stats.txt'),'w') as f:
         print >> f, numpy.mean(es)
         print >> f, numpy.var(es)
 
