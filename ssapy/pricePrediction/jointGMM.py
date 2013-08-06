@@ -1,6 +1,7 @@
 import numpy
 import sklearn.mixture
 from scipy.stats import norm
+from mvncdf import mvnormcdf
 
 import matplotlib.pyplot as plt
 from matplotlib import cm
@@ -41,7 +42,7 @@ class jointGMM(sklearn.mixture.GMM):
         super(jointGMM,self).__init__(n_components    = kwargs.get('n_components',1),
                                       covariance_type = kwargs.get('covariance_type','full'),
                                       random_state    = kwargs.get('random_state',None),
-                                      thresh           = kwargs.get('thresh', 1e-2),
+                                      thresh          = kwargs.get('thresh', 1e-2),
                                       min_covar       = kwargs.get('min_covar',1e-3),
                                       n_iter          = kwargs.get('n_iter',100),
                                       n_init          = kwargs.get('n_init',1),
@@ -161,7 +162,7 @@ class jointGMM(sklearn.mixture.GMM):
         # derived class to match the fitted distribution
         self.__dict__.update(clfList[argMinAic].__dict__)
         
-        #not all versions of python store this so explicitly set it
+        #not all versions of scikit store this so explicitly set it
         self.covariance_type = covariance_type
         
         if verbose:
@@ -315,6 +316,14 @@ class jointGMM(sklearn.mixture.GMM):
             plt.show()
         else:
             plt.savefig(fname)
+            
+            
+    def cdf(self, lower, upper,  **kwargs):
+        cdf = 0.0
+        for w, m, c in zip(self.weights_, self.means_, self.covars_):
+            cdf += w*mvnormcdf(lower, upper, m, c, **kwargs)
+            
+        return cdf
             
 
     def margParams(self,**kwargs):
